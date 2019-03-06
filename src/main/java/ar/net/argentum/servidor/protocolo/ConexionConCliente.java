@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor.protocolo;
 
 import ar.net.argentum.servidor.Servidor;
+import ar.net.argentum.servidor.Usuario;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -44,6 +45,7 @@ public class ConexionConCliente extends Thread {
     private final byte versionProtocolo = 0x1;
     private String username = "";
     private final ArrayList<ConexionConCliente> conexiones;
+    protected Usuario usuario;
 
     // Constructor 
     public ConexionConCliente(Socket s, ArrayList<ConexionConCliente> conexiones) throws IOException {
@@ -74,8 +76,6 @@ public class ConexionConCliente extends Thread {
                     break;
                 }
 
-                System.out.println("Recibimos un paquete nuevo :D");
-
                 // Manejamos el paquete recibido
                 switch (tipoPaquete) {
 
@@ -86,30 +86,7 @@ public class ConexionConCliente extends Thread {
                         break;
 
                     case INICIAR_SESION:
-                        System.out.println("Recibimos un inicio de sesion.");
-                        // Inicio de sesion
-                        Byte version = dis.readByte();
-
-                        if (versionProtocolo != version) {
-                            // Version de protocolo incompatible
-                            desconectar("Protocolo incompatible.");
-                            break;
-                        }
-
-                        String usuario = dis.readUTF();
-
-                        if (usuario.isEmpty()) {
-                            desconectar("Usuario invalido.");
-                            break;
-                        }
-
-                        String password = dis.readUTF();
-
-                        System.out.println("Inicio de sesion recibido -> " + usuario + ":" + password);
-                        Servidor.getServidor().enviarMensajeDeDifusion("{0} ha ingresado al juego.", usuario);
-
-                        // @TODO: Implementar inicio de sesion
-                        this.username = usuario;
+                        manejarInicioDeSesion();
                         break;
 
                     case CHAT:
@@ -117,6 +94,7 @@ public class ConexionConCliente extends Thread {
 
                         if (mensaje.startsWith("/")) {
                             // El usuario ha ingresado un comando
+                            // Le quitamos la "/" inicial
                             manejarComando(mensaje.substring(1));
                             break;
                         }
@@ -134,14 +112,18 @@ public class ConexionConCliente extends Thread {
         }
 
         try {
-            Servidor.getServidor().enviarMensajeDeDifusion("{0} se ha desconectado del juego.", username);
-
             // Cerramos el socket
             socket.close();
 
             // Cerramos los recursos abiertos
             dis.close();
             dos.close();
+            
+            if (usuario != null) {
+                Servidor.getServidor().enviarMensajeDeDifusion("{0} se ha desconectado del juego.", usuario.getNombre());
+                usuario.setConectado(false);
+                usuario.guardar();
+            }
 
             // Eliminamos la conexion de nuestra lista
             conexiones.remove(this);
@@ -193,5 +175,75 @@ public class ConexionConCliente extends Thread {
 
         enviarMensaje("Comando invalido!");
         return false;
+    }
+
+    public boolean manejarInicioDeSesion() {
+        try {
+            System.out.println("Recibimos un inicio de sesion.");
+            // Inicio de sesion
+            Byte version = dis.readByte();
+
+            if (versionProtocolo != version) {
+                // Version de protocolo incompatible
+                desconectar("Protocolo incompatible.");
+                return false;
+            }
+
+            // Leemos el nombre de usuario
+            String nombre = dis.readUTF();
+
+            // Leemos la contraseña del usuario
+            String password = dis.readUTF();
+
+            if (nombre.length() > 16) {
+                desconectar("El nombre de usuario puede tener como máximo 16 caracteres.");
+                return false;
+            }
+
+            if (!Usuario.nombreValido(nombre)) {
+                desconectar("El nombre de usuario tiene caracteres inválidos.\nSolo se permiten letras y espacios.");
+                return false;
+            }
+
+            if (!Usuario.existePersonaje(nombre)) {
+                desconectar("El personaje no existe.");
+                return false;
+            }
+
+            try {
+                this.usuario = Usuario.cargar(nombre);
+
+                if (!usuario.getPassword().equals(password)) {
+                    desconectar("Contraseña incorrecta.");
+                    return false;
+                }
+
+                if (usuario.isConectado()) {
+                    desconectar("El usuario ya se encuentra conectado.");
+                    return false;
+                }
+
+                usuario.setConectado(true);
+                usuario.guardar();
+
+            } catch (Exception ex) {
+                desconectar("Ocurrio un error al cargar el personaje.");
+                Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+
+            Servidor.getServidor().enviarMensajeDeDifusion("{0} ha ingresado al juego.", nombre);
+
+            // @TODO: Implementar inicio de sesion
+            this.username = nombre;
+            return true;
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
     }
 }
