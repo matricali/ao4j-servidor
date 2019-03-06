@@ -21,6 +21,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 /**
@@ -39,12 +40,16 @@ public class ConexionConCliente extends Thread {
     private boolean conectado = false;
     private final byte versionProtocolo = 0x1;
     private String username;
+    private final ArrayList<ConexionConCliente> conexiones;
 
     // Constructor 
-    public ConexionConCliente(Socket s, DataInputStream ois, DataOutputStream oos) {
+    public ConexionConCliente(Socket s, ArrayList<ConexionConCliente> conexiones) throws IOException {
         this.socket = s;
-        this.dis = ois;
-        this.dos = oos;
+        this.conexiones = conexiones;
+
+        // Obtener Streams de entrada y salida
+        this.dis = new DataInputStream(s.getInputStream());
+        this.dos = new DataOutputStream(s.getOutputStream());
     }
 
     @Override
@@ -97,7 +102,7 @@ public class ConexionConCliente extends Thread {
                     case CHAT:
                         String mensaje = dis.readUTF();
                         System.out.println(">>" + mensaje);
-                        enviarChat(username + ": " + mensaje);
+                        Servidor.getServidor().enviarMensajeDeDifusion(username + ": " + mensaje);
                         break;
 
                     default:
@@ -116,6 +121,9 @@ public class ConexionConCliente extends Thread {
             // Cerramos los recursos abiertos
             dis.close();
             dos.close();
+
+            // Eliminamos la conexion de nuestra lista
+            conexiones.remove(this);
 
         } catch (IOException e) {
             Servidor.getLogger().log(Level.SEVERE, null, e);

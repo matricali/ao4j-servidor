@@ -18,11 +18,10 @@ package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.configuracion.ConfiguracionGeneral;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,10 +31,33 @@ import java.util.logging.Logger;
  */
 public class Servidor {
 
+    private static Servidor instancia;
+
+    public static Servidor getServidor() {
+        if (null == instancia) {
+            try {
+                instancia = new Servidor();
+            } catch (IOException ex) {
+                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return instancia;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Servidor servidor = Servidor.getServidor();
+        servidor.iniciar();
+    }
+
+    public static Logger getLogger() {
+        return Logger.getLogger(Servidor.class.getName());
+    }
+
     private final ConfiguracionGeneral configuracionGeneral;
     private ServerSocket serverSocket;
+    private ArrayList<ConexionConCliente> conexiones;
 
-    public Servidor() throws IOException {
+    private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
     }
@@ -52,6 +74,9 @@ public class Servidor {
             return;
         }
 
+        // Creamos una lista para mantener las conexiones
+        this.conexiones = new ArrayList<>();
+
         // Bucle infinito
         while (true) {
             Socket s = null;
@@ -61,15 +86,13 @@ public class Servidor {
                 s = serverSocket.accept();
 
                 System.out.println("Se ha conectado un nuevo cliente: " + s);
-
-                // Obtener Streams de entrada y salida
-                DataInputStream dis = new DataInputStream(s.getInputStream());
-                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-
                 System.out.println("Asignando nuevo Thread al cliente");
 
                 // Crear nuevo Thread
-                Thread t = new ConexionConCliente(s, dis, dos);
+                ConexionConCliente t = new ConexionConCliente(s, conexiones);
+
+                // Agregamos el nuevo thread a la lista de conexiones
+                conexiones.add(t);
 
                 // Iniciar el hilo 
                 t.start();
@@ -88,12 +111,13 @@ public class Servidor {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Servidor servidor = new Servidor();
-        servidor.iniciar();
-    }
-
-    public static Logger getLogger() {
-        return Logger.getLogger(Servidor.class.getName());
+    public void enviarMensajeDeDifusion(String mensaje) {
+        for (ConexionConCliente usuario : conexiones) {
+            try {
+                usuario.enviarChat(mensaje);
+            } catch (IOException ex) {
+                getLogger().log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }
