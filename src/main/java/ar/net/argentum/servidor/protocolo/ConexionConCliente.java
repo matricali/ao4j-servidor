@@ -22,8 +22,10 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -112,7 +114,13 @@ public class ConexionConCliente extends Thread {
 
                     case CHAT:
                         String mensaje = dis.readUTF();
-                        System.out.println(">>" + mensaje);
+
+                        if (mensaje.startsWith("/")) {
+                            // El usuario ha ingresado un comando
+                            manejarComando(mensaje.substring(1));
+                            break;
+                        }
+
                         Servidor.getServidor().enviarMensajeDeDifusion(username + ": " + mensaje);
                         break;
 
@@ -127,7 +135,7 @@ public class ConexionConCliente extends Thread {
 
         try {
             Servidor.getServidor().enviarMensajeDeDifusion("{0} se ha desconectado del juego.", username);
-                    
+
             // Cerramos el socket
             socket.close();
 
@@ -147,14 +155,43 @@ public class ConexionConCliente extends Thread {
         desconectar("");
     }
 
-    public void desconectar(String message) throws IOException {
-        dos.writeByte(DESCONECTAR);
-        dos.writeUTF(message);
+    public void desconectar(String message) {
+        try {
+            dos.writeByte(DESCONECTAR);
+            dos.writeUTF(message);
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.conectado = false;
     }
 
-    public void enviarChat(String mensaje) throws IOException {
-        dos.writeByte(0x3);
-        dos.writeUTF(mensaje);
+    public void enviarMensaje(String mensaje) {
+        try {
+            dos.writeByte(0x3);
+            dos.writeUTF(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarMensaje(String mensaje, Object... args) {
+        enviarMensaje(MessageFormat.format(mensaje, args));
+    }
+
+    public boolean manejarComando(String mensaje) {
+        String[] args = mensaje.split("\\s+");
+
+        switch (args[0].toUpperCase()) {
+            case "SALIR":
+                desconectar("Gracias por jugar Argentum Online!");
+                return true;
+
+            case "ONLINE":
+                enviarMensaje("Hay {0} jugadores conectados.", conexiones.size());
+                return true;
+        }
+
+        enviarMensaje("Comando invalido!");
+        return false;
     }
 }

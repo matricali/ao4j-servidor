@@ -115,11 +115,7 @@ public class Servidor {
     public void enviarMensajeDeDifusion(String mensaje) {
         System.out.println(mensaje);
         for (ConexionConCliente usuario : conexiones) {
-            try {
-                usuario.enviarChat(mensaje);
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
-            }
+            usuario.enviarMensaje(mensaje);
         }
     }
     
