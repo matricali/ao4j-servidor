@@ -21,6 +21,7 @@ import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,6 +113,7 @@ public class Servidor {
     }
 
     public void enviarMensajeDeDifusion(String mensaje) {
+        System.out.println(mensaje);
         for (ConexionConCliente usuario : conexiones) {
             try {
                 usuario.enviarChat(mensaje);
@@ -119,5 +121,9 @@ public class Servidor {
                 getLogger().log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    public void enviarMensajeDeDifusion(String mensaje, Object... args) {
+        enviarMensajeDeDifusion(MessageFormat.format(mensaje, args));
     }
 }

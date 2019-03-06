@@ -19,6 +19,7 @@ package ar.net.argentum.servidor.protocolo;
 import ar.net.argentum.servidor.Servidor;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class ConexionConCliente extends Thread {
     private final Socket socket;
     private boolean conectado = false;
     private final byte versionProtocolo = 0x1;
-    private String username;
+    private String username = "";
     private final ArrayList<ConexionConCliente> conexiones;
 
     // Constructor 
@@ -61,7 +62,16 @@ public class ConexionConCliente extends Thread {
         while (conectado) {
             try {
                 // Obtenemos el tipo de paquete recibido
-                byte tipoPaquete = dis.readByte();
+                byte tipoPaquete;
+
+                try {
+                    tipoPaquete = dis.readByte();
+                } catch (EOFException ex) {
+                    Servidor.getLogger().log(Level.SEVERE, null, ex);
+                    this.conectado = false;
+                    break;
+                }
+
                 System.out.println("Recibimos un paquete nuevo :D");
 
                 // Manejamos el paquete recibido
@@ -94,6 +104,7 @@ public class ConexionConCliente extends Thread {
                         String password = dis.readUTF();
 
                         System.out.println("Inicio de sesion recibido -> " + usuario + ":" + password);
+                        Servidor.getServidor().enviarMensajeDeDifusion("{0} ha ingresado al juego.", usuario);
 
                         // @TODO: Implementar inicio de sesion
                         this.username = usuario;
@@ -115,6 +126,8 @@ public class ConexionConCliente extends Thread {
         }
 
         try {
+            Servidor.getServidor().enviarMensajeDeDifusion("{0} se ha desconectado del juego.", username);
+                    
             // Cerramos el socket
             socket.close();
 
