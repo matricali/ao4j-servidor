@@ -17,12 +17,17 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.configuracion.ConfiguracionGeneral;
+import ar.net.argentum.servidor.mundo.Personaje;
+import ar.net.argentum.servidor.mundo.UtilMapas;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,13 +59,20 @@ public class Servidor {
         return Logger.getLogger(Servidor.class.getName());
     }
 
+    private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
     private ServerSocket serverSocket;
     private ArrayList<ConexionConCliente> conexiones;
-
+    private final Map<Integer, Mapa> mapas;
+    private final Map<Integer, Personaje> personajes;
+    
     private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
+        this.objetosdb = new ObjetosDB("datos/objetos.json");
+        this.mapas = new HashMap<>();
+        this.personajes = new HashMap<>();
+        cargarMapas();
     }
 
     public void iniciar() {
@@ -118,8 +130,24 @@ public class Servidor {
             usuario.enviarMensaje(mensaje);
         }
     }
-    
+
     public void enviarMensajeDeDifusion(String mensaje, Object... args) {
         enviarMensajeDeDifusion(MessageFormat.format(mensaje, args));
+    }
+
+    private void cargarMapas() {
+        File directorio = new File("datos/mapas");
+        for (File f : directorio.listFiles()) {
+            if (f.getName().endsWith(".map")) {
+                String nmapa = f.getName().substring(0, f.getName().length() - 4).substring(4);
+                int numMapa = Integer.valueOf(nmapa);
+                Mapa mapa = UtilMapas.cargarMapa(numMapa, f.getName());
+                mapas.put(numMapa, mapa);
+            }
+        }
+    }
+    
+    public Mapa getMapa(int numMapa) {
+        return mapas.get(numMapa);
     }
 }

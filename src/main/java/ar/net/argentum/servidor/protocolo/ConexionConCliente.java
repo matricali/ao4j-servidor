@@ -16,8 +16,14 @@
  */
 package ar.net.argentum.servidor.protocolo;
 
+import ar.net.argentum.servidor.Baldosa;
+import ar.net.argentum.servidor.InventarioSlot;
+import ar.net.argentum.servidor.Mapa;
+import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
+import ar.net.argentum.servidor.mundo.Personaje;
+import ar.net.argentum.servidor.mundo.PersonajeImpl;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -34,9 +40,15 @@ import java.util.logging.Logger;
  */
 public class ConexionConCliente extends Thread {
 
-    private static final byte DESCONECTAR = 0x1;
-    private static final byte INICIAR_SESION = 0x2;
-    private static final byte CHAT = 0x3;
+    private static final byte PQT_DESCONECTAR = 0x1;
+    private static final byte PQT_INICIAR_SESION = 0x2;
+    private static final byte PQT_CHAT = 0x3;
+    private static final byte PQT_ACTUALIZAR_INVENTARIO = 0x4;
+    private static final byte PQT_CAMBIA_MUNDO = 0x5;
+    private static final byte PQT_USUARIO_NOMBRE = 0x6;
+    private static final byte PQT_USUARIO_POSICION = 0x7;
+    private static final byte PQT_USUARIO_STATS = 0x8;
+    private static final byte PQT_MUNDO_REPRODUCIR_ANIMACION = 0x9;
 
     private final DataInputStream dis;
     private final DataOutputStream dos;
@@ -79,17 +91,17 @@ public class ConexionConCliente extends Thread {
                 // Manejamos el paquete recibido
                 switch (tipoPaquete) {
 
-                    case DESCONECTAR:
+                    case PQT_DESCONECTAR:
                         System.out.println("Recibimos un cierre de conexion.");
                         // Terminamos
                         this.conectado = false;
                         break;
 
-                    case INICIAR_SESION:
+                    case PQT_INICIAR_SESION:
                         manejarInicioDeSesion();
                         break;
 
-                    case CHAT:
+                    case PQT_CHAT:
                         String mensaje = dis.readUTF();
 
                         if (mensaje.startsWith("/")) {
@@ -99,7 +111,7 @@ public class ConexionConCliente extends Thread {
                             break;
                         }
 
-                        Servidor.getServidor().enviarMensajeDeDifusion(username + ": " + mensaje);
+                        Servidor.getServidor().enviarMensajeDeDifusion("\u00a79" + username + "\u00a77: " + mensaje);
                         break;
 
                     default:
@@ -118,11 +130,16 @@ public class ConexionConCliente extends Thread {
             // Cerramos los recursos abiertos
             dis.close();
             dos.close();
-            
+
             if (usuario != null) {
-                Servidor.getServidor().enviarMensajeDeDifusion("{0} se ha desconectado del juego.", usuario.getNombre());
+                Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", usuario.getNombre());
                 usuario.setConectado(false);
                 usuario.guardar();
+
+                Mapa mapa = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa());
+
+                // Eliminamos el personaje del mundo
+                mapa.getBaldosa(usuario.getCoordenada().getPosicion()).setCharindex(0);
             }
 
             // Eliminamos la conexion de nuestra lista
@@ -139,7 +156,7 @@ public class ConexionConCliente extends Thread {
 
     public void desconectar(String message) {
         try {
-            dos.writeByte(DESCONECTAR);
+            dos.writeByte(PQT_DESCONECTAR);
             dos.writeUTF(message);
         } catch (IOException ex) {
             Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -149,7 +166,7 @@ public class ConexionConCliente extends Thread {
 
     public void enviarMensaje(String mensaje) {
         try {
-            dos.writeByte(0x3);
+            dos.writeByte(PQT_CHAT);
             dos.writeUTF(mensaje);
         } catch (IOException ex) {
             Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
@@ -223,8 +240,38 @@ public class ConexionConCliente extends Thread {
                     return false;
                 }
 
+                if (usuario.getCoordenada().getMapa() == 0) {
+                    usuario.getCoordenada().setMapa(1);
+                    usuario.getCoordenada().getPosicion().setX(50);
+                    usuario.getCoordenada().getPosicion().setY(0);
+                }
+
+                Mapa mapa = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa());
+                Baldosa baldosa = mapa.getBaldosa(usuario.getCoordenada().getPosicion());
+
+                if (baldosa.getCharindex() != 0) {
+                    // Ya hay alguien parado en esa posicion
+                    desconectar("Hay alguien parado en tu posicion, intenta luego.");
+                }
+
+                // Creamos el personaje en la posicion del mundo
+                Personaje pers = new PersonajeImpl();
+                pers.setNombre(usuario.getNombre());
+                pers.setAnimacionArma(1);
+                pers.setAnimacionCuerpo(usuario.getCuerpo());
+                pers.setAnimacionCabeza(usuario.getCabeza());
+                pers.setPosicion(usuario.getCoordenada().getPosicion());
+                mapa.getPersonajes().add(pers);
+                baldosa.setCharindex(1);
+
                 usuario.setConectado(true);
                 usuario.guardar();
+
+                enviarUsuarioNombre();
+                enviarUsuarioCambiaMapa();
+                enviarUsuarioPosicion();
+                enviarUsuarioStats();
+                usuarioInventarioActualizar();
 
             } catch (Exception ex) {
                 desconectar("Ocurrio un error al cargar el personaje.");
@@ -232,7 +279,7 @@ public class ConexionConCliente extends Thread {
                 return false;
             }
 
-            Servidor.getServidor().enviarMensajeDeDifusion("{0} ha ingresado al juego.", nombre);
+            Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} ha ingresado al juego.", nombre);
 
             // @TODO: Implementar inicio de sesion
             this.username = nombre;
@@ -245,5 +292,100 @@ public class ConexionConCliente extends Thread {
 
     public Usuario getUsuario() {
         return usuario;
+    }
+
+    public void usuarioInventarioActualizar() {
+        for (int i = 0; i < 20; ++i) {
+            usuarioInventarioActualizarSlot(i);
+        }
+    }
+
+    public void usuarioInventarioActualizarSlot(int slot) {
+        InventarioSlot is = usuario.getInventarioSlot(slot);
+        if (is == null) {
+            return;
+        }
+        ObjetoMetadata om = is.getObjeto();
+        if (om == null) {
+            return;
+        }
+        try {
+            dos.writeByte(PQT_ACTUALIZAR_INVENTARIO);
+            dos.writeInt(slot);
+            dos.writeInt(om.getId());
+            dos.writeInt(om.getTipo().valor());
+            dos.writeInt(om.getGrhIndex());
+            dos.writeUTF(om.getNombre());
+            dos.writeInt(is.getCantidad());
+            dos.writeBoolean(is.isEquipado());
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarUsuarioCambiaMapa() {
+        try {
+            dos.writeByte(PQT_CAMBIA_MUNDO);
+            dos.writeInt(usuario.getCoordenada().getMapa());
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarUsuarioNombre() {
+        try {
+            dos.writeByte(PQT_USUARIO_NOMBRE);
+            dos.writeUTF(usuario.getNombre());
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarUsuarioPosicion() {
+        try {
+            dos.writeByte(PQT_USUARIO_POSICION);
+            dos.writeInt(usuario.getCoordenada().getMapa());
+            dos.writeInt(usuario.getCoordenada().getPosicion().getX());
+            dos.writeInt(usuario.getCoordenada().getPosicion().getY());
+            dos.writeInt(usuario.getOrientacion().valor());
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarUsuarioStats() {
+        try {
+            dos.writeByte(PQT_USUARIO_STATS);
+            // Salud
+            dos.writeInt(usuario.getVida().getMin());
+            dos.writeInt(usuario.getVida().getMax());
+            // Mana
+            dos.writeInt(usuario.getMana().getMin());
+            dos.writeInt(usuario.getMana().getMax());
+            // Stamina
+            dos.writeInt(usuario.getStamina().getMin());
+            dos.writeInt(usuario.getStamina().getMax());
+            // Hambre
+            dos.writeInt(usuario.getHambre().getMin());
+            dos.writeInt(usuario.getHambre().getMax());
+            // Sed
+            dos.writeInt(usuario.getSed().getMin());
+            dos.writeInt(usuario.getSed().getMax());
+
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarMundoReproducirAnimacion(int x, int y, int animacion) {
+        try {
+            dos.writeByte(PQT_MUNDO_REPRODUCIR_ANIMACION);
+            dos.writeInt(animacion);
+            dos.writeInt(x);
+            dos.writeInt(y);
+
+        } catch (IOException ex) {
+            Logger.getLogger(ConexionConCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

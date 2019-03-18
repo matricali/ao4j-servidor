@@ -16,9 +16,12 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.mundo.Orientacion;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -58,9 +61,34 @@ public class Usuario {
         Usuario usuario = mapper.readValue(getArchivo(nombre), Usuario.class);
         return usuario;
     }
+
+    @JsonProperty
     protected String nombre;
+    @JsonProperty
     protected String password;
+    @JsonProperty
     protected boolean conectado;
+    @JsonProperty
+    protected Coordenada coordenada;
+    @JsonProperty
+    protected Map<Integer, InventarioSlot> inventario;
+    @JsonProperty
+    protected int cuerpo;
+    @JsonProperty
+    protected int cabeza;
+    // Estadisticas
+    @JsonProperty
+    protected MinMax vida = new MinMax();
+    @JsonProperty
+    protected MinMax mana = new MinMax();
+    @JsonProperty
+    protected MinMax stamina = new MinMax();
+    @JsonProperty
+    protected MinMax hambre = new MinMax();
+    @JsonProperty
+    protected MinMax sed = new MinMax();
+    @JsonProperty
+    protected Orientacion orientacion = Orientacion.SUR;
 
     /**
      * @return the nombre
@@ -103,7 +131,7 @@ public class Usuario {
     public void setConectado(boolean conectado) {
         this.conectado = conectado;
     }
-    
+
     public void guardar() {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -112,8 +140,108 @@ public class Usuario {
             Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private static File getArchivo(String nombre) {
-        return new File("datos/personajes/" + nombre.toLowerCase()+ ".json");
+        return new File("datos/personajes/" + nombre.toLowerCase() + ".json");
+    }
+
+    public InventarioSlot getInventarioSlot(int slot) {
+        return inventario.get(slot);
+    }
+
+    public void setInventarioSlot(int slot, final InventarioSlot inv) {
+        inventario.put(slot, inv);
+    }
+//
+//    @SuppressWarnings("unchecked")
+//    @JsonProperty("inventario")
+//    private void unpackNested(Map<String, Object> brand) {
+//        this.brandName = (String) brand.get("name");
+//        Map<String, String> owner = (Map<String, String>) brand.get("owner");
+//        this.ownerName = owner.get("name");
+//    }
+
+    /**
+     * @return the coordenada
+     */
+    public Coordenada getCoordenada() {
+        return coordenada;
+    }
+
+    /**
+     * @return the cuerpo
+     */
+    public int getCuerpo() {
+        return cuerpo;
+    }
+
+    /**
+     * @param cuerpo the cuerpo to set
+     */
+    public void setCuerpo(int cuerpo) {
+        this.cuerpo = cuerpo;
+    }
+
+    /**
+     * @return the cabeza
+     */
+    public int getCabeza() {
+        return cabeza;
+    }
+
+    /**
+     * @param cabeza the cabeza to set
+     */
+    public void setCabeza(int cabeza) {
+        this.cabeza = cabeza;
+    }
+
+    /**
+     * @return the vida
+     */
+    public MinMax getVida() {
+        return vida;
+    }
+
+    /**
+     * @return the mana
+     */
+    public MinMax getMana() {
+        return mana;
+    }
+
+    /**
+     * @return the stamina
+     */
+    public MinMax getStamina() {
+        return stamina;
+    }
+
+    /**
+     * @return the hambre
+     */
+    public MinMax getHambre() {
+        return hambre;
+    }
+
+    /**
+     * @return the sed
+     */
+    public MinMax getSed() {
+        return sed;
+    }
+
+    /**
+     * @return the orientacion
+     */
+    public Orientacion getOrientacion() {
+        return orientacion;
+    }
+
+    /**
+     * @param orientacion the orientacion to set
+     */
+    public void setOrientacion(Orientacion orientacion) {
+        this.orientacion = orientacion;
     }
 }
