@@ -25,12 +25,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -38,8 +39,9 @@ import java.util.logging.Logger;
  */
 public class Servidor {
 
-    protected static final Logger LOGGER = Logger.getLogger(Servidor.class.getName());
+    protected static final Logger LOGGER = Logger.getLogger(Servidor.class);
     private static int ultimoCharindex = 2;
+    private static int ultimoUseridex = 0;
     private static Servidor instancia;
 
     public static Servidor getServidor() {
@@ -47,47 +49,48 @@ public class Servidor {
             try {
                 instancia = new Servidor();
             } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
+                LOGGER.fatal(null, ex);
             }
         }
         return instancia;
     }
 
     public static void main(String[] args) throws IOException {
+        BasicConfigurator.configure();
         Servidor servidor = Servidor.getServidor();
         servidor.iniciar();
     }
 
     private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
-    private ServerSocket serverSocket;
-    private Map<Usuario, ConexionConCliente> conexiones;
+    private final LinkedList<ConexionConCliente> conexiones;
     private final Map<Integer, Mapa> mapas;
-    private final Map<Integer, Personaje> personajes;
+    private final ConcurrentMap<Integer, Personaje> personajes;
+
+    private ServerSocket serverSocket;
 
     private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
         this.objetosdb = new ObjetosDB("datos/objetos.json");
-        this.mapas = new HashMap<>();
-        this.personajes = new HashMap<>();
+        this.mapas = new ConcurrentHashMap<>();
+        this.personajes = new ConcurrentHashMap<>();
+        // Creamos una lista para mantener las conexiones
+        this.conexiones = new LinkedList<>();
         cargarMapas();
     }
 
     public void iniciar() {
-        LOGGER.log(Level.INFO, "Iniciando servidor en el puerto " + configuracionGeneral.getPuerto() + "...");
+        LOGGER.info("Iniciando servidor en el puerto " + configuracionGeneral.getPuerto() + "...");
         try {
             // Iniciar socket, el puerto por defecto es 7666
             this.serverSocket = new ServerSocket(configuracionGeneral.getPuerto());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
 
             // Si no podemos iniciar el socket ya no hay nada que hacer :(
             return;
         }
-
-        // Creamos una lista para mantener las conexiones
-        this.conexiones = new HashMap<>();
 
         // Bucle infinito
         while (true) {
@@ -97,28 +100,26 @@ public class Servidor {
                 // Recibir conexiones entrantes
                 socket = serverSocket.accept();
 
-                LOGGER.log(Level.INFO, "Se ha conectado un nuevo cliente: " + socket);
-                LOGGER.log(Level.INFO, "Asignando nuevo Thread al cliente");
+                LOGGER.info("Se ha conectado un nuevo cliente: " + socket);
+                LOGGER.info("Asignando nuevo Thread al cliente");
 
-                // Creamos un objeto Usuario
-                Usuario usuario = new Usuario();
                 // Crear nuevo Thread
-                ConexionConCliente t = new ConexionConCliente(socket, usuario, conexiones);
+                ConexionConCliente t = new ConexionConCliente(socket);
 
                 // Agregamos el nuevo thread a la lista de conexiones
-                conexiones.put(usuario, t);
+                conexiones.add(t);
 
                 // Iniciar el hilo 
                 t.start();
 
             } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
+                LOGGER.fatal(null, ex);
                 if (null != socket) {
                     // Si creamos el Socket entonces hay que cerrarlo
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        LOGGER.log(Level.SEVERE, null, e);
+                        LOGGER.fatal(null, e);
                     }
                 }
             }
@@ -126,9 +127,11 @@ public class Servidor {
     }
 
     public void enviarMensajeDeDifusion(String mensaje) {
-        LOGGER.log(Level.INFO, "[DIFUSION] " + mensaje);
-        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
-            entry.getValue().enviarMensaje(mensaje);
+        LOGGER.info("[DIFUSION] " + mensaje);
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.isConectado()) {
+                conn.enviarMensaje(mensaje);
+            }
         }
     }
 
@@ -158,20 +161,54 @@ public class Servidor {
      * @param usuario Usuario del cual obtener la conexion
      * @return Conexion establecida con el usuario
      */
-    public ConexionConCliente getConexion(Usuario usuario) {
-        return conexiones.get(usuario);
+    public synchronized ConexionConCliente getConexion(Usuario usuario) {
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario().getCharindex() == usuario.getCharindex()) {
+                return conn;
+            }
+        }
+        return null;
+    }
+
+    public synchronized void eliminarConexion(Usuario usuario) {
+        LOGGER.info("Eliminando conexiones (" + conexiones.size() + ")\n" + conexiones);
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario().getCharindex() == usuario.getCharindex()) {
+                conexiones.remove(conn);
+                return;
+            }
+        }
+        LOGGER.info("Quedaron asi (" + conexiones.size() + ")\n" + conexiones);
+    }
+
+    public synchronized List<ConexionConCliente> getConexiones() {
+        return conexiones;
+    }
+
+    public static synchronized int crearUserindex() {
+        ultimoUseridex++;
+
+        LOGGER.info("Generado nuevo userindex >>" + ultimoUseridex);
+        return ultimoUseridex;
     }
 
     public static synchronized int crearCharindex() {
-        return ultimoCharindex++;
+        ultimoCharindex++;
+
+        LOGGER.info("Generado nuevo charindex >>" + ultimoCharindex);
+        return ultimoCharindex;
     }
-    
+
     public void todosMenosUsuarioArea(Usuario usuario, EnvioAUsuario envio) {
-        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
-            if (usuario.equals(entry.getKey())) {
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario().getCharindex() == usuario.getCharindex()) {
                 continue;
             }
-            envio.enviar(entry.getKey(), entry.getValue());
+            envio.enviar(conn.getUsuario().getCharindex(), conn);
         }
+    }
+
+    public int getJugadoresConectados() {
+        return conexiones.size();
     }
 }

@@ -23,17 +23,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public class Usuario {
+
+    private static final Logger LOGGER = Logger.getLogger(Usuario.class);
 
     /**
      * Compruebe si esta registrado un usuario.
@@ -61,17 +61,6 @@ public class Usuario {
         }
         ObjectMapper mapper = new ObjectMapper();
         Usuario usuario = mapper.readValue(getArchivo(nombre), Usuario.class);
-
-        if (usuario.getCoordenada() == null) {
-            System.out.println("coordenada es null");
-        } else {
-            if (usuario.getCoordenada().getPosicion() == null) {
-                System.out.println("posicion es null");
-            } else {
-                System.out.println("posicion:" + usuario.getCoordenada().getPosicion().getX() + "," + usuario.getCoordenada().getPosicion().getY());
-            }
-        }
-
         return usuario;
     }
 
@@ -115,40 +104,37 @@ public class Usuario {
     protected boolean meditando = false;
     protected boolean descansando = false;
     protected final int charindex;
+    protected final int userindex;
 
     public Usuario() {
         this.charindex = Servidor.crearCharindex();
+        this.userindex = Servidor.crearUserindex();
     }
 
-     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.nombre);
-        hash = 29 * hash + this.charindex;
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Usuario other = (Usuario) obj;
-        if (this.charindex != other.charindex) {
-            return false;
-        }
-        if (!Objects.equals(this.nombre, other.nombre)) {
-            return false;
-        }
-        return true;
-    }
-
+//    @Override
+//    public int hashCode() {
+//        int hash = 5;
+//        hash = 53 * hash + this.charindex;
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (this == obj) {
+//            return true;
+//        }
+//        if (obj == null) {
+//            return false;
+//        }
+//        if (getClass() != obj.getClass()) {
+//            return false;
+//        }
+//        final Usuario other = (Usuario) obj;
+//        if (this.charindex != other.charindex) {
+//            return false;
+//        }
+//        return true;
+//    }
     /**
      * @return the nombre
      */
@@ -196,7 +182,7 @@ public class Usuario {
         try {
             mapper.writeValue(Usuario.getArchivo(nombre), this);
         } catch (IOException ex) {
-            Logger.getLogger(Usuario.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 

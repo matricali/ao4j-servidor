@@ -20,8 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -32,14 +31,15 @@ import org.json.JSONTokener;
  */
 public class ObjetosDB {
 
+    private static final Logger LOGGER = Logger.getLogger(ObjetosDB.class);
     protected static ObjetoMetadata objetos[];
-    
+
     public static ObjetoMetadata obtener(int id) {
         return objetos[id];
     }
 
     public ObjetosDB(String archivo) {
-        System.out.println("Cargando objetos (" + archivo + ")...");
+        LOGGER.info("Cargando objetos (" + archivo + ")...");
         try {
             File f = new File(archivo);
             InputStream is = new FileInputStream(f);
@@ -50,7 +50,7 @@ public class ObjetosDB {
             JSONObject init = json.getJSONObject("INIT");
 
             int cantObjetos = init.getInt("NumOBJs");
-            System.out.println("hay " + cantObjetos + " para cargar");
+            LOGGER.info("hay " + cantObjetos + " para cargar");
 
             this.objetos = new ObjetoMetadata[cantObjetos + 1];
 
@@ -66,15 +66,15 @@ public class ObjetosDB {
                         grhIndex = jo.getInt("GrhIndex");
                         ObjetoMetadata nobjeto = new ObjetoMetadata(i, nombre, ObjetoTipo.otUseOnce, grhIndex, 0, 10000);
                         objetos[i] = nobjeto;
-                        System.out.println("OBJ" + i + " - " + nombre);
+                        LOGGER.info("OBJ" + i + " - " + nombre);
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(ObjetosDB.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.fatal(null, ex);
                 }
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(ObjetosDB.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 }

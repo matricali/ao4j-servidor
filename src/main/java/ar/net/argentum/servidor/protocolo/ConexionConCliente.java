@@ -29,9 +29,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  * Clase encargada de la comunicacion entre el cliente y el servidor
@@ -57,7 +55,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_PERSONAJE_ANIMACION = 0x15;
     protected static final byte PQT_PERSONAJE_QUITAR = 0x16;
 
-    protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class.getName());
+    protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
      * Conexion
      */
@@ -73,11 +71,10 @@ public class ConexionConCliente extends Thread {
      */
     protected final DataOutputStream dos;
 
-    /**
-     * Referencia a nuestra coleccion de conexiones
-     */
-    protected final Map<Usuario, ConexionConCliente> conexiones;
-
+//    /**
+//     * Referencia a nuestra coleccion de conexiones
+//     */
+//    protected final Map<Usuario, ConexionConCliente> conexiones;
     /**
      * El usuario esta conectado?
      */
@@ -102,12 +99,11 @@ public class ConexionConCliente extends Thread {
      * Crear un nuevo thread para manejar la comunicacion con un usuario
      *
      * @param s Instancia del socket
-     * @param conexiones Referencia a nuestra coleccion de conexiones
      * @throws IOException
      */
-    public ConexionConCliente(Socket s, Usuario usuario, Map<Usuario, ConexionConCliente> conexiones) throws IOException {
+    public ConexionConCliente(Socket s) throws IOException {
         this.socket = s;
-        this.conexiones = conexiones;
+//        this.conexiones = conexiones;
 
         // Obtener Streams de entrada y salida
         this.dis = new DataInputStream(s.getInputStream());
@@ -116,7 +112,7 @@ public class ConexionConCliente extends Thread {
 
     @Override
     public void run() {
-        LOGGER.log(Level.INFO, "Nuevo thread iniciado.");
+        LOGGER.info("Nuevo thread iniciado.");
 
         this.conectado = true;
 
@@ -128,7 +124,7 @@ public class ConexionConCliente extends Thread {
                 try {
                     tipoPaquete = dis.readByte();
                 } catch (EOFException ex) {
-                    LOGGER.log(Level.SEVERE, null, ex);
+                    LOGGER.fatal(null, ex);
                     this.conectado = false;
                     break;
                 }
@@ -137,7 +133,7 @@ public class ConexionConCliente extends Thread {
                 switch (tipoPaquete) {
 
                     case PQT_DESCONECTAR:
-                        LOGGER.log(Level.INFO, "Recibimos un cierre de conexion.");
+                        LOGGER.info("Recibimos un cierre de conexion.");
 
                         // Terminamos
                         this.conectado = false;
@@ -169,12 +165,12 @@ public class ConexionConCliente extends Thread {
                         break;
 
                     default:
-                        LOGGER.log(Level.SEVERE, "Recibimos un paquete que no supimos manejar!");
+                        LOGGER.fatal("Recibimos un paquete que no supimos manejar!");
                         desconectar("Paquete invalido.");
                         break;
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, null, e);
+                LOGGER.fatal(null, e);
             }
         }
 
@@ -199,13 +195,11 @@ public class ConexionConCliente extends Thread {
                 Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
                     conexion.enviarPersonajeQuitar(usuario.getCharindex());
                 });
+                // Eliminamos la conexion de nuestra lista
+                Servidor.getServidor().eliminarConexion(usuario);
             }
-
-            // Eliminamos la conexion de nuestra lista
-            conexiones.remove(this);
-
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, null, e);
+            LOGGER.fatal(null, e);
         }
     }
 
@@ -228,7 +222,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_DESCONECTAR);
             dos.writeUTF(mensaje);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
         this.conectado = false;
     }
@@ -238,7 +232,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_CHAT);
             dos.writeUTF(mensaje);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -255,7 +249,7 @@ public class ConexionConCliente extends Thread {
                 return true;
 
             case "ONLINE":
-                enviarMensaje("Hay {0} jugadores conectados.", conexiones.size());
+                enviarMensaje("Hay {0} jugadores conectados.", Servidor.getServidor().getJugadoresConectados());
                 return true;
         }
 
@@ -265,7 +259,7 @@ public class ConexionConCliente extends Thread {
 
     public boolean manejarInicioDeSesion() {
         try {
-            LOGGER.log(Level.INFO, "Recibimos un inicio de sesion.");
+            LOGGER.info("Recibimos un inicio de sesion.");
             // Inicio de sesion
             Byte version = dis.readByte();
 
@@ -337,7 +331,7 @@ public class ConexionConCliente extends Thread {
                 usuario.guardar();
 
                 this.username = nombre;
-                
+
                 enviarUsuarioNombre();
                 enviarUsuarioCambiaMapa();
                 enviarUsuarioPosicion();
@@ -359,33 +353,33 @@ public class ConexionConCliente extends Thread {
                 });
 
                 // Enviamos al usuario todos los personojaes
-                for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
-                    Usuario u = entry.getKey();
+                for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
+                    Usuario u = conn.getUsuario();
                     try {
-                    enviarPersonajeCrear(
-                            usuario.equals(u) ? 1 : u.getCharindex(),
-                            u.getOrientacion().valor(),
-                            u.getCoordenada().getPosicion().getX(),
-                            u.getCoordenada().getPosicion().getY(),
-                            u.getCuerpo(),
-                            u.getCabeza(),
-                            u.getArma(),
-                            u.getEscudo(),
-                            u.getCasco());
+                        enviarPersonajeCrear(
+                                usuario.getCharindex() == u.getCharindex() ? 1 : u.getCharindex(),
+                                u.getOrientacion().valor(),
+                                u.getCoordenada().getPosicion().getX(),
+                                u.getCoordenada().getPosicion().getY(),
+                                u.getCuerpo(),
+                                u.getCabeza(),
+                                u.getArma(),
+                                u.getEscudo(),
+                                u.getCasco());
                     } catch (Exception ex) {
-                        LOGGER.log(Level.SEVERE, null, ex);
+                        LOGGER.fatal(null, ex);
                     }
                 }
             } catch (Exception ex) {
                 desconectar("Ocurrio un error al cargar el personaje.");
-                LOGGER.log(Level.SEVERE, "Ocurrio un error al cargar el personaje.", ex);
+                LOGGER.fatal("Ocurrio un error al cargar el personaje.", ex);
                 return false;
             }
 
             Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} ha ingresado al juego.", nombre);
             return true;
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
         return false;
     }
@@ -419,7 +413,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(is.getCantidad());
             dos.writeBoolean(is.isEquipado());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -428,7 +422,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_CAMBIA_MUNDO);
             dos.writeInt(usuario.getCoordenada().getMapa());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -437,7 +431,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_USUARIO_NOMBRE);
             dos.writeUTF(usuario.getNombre());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -449,7 +443,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(usuario.getCoordenada().getPosicion().getY());
             dos.writeInt(usuario.getOrientacion().valor());
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -473,7 +467,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(usuario.getSed().getMax());
 
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -485,7 +479,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(y);
 
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -503,7 +497,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(casco);
 
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -513,7 +507,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(charindex);
             dos.writeInt(heading);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -522,7 +516,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_PERSONAJE_QUITAR);
             dos.writeInt(charindex);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
@@ -538,17 +532,17 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(casco);
 
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
     }
 
     public boolean manejarUsuarioCaminar() {
         try {
-            if (dis.available() < 1) {
-                throw new Error("Data insuficiente");
-            }
+//            if (dis.available() < 1) {
+//                throw new Error("Data insuficiente");
+//            }
 
-            int heading = dis.readInt();
+            byte heading = dis.readByte();
 
             // @TODO: Prevenir speed hack
             // @TODO: Cancelar /salir
@@ -563,23 +557,23 @@ public class ConexionConCliente extends Thread {
                 return true;
             }
             // Movemos al jugador
-            if (!usuario.isDescansando()) {
+            if (usuario.isDescansando()) {
                 usuario.setDescansando(false);
             }
             // @TODO: Solo el ladron y el bandido pueden caminar ocultos
             usuario.mover(Orientacion.valueOf(heading));
             return true;
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
         return false;
     }
 
     public boolean manejarUsuarioCambiarDireccion() {
         try {
-            if (dis.available() < 1) {
-                throw new Error("Data insuficiente");
-            }
+//            if (dis.available() < 1) {
+//                throw new Error("Data insuficiente");
+//            }
 
             byte heading = dis.readByte();
 
@@ -614,17 +608,17 @@ public class ConexionConCliente extends Thread {
             });
             return true;
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
         return false;
     }
 
     public void ChangeUserChar(Usuario usuario, Orientacion orientacion, int cuerpo, int head, int arma, int escudo, int casco) {
-        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
-            if (usuario.equals(entry.getKey())) {
+        for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
+            if (usuario.getCharindex() == conn.getUsuario().getCharindex()) {
                 continue;
             }
-            entry.getValue().enviarPersonajeCambiar(
+            conn.enviarPersonajeCambiar(
                     usuario.getCharindex(),
                     usuario.getOrientacion().valor(),
                     usuario.getCuerpo(),
@@ -634,5 +628,9 @@ public class ConexionConCliente extends Thread {
                     usuario.getCasco());
         }
 
+    }
+
+    public boolean isConectado() {
+        return socket.isConnected();
     }
 }

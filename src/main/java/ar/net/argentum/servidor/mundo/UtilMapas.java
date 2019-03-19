@@ -21,6 +21,7 @@ import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.Mapa;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -28,9 +29,11 @@ import java.io.RandomAccessFile;
  */
 public class UtilMapas {
 
+    private static final Logger LOGGER = Logger.getLogger(UtilMapas.class);
+
     public static Mapa cargarMapa(int num_mapa, String archivo) {
 
-        System.out.print("Iniciando carga del mapa " + num_mapa + "...");
+        LOGGER.info("Iniciando carga del mapa " + num_mapa + "...");
 
         try (RandomAccessFile f = new RandomAccessFile("datos/mapas/mapa" + num_mapa + ".map", "r")) {
             f.seek(0);
@@ -48,7 +51,7 @@ public class UtilMapas {
             tempint = UtilLegacy.bigToLittle(f.readShort());
             tempint = UtilLegacy.bigToLittle(f.readShort());
             tempint = UtilLegacy.bigToLittle(f.readShort());
-            
+
             byte bloq;
             short tempshort;
 
@@ -98,14 +101,14 @@ public class UtilMapas {
 
                         mapa.setBaldosa(x, y, md);
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        LOGGER.fatal(null, ex);
                     }
                 }
             }
-            System.out.println("...OK!");
+            LOGGER.info("Carga de mapa finalizada!");
             return mapa;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.fatal(null, ex);
         }
         return null;
     }

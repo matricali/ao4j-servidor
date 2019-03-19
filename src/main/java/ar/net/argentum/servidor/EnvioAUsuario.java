@@ -23,5 +23,5 @@ import ar.net.argentum.servidor.protocolo.ConexionConCliente;
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public interface EnvioAUsuario {
-    public void enviar(Usuario usuario, ConexionConCliente conexion);
+    public void enviar(Integer charindex, ConexionConCliente conexion);
 }

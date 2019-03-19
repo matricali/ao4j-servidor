@@ -20,8 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -29,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class Configuracion {
 
-    protected static final Logger LOGGER = Logger.getLogger(Configuracion.class.getName());
+    protected static final Logger LOGGER = Logger.getLogger(Configuracion.class);
 
     protected Properties prop;
 
@@ -44,14 +43,14 @@ public class Configuracion {
             // Cargar archivo dentro de un objeto java.util.Properties
             prop.load(input);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         } finally {
             // Cerramos el archivo apropiadamente.
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, null, e);
+                    LOGGER.fatal(null, e);
                 }
             }
         }
@@ -65,7 +64,7 @@ public class Configuracion {
             }
             return Integer.parseInt(prop.getProperty(nombreCampo));
         } catch (NumberFormatException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.fatal(null, ex);
         }
         return valorPorDefecto;
     }
