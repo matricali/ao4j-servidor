@@ -31,7 +31,7 @@ public class Coordenada {
     protected Posicion posicion;
 
     public Coordenada() {
-        
+
     }
 
     public Coordenada(int mapa, Posicion posicion) {

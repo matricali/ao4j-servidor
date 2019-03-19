@@ -127,4 +127,16 @@ public class BaldosaImpl implements Baldosa {
     public void setTrigger(short trigger) {
         this.trigger = trigger;
     }
+
+    @Override
+    public boolean isAgua() {
+
+        // @TODO: Detectar si es agua o no
+        return false;
+    }
+
+    @Override
+    public boolean isTierra() {
+        return !isAgua();
+    }
 }

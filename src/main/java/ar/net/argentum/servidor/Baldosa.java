@@ -37,8 +37,12 @@ public interface Baldosa {
     public int getCharindex();
 
     public boolean isBloqueado();
-    
+
     public short getTrigger();
-    
+
     public void setTrigger(short trigger);
+
+    public boolean isAgua();
+
+    public boolean isTierra();
 }

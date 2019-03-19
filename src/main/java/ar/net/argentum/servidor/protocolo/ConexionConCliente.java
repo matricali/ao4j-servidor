@@ -22,15 +22,14 @@ import ar.net.argentum.servidor.Mapa;
 import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
-import ar.net.argentum.servidor.mundo.Personaje;
-import ar.net.argentum.servidor.mundo.PersonajeImpl;
+import ar.net.argentum.servidor.mundo.Orientacion;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,9 +49,15 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_USUARIO_POSICION = 0x7;
     protected static final byte PQT_USUARIO_STATS = 0x8;
     protected static final byte PQT_MUNDO_REPRODUCIR_ANIMACION = 0x9;
+    protected static final byte PQT_USUARIO_CAMINAR = 0x10;
+    protected static final byte PQT_USUARIO_CAMBIAR_DIRECCION = 0x11;
+    protected static final byte PQT_PERSONAJE_CREAR = 0x12;
+    protected static final byte PQT_PERSONAJE_CAMBIAR = 0x13;
+    protected static final byte PQT_PERSONAJE_CAMINAR = 0x14;
+    protected static final byte PQT_PERSONAJE_ANIMACION = 0x15;
+    protected static final byte PQT_PERSONAJE_QUITAR = 0x16;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class.getName());
-
     /**
      * Conexion
      */
@@ -71,7 +76,7 @@ public class ConexionConCliente extends Thread {
     /**
      * Referencia a nuestra coleccion de conexiones
      */
-    protected final ArrayList<ConexionConCliente> conexiones;
+    protected final Map<Usuario, ConexionConCliente> conexiones;
 
     /**
      * El usuario esta conectado?
@@ -100,7 +105,7 @@ public class ConexionConCliente extends Thread {
      * @param conexiones Referencia a nuestra coleccion de conexiones
      * @throws IOException
      */
-    public ConexionConCliente(Socket s, ArrayList<ConexionConCliente> conexiones) throws IOException {
+    public ConexionConCliente(Socket s, Usuario usuario, Map<Usuario, ConexionConCliente> conexiones) throws IOException {
         this.socket = s;
         this.conexiones = conexiones;
 
@@ -155,6 +160,14 @@ public class ConexionConCliente extends Thread {
                         Servidor.getServidor().enviarMensajeDeDifusion("\u00a79" + username + "\u00a77: " + mensaje);
                         break;
 
+                    case PQT_USUARIO_CAMINAR:
+                        manejarUsuarioCaminar();
+                        break;
+
+                    case PQT_USUARIO_CAMBIAR_DIRECCION:
+                        manejarUsuarioCambiarDireccion();
+                        break;
+
                     default:
                         LOGGER.log(Level.SEVERE, "Recibimos un paquete que no supimos manejar!");
                         desconectar("Paquete invalido.");
@@ -182,6 +195,10 @@ public class ConexionConCliente extends Thread {
 
                 // Eliminamos el personaje del mundo
                 mapa.getBaldosa(usuario.getCoordenada().getPosicion()).setCharindex(0);
+
+                Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
+                    conexion.enviarPersonajeQuitar(usuario.getCharindex());
+                });
             }
 
             // Eliminamos la conexion de nuestra lista
@@ -295,7 +312,7 @@ public class ConexionConCliente extends Thread {
                 if (usuario.getCoordenada().getMapa() == 0) {
                     usuario.getCoordenada().setMapa(1);
                     usuario.getCoordenada().getPosicion().setX(50);
-                    usuario.getCoordenada().getPosicion().setY(0);
+                    usuario.getCoordenada().getPosicion().setY(50);
                 }
 
                 Mapa mapa = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa());
@@ -307,28 +324,61 @@ public class ConexionConCliente extends Thread {
                 }
 
                 // Creamos el personaje en la posicion del mundo
-                Personaje pers = new PersonajeImpl();
-                pers.setNombre(usuario.getNombre());
-                pers.setAnimacionArma(1);
-                pers.setAnimacionCuerpo(usuario.getCuerpo());
-                pers.setAnimacionCabeza(usuario.getCabeza());
-                pers.setPosicion(usuario.getCoordenada().getPosicion());
-                mapa.getPersonajes().add(pers);
-                baldosa.setCharindex(1);
+//                Personaje pers = new PersonajeImpl();
+//                pers.setNombre(usuario.getNombre());
+//                pers.setAnimacionArma(1);
+//                pers.setAnimacionCuerpo(usuario.getCuerpo());
+//                pers.setAnimacionCabeza(usuario.getCabeza());
+//                pers.setPosicion(usuario.getCoordenada().getPosicion());
+//                mapa.getPersonajes().add(pers);
+                baldosa.setCharindex(usuario.getCharindex());
 
                 usuario.setConectado(true);
                 usuario.guardar();
 
+                this.username = nombre;
+                
                 enviarUsuarioNombre();
                 enviarUsuarioCambiaMapa();
                 enviarUsuarioPosicion();
                 enviarUsuarioStats();
                 usuarioInventarioActualizar();
-                this.username = nombre;
 
+                // Enviamos a los demas usuarios que dibujen el personaje
+                Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
+                    conexion.enviarPersonajeCrear(
+                            usuario.getCharindex(),
+                            usuario.getOrientacion().valor(),
+                            usuario.getCoordenada().getPosicion().getX(),
+                            usuario.getCoordenada().getPosicion().getY(),
+                            usuario.getCuerpo(),
+                            usuario.getCabeza(),
+                            usuario.getArma(),
+                            usuario.getEscudo(),
+                            usuario.getCasco());
+                });
+
+                // Enviamos al usuario todos los personojaes
+                for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
+                    Usuario u = entry.getKey();
+                    try {
+                    enviarPersonajeCrear(
+                            usuario.equals(u) ? 1 : u.getCharindex(),
+                            u.getOrientacion().valor(),
+                            u.getCoordenada().getPosicion().getX(),
+                            u.getCoordenada().getPosicion().getY(),
+                            u.getCuerpo(),
+                            u.getCabeza(),
+                            u.getArma(),
+                            u.getEscudo(),
+                            u.getCasco());
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.SEVERE, null, ex);
+                    }
+                }
             } catch (Exception ex) {
                 desconectar("Ocurrio un error al cargar el personaje.");
-                LOGGER.log(Level.SEVERE, "Ocurrio un error al cargar el persnoaje.", ex);
+                LOGGER.log(Level.SEVERE, "Ocurrio un error al cargar el personaje.", ex);
                 return false;
             }
 
@@ -437,5 +487,152 @@ public class ConexionConCliente extends Thread {
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
+    }
+
+    public void enviarPersonajeCrear(int charindex, int heading, int x, int y, int cuerpo, int cabeza, int arma, int escudo, int casco) {
+        try {
+            dos.writeByte(PQT_PERSONAJE_CREAR);
+            dos.writeInt(charindex);
+            dos.writeInt(heading);
+            dos.writeInt(x);
+            dos.writeInt(y);
+            dos.writeInt(cuerpo);
+            dos.writeInt(cabeza);
+            dos.writeInt(arma);
+            dos.writeInt(escudo);
+            dos.writeInt(casco);
+
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarPersonajeCaminar(int charindex, int heading) {
+        try {
+            dos.writeByte(PQT_PERSONAJE_CAMINAR);
+            dos.writeInt(charindex);
+            dos.writeInt(heading);
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarPersonajeQuitar(int charindex) {
+        try {
+            dos.writeByte(PQT_PERSONAJE_QUITAR);
+            dos.writeInt(charindex);
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void enviarPersonajeCambiar(int charindex, int heading, int cuerpo, int cabeza, int arma, int escudo, int casco) {
+        try {
+            dos.writeByte(PQT_PERSONAJE_CAMINAR);
+            dos.writeInt(charindex);
+            dos.writeInt(heading);
+            dos.writeInt(cuerpo);
+            dos.writeInt(cabeza);
+            dos.writeInt(arma);
+            dos.writeInt(escudo);
+            dos.writeInt(casco);
+
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public boolean manejarUsuarioCaminar() {
+        try {
+            if (dis.available() < 1) {
+                throw new Error("Data insuficiente");
+            }
+
+            int heading = dis.readInt();
+
+            // @TODO: Prevenir speed hack
+            // @TODO: Cancelar /salir
+            if (usuario.isParalizado()) {
+                enviarMensaje("No puedes moverte porque estás paralizado.");
+                return true;
+            }
+            if (usuario.isMeditando()) {
+                // Detenemos la meditacion
+                usuario.setMeditando(false);
+                // @TODO: Enviar efecto 0
+                return true;
+            }
+            // Movemos al jugador
+            if (!usuario.isDescansando()) {
+                usuario.setDescansando(false);
+            }
+            // @TODO: Solo el ladron y el bandido pueden caminar ocultos
+            usuario.mover(Orientacion.valueOf(heading));
+            return true;
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean manejarUsuarioCambiarDireccion() {
+        try {
+            if (dis.available() < 1) {
+                throw new Error("Data insuficiente");
+            }
+
+            byte heading = dis.readByte();
+
+            // @TODO: Prevenir speed hack
+            // @TODO: Cancelar /salir
+            if (usuario.isMeditando()) {
+                // Detenemos la meditacion
+                usuario.setMeditando(false);
+                // @TODO: Enviar efecto 0
+                return true;
+            }
+
+            // Paramos de descansar
+            if (usuario.isDescansando()) {
+                usuario.setDescansando(false);
+            }
+
+            // @TODO: Solo el ladron y el bandido pueden caminar ocultos
+            // Establecemos la nueva orientacion
+            usuario.setOrientacion(Orientacion.valueOf(heading));
+
+            // Le avisamos a los cercanos
+            Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
+                conexion.enviarPersonajeCambiar(
+                        usuario.getCharindex(),
+                        usuario.getOrientacion().valor(),
+                        usuario.getCuerpo(),
+                        usuario.getCabeza(),
+                        usuario.getArma(),
+                        usuario.getEscudo(),
+                        usuario.getCasco());
+            });
+            return true;
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public void ChangeUserChar(Usuario usuario, Orientacion orientacion, int cuerpo, int head, int arma, int escudo, int casco) {
+        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
+            if (usuario.equals(entry.getKey())) {
+                continue;
+            }
+            entry.getValue().enviarPersonajeCambiar(
+                    usuario.getCharindex(),
+                    usuario.getOrientacion().valor(),
+                    usuario.getCuerpo(),
+                    usuario.getCabeza(),
+                    usuario.getArma(),
+                    usuario.getEscudo(),
+                    usuario.getCasco());
+        }
+
     }
 }

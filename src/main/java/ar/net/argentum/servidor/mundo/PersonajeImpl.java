@@ -23,7 +23,7 @@ import ar.net.argentum.servidor.Posicion;
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public class PersonajeImpl implements Personaje {
-    
+
     protected String nombre;
     protected Posicion posicion;
     protected int animacionCuerpo;
@@ -78,6 +78,8 @@ public class PersonajeImpl implements Personaje {
     }
 
     /**
+     * Establecer posicion
+     *
      * @param posicion the posicion to set
      */
     @Override
@@ -86,7 +88,10 @@ public class PersonajeImpl implements Personaje {
     }
 
     /**
-     * @param posicion the posicion to set
+     * Establecer posicion
+     *
+     * @param x
+     * @param y
      */
     @Override
     public void setPosicion(int x, int y) {
@@ -173,5 +178,5 @@ public class PersonajeImpl implements Personaje {
     public void setAnimacionArma(int animacionArma) {
         this.animacionArma = animacionArma;
     }
-    
+
 }

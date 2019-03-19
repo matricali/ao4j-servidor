@@ -17,11 +17,13 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.mundo.Orientacion;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -59,6 +61,17 @@ public class Usuario {
         }
         ObjectMapper mapper = new ObjectMapper();
         Usuario usuario = mapper.readValue(getArchivo(nombre), Usuario.class);
+
+        if (usuario.getCoordenada() == null) {
+            System.out.println("coordenada es null");
+        } else {
+            if (usuario.getCoordenada().getPosicion() == null) {
+                System.out.println("posicion es null");
+            } else {
+                System.out.println("posicion:" + usuario.getCoordenada().getPosicion().getX() + "," + usuario.getCoordenada().getPosicion().getY());
+            }
+        }
+
         return usuario;
     }
 
@@ -76,6 +89,12 @@ public class Usuario {
     protected int cuerpo;
     @JsonProperty
     protected int cabeza;
+    @JsonProperty
+    protected int arma;
+    @JsonProperty
+    protected int escudo;
+    @JsonProperty
+    protected int casco;
     // Estadisticas
     @JsonProperty
     protected MinMax vida = new MinMax();
@@ -89,6 +108,46 @@ public class Usuario {
     protected MinMax sed = new MinMax();
     @JsonProperty
     protected Orientacion orientacion = Orientacion.SUR;
+    @JsonProperty
+    protected boolean paralizado = false;
+    @JsonProperty
+    protected boolean navegando = false;
+    protected boolean meditando = false;
+    protected boolean descansando = false;
+    protected final int charindex;
+
+    public Usuario() {
+        this.charindex = Servidor.crearCharindex();
+    }
+
+     @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.nombre);
+        hash = 29 * hash + this.charindex;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Usuario other = (Usuario) obj;
+        if (this.charindex != other.charindex) {
+            return false;
+        }
+        if (!Objects.equals(this.nombre, other.nombre)) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * @return the nombre
@@ -243,5 +302,153 @@ public class Usuario {
      */
     public void setOrientacion(Orientacion orientacion) {
         this.orientacion = orientacion;
+    }
+
+    /**
+     * @return the paralizado
+     */
+    public boolean isParalizado() {
+        return paralizado;
+    }
+
+    /**
+     * @param paralizado the paralizado to set
+     */
+    public void setParalizado(boolean paralizado) {
+        this.paralizado = paralizado;
+    }
+
+    /**
+     * @return the navegando
+     */
+    public boolean isNavegando() {
+        return navegando;
+    }
+
+    /**
+     * @param navegando the navegando to set
+     */
+    public void setNavegando(boolean navegando) {
+        this.navegando = navegando;
+    }
+
+    /**
+     * @return the meditando
+     */
+    @JsonIgnore
+    public boolean isMeditando() {
+        return meditando;
+    }
+
+    /**
+     * @param meditando the meditando to set
+     */
+    @JsonIgnore
+    public void setMeditando(boolean meditando) {
+        this.meditando = meditando;
+        if (meditando) {
+            Servidor.getServidor().getConexion(this).enviarMensaje("Has comenzado a meditar.");
+        } else {
+            Servidor.getServidor().getConexion(this).enviarMensaje("Dejas de meditar.");
+        }
+    }
+
+    /**
+     * @return the descansando
+     */
+    @JsonIgnore
+    public boolean isDescansando() {
+        return descansando;
+    }
+
+    /**
+     * @param descansando the descansando to set
+     */
+    @JsonIgnore
+    public void setDescansando(boolean descansando) {
+        this.descansando = descansando;
+        if (descansando) {
+            Servidor.getServidor().getConexion(this).enviarMensaje("Has comenzado a descascar.");
+        } else {
+            Servidor.getServidor().getConexion(this).enviarMensaje("Has dejado de descansar.");
+        }
+    }
+
+    /**
+     * Mover el usuario en una direccion dada y enviar el mensaje al cliente de
+     * todos los usuarios en el area.
+     *
+     * @see MoveUserChar
+     *
+     * @param orientacion
+     */
+    public void mover(Orientacion orientacion) {
+        Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
+
+        if (!Logica.isPosicionValida(coordenada.getMapa(), nuevaPosicion.getX(), nuevaPosicion.getY(), false, true)) {
+            Servidor.getServidor().getConexion(this).enviarUsuarioPosicion();
+            return;
+        }
+
+        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
+            conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
+        });
+    }
+
+    /**
+     * @return the charindex
+     */
+    @JsonIgnore
+    public int getCharindex() {
+        return charindex;
+    }
+
+    /**
+     * @return the arma
+     */
+    public int getArma() {
+        return arma;
+    }
+
+    /**
+     * @param arma the arma to set
+     */
+    public void setArma(int arma) {
+        this.arma = arma;
+    }
+
+    /**
+     * @return the escudo
+     */
+    public int getEscudo() {
+        return escudo;
+    }
+
+    /**
+     * @param escudo the escudo to set
+     */
+    public void setEscudo(int escudo) {
+        this.escudo = escudo;
+    }
+
+    /**
+     * @return the casco
+     */
+    public int getCasco() {
+        return casco;
+    }
+
+    /**
+     * @param casco the casco to set
+     */
+    public void setCasco(int casco) {
+        this.casco = casco;
+    }
+
+    /**
+     * @param coordenada the coordenada to set
+     */
+    public void setCoordenada(Coordenada coordenada) {
+        this.coordenada = coordenada;
     }
 }

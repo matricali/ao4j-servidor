@@ -14,37 +14,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package ar.net.argentum.servidor.mundo;
+package ar.net.argentum.servidor;
+
+import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 
 /**
- * Representa la orientacion hacia la que mira un personaje
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public enum Orientacion {
-    NORTE(1), ESTE(2), SUR(3), OESTE(4);
-    private final int valor;
-
-    private Orientacion(int valor) {
-        this.valor = valor;
-    }
-
-    public int valor() {
-        return valor;
-    }
-
-    /**
-     * Obtener orientacion desde un valor entero dado
-     *
-     * @param valor
-     * @return
-     */
-    public static Orientacion valueOf(int valor) throws IllegalArgumentException {
-        for (Orientacion o : Orientacion.values()) {
-            if (o.valor == valor) {
-                return o;
-            }
-        }
-        throw new IllegalArgumentException("Orientacion invalida (" + valor + ")");
-    }
+public interface EnvioAUsuario {
+    public void enviar(Usuario usuario, ConexionConCliente conexion);
 }

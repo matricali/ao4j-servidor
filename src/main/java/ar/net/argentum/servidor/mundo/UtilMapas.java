@@ -37,17 +37,17 @@ public class UtilMapas {
 
             Mapa mapa = new MapaImpl(num_mapa, 100, 100);
 
-            short version = UtilLegacy.bigToLittle_Short(f.readShort());
+            short version = UtilLegacy.bigToLittle(f.readShort());
             byte[] cabecera = new byte[263];
             f.read(cabecera);
 
             byte byflags = 0;
             short tempint;
 
-            tempint = UtilLegacy.bigToLittle_Short(f.readShort());
-            tempint = UtilLegacy.bigToLittle_Short(f.readShort());
-            tempint = UtilLegacy.bigToLittle_Short(f.readShort());
-            tempint = UtilLegacy.bigToLittle_Short(f.readShort());
+            tempint = UtilLegacy.bigToLittle(f.readShort());
+            tempint = UtilLegacy.bigToLittle(f.readShort());
+            tempint = UtilLegacy.bigToLittle(f.readShort());
+            tempint = UtilLegacy.bigToLittle(f.readShort());
             
             byte bloq;
             short tempshort;
@@ -57,37 +57,37 @@ public class UtilMapas {
                     try {
                         Baldosa md = new BaldosaImpl();
 
-                        byflags = UtilLegacy.bigToLittle_Byte(f.readByte());
+                        byflags = UtilLegacy.bigToLittle(f.readByte());
                         bloq = (byte) (byflags & 1);
                         md.setBloqueado(bloq == 1);
 
                         // Grafico de la capa 1
-                        md.setGrafico(1, UtilLegacy.bigToLittle_Short(f.readShort()));
+                        md.setGrafico(1, UtilLegacy.bigToLittle(f.readShort()));
 
                         // Graficoo de la capa 2
                         if ((byte) (byflags & 2) != 0) {
-                            md.setGrafico(2, UtilLegacy.bigToLittle_Short(f.readShort()));
+                            md.setGrafico(2, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(2, 0);
                         }
 
                         // Grafico de la capa 3
                         if ((byte) (byflags & 4) != 0) {
-                            tempshort = UtilLegacy.bigToLittle_Short(f.readShort());
-                            md.setGrafico(3, UtilLegacy.bigToLittle_Short(f.readShort()));
+                            tempshort = UtilLegacy.bigToLittle(f.readShort());
+                            md.setGrafico(3, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(3, 0);
                         }
 
                         // Grafico de la capa 4
                         if ((byte) (byflags & 8) != 0) {
-                            md.setGrafico(4, UtilLegacy.bigToLittle_Short(f.readShort()));
+                            md.setGrafico(4, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(4, 0);
                         }
 
                         if ((byte) (byflags & 16) != 0) {
-                            md.setTrigger(UtilLegacy.bigToLittle_Short(f.readShort()));
+                            md.setTrigger(UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setTrigger((short) 0);
                         }

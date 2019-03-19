@@ -29,6 +29,8 @@ import java.util.logging.Logger;
  */
 public class Configuracion {
 
+    protected static final Logger LOGGER = Logger.getLogger(Configuracion.class.getName());
+
     protected Properties prop;
 
     public Configuracion(String archivo) {
@@ -42,14 +44,14 @@ public class Configuracion {
             // Cargar archivo dentro de un objeto java.util.Properties
             prop.load(input);
         } catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         } finally {
             // Cerramos el archivo apropiadamente.
             if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);
+                    LOGGER.log(Level.SEVERE, null, e);
                 }
             }
         }
@@ -63,7 +65,7 @@ public class Configuracion {
             }
             return Integer.parseInt(prop.getProperty(nombreCampo));
         } catch (NumberFormatException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
         }
         return valorPorDefecto;
     }

@@ -27,7 +27,14 @@ import java.nio.ByteOrder;
  */
 public class UtilLegacy {
 
-    public static int bigToLittle_Int(int bigendian) {
+    /**
+     * Convertir un entero de big-endian a little-endian
+     *
+     * @see https://es.wikipedia.org/wiki/Endianness
+     * @param bigendian
+     * @return
+     */
+    public static int bigToLittle(int bigendian) {
         ByteBuffer buf = ByteBuffer.allocate(4);
 
         buf.order(ByteOrder.BIG_ENDIAN);
@@ -37,7 +44,14 @@ public class UtilLegacy {
         return buf.getInt(0);
     }
 
-    public static float bigToLittle_Float(float bigendian) {
+    /**
+     * Convertir un float de big-endian a little-endian
+     *
+     * @see https://es.wikipedia.org/wiki/Endianness
+     * @param bigendian
+     * @return
+     */
+    public static float bigToLittle(float bigendian) {
         ByteBuffer buf = ByteBuffer.allocate(4);
 
         buf.order(ByteOrder.BIG_ENDIAN);
@@ -47,7 +61,14 @@ public class UtilLegacy {
         return buf.getFloat(0);
     }
 
-    public static short bigToLittle_Short(short bigendian) {
+    /**
+     * Convertir un short de big-endian a little-endian
+     *
+     * @see https://es.wikipedia.org/wiki/Endianness
+     * @param bigendian
+     * @return
+     */
+    public static short bigToLittle(short bigendian) {
         ByteBuffer buf = ByteBuffer.allocate(2);
 
         buf.order(ByteOrder.BIG_ENDIAN);
@@ -57,7 +78,14 @@ public class UtilLegacy {
         return buf.getShort(0);
     }
 
-    public static byte bigToLittle_Byte(byte bigendian) {
+    /**
+     * Convertir un byte de big-endian a little-endian
+     *
+     * @see https://es.wikipedia.org/wiki/Endianness
+     * @param bigendian
+     * @return
+     */
+    public static byte bigToLittle(byte bigendian) {
         ByteBuffer buf = ByteBuffer.allocate(1);
 
         buf.order(ByteOrder.BIG_ENDIAN);

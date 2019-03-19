@@ -25,9 +25,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +38,8 @@ import java.util.logging.Logger;
  */
 public class Servidor {
 
+    protected static final Logger LOGGER = Logger.getLogger(Servidor.class.getName());
+    private static int ultimoCharindex = 2;
     private static Servidor instancia;
 
     public static Servidor getServidor() {
@@ -44,7 +47,7 @@ public class Servidor {
             try {
                 instancia = new Servidor();
             } catch (IOException ex) {
-                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.SEVERE, null, ex);
             }
         }
         return instancia;
@@ -55,17 +58,13 @@ public class Servidor {
         servidor.iniciar();
     }
 
-    public static Logger getLogger() {
-        return Logger.getLogger(Servidor.class.getName());
-    }
-
     private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
     private ServerSocket serverSocket;
-    private ArrayList<ConexionConCliente> conexiones;
+    private Map<Usuario, ConexionConCliente> conexiones;
     private final Map<Integer, Mapa> mapas;
     private final Map<Integer, Personaje> personajes;
-    
+
     private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
@@ -76,48 +75,50 @@ public class Servidor {
     }
 
     public void iniciar() {
-        Servidor.getLogger().log(Level.INFO, "Iniciando servidor en el puerto " + configuracionGeneral.getPuerto() + "...");
+        LOGGER.log(Level.INFO, "Iniciando servidor en el puerto " + configuracionGeneral.getPuerto() + "...");
         try {
             // Iniciar socket, el puerto por defecto es 7666
             this.serverSocket = new ServerSocket(configuracionGeneral.getPuerto());
         } catch (IOException ex) {
-            Servidor.getLogger().log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, null, ex);
 
             // Si no podemos iniciar el socket ya no hay nada que hacer :(
             return;
         }
 
         // Creamos una lista para mantener las conexiones
-        this.conexiones = new ArrayList<>();
+        this.conexiones = new HashMap<>();
 
         // Bucle infinito
         while (true) {
-            Socket s = null;
+            Socket socket = null;
 
             try {
                 // Recibir conexiones entrantes
-                s = serverSocket.accept();
+                socket = serverSocket.accept();
 
-                System.out.println("Se ha conectado un nuevo cliente: " + s);
-                System.out.println("Asignando nuevo Thread al cliente");
+                LOGGER.log(Level.INFO, "Se ha conectado un nuevo cliente: " + socket);
+                LOGGER.log(Level.INFO, "Asignando nuevo Thread al cliente");
 
+                // Creamos un objeto Usuario
+                Usuario usuario = new Usuario();
                 // Crear nuevo Thread
-                ConexionConCliente t = new ConexionConCliente(s, conexiones);
+                ConexionConCliente t = new ConexionConCliente(socket, usuario, conexiones);
 
                 // Agregamos el nuevo thread a la lista de conexiones
-                conexiones.add(t);
+                conexiones.put(usuario, t);
 
                 // Iniciar el hilo 
                 t.start();
 
             } catch (IOException ex) {
-                Servidor.getLogger().log(Level.SEVERE, null, ex);
-                if (null != s) {
+                LOGGER.log(Level.SEVERE, null, ex);
+                if (null != socket) {
                     // Si creamos el Socket entonces hay que cerrarlo
                     try {
-                        s.close();
+                        socket.close();
                     } catch (IOException e) {
-                        Servidor.getLogger().log(Level.SEVERE, null, e);
+                        LOGGER.log(Level.SEVERE, null, e);
                     }
                 }
             }
@@ -125,9 +126,9 @@ public class Servidor {
     }
 
     public void enviarMensajeDeDifusion(String mensaje) {
-        System.out.println(mensaje);
-        for (ConexionConCliente usuario : conexiones) {
-            usuario.enviarMensaje(mensaje);
+        LOGGER.log(Level.INFO, "[DIFUSION] " + mensaje);
+        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
+            entry.getValue().enviarMensaje(mensaje);
         }
     }
 
@@ -146,8 +147,31 @@ public class Servidor {
             }
         }
     }
-    
+
     public Mapa getMapa(int numMapa) {
         return mapas.get(numMapa);
+    }
+
+    /**
+     * Devuelve la conexion establecida con un usuario en particular
+     *
+     * @param usuario Usuario del cual obtener la conexion
+     * @return Conexion establecida con el usuario
+     */
+    public ConexionConCliente getConexion(Usuario usuario) {
+        return conexiones.get(usuario);
+    }
+
+    public static synchronized int crearCharindex() {
+        return ultimoCharindex++;
+    }
+    
+    public void todosMenosUsuarioArea(Usuario usuario, EnvioAUsuario envio) {
+        for (Map.Entry<Usuario, ConexionConCliente> entry : conexiones.entrySet()) {
+            if (usuario.equals(entry.getKey())) {
+                continue;
+            }
+            envio.enviar(entry.getKey(), entry.getValue());
+        }
     }
 }

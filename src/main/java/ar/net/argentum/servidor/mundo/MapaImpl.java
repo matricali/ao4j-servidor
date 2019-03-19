@@ -20,9 +20,7 @@ import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.Mapa;
 import ar.net.argentum.servidor.Posicion;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * Representa un mapa
