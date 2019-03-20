@@ -28,8 +28,10 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.MessageFormat;
 import org.apache.log4j.Logger;
+import org.omg.PortableServer.Servant;
 
 /**
  * Clase encargada de la comunicacion entre el cliente y el servidor
@@ -54,6 +56,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_PERSONAJE_CAMINAR = 0x14;
     protected static final byte PQT_PERSONAJE_ANIMACION = 0x15;
     protected static final byte PQT_PERSONAJE_QUITAR = 0x16;
+    protected static final byte PQT_CLICK = 0x17;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -123,7 +126,7 @@ public class ConexionConCliente extends Thread {
 
                 try {
                     tipoPaquete = dis.readByte();
-                } catch (EOFException ex) {
+                } catch (EOFException | SocketException ex) {
                     LOGGER.fatal(null, ex);
                     this.conectado = false;
                     break;
@@ -162,6 +165,10 @@ public class ConexionConCliente extends Thread {
 
                     case PQT_USUARIO_CAMBIAR_DIRECCION:
                         manejarUsuarioCambiarDireccion();
+                        break;
+
+                    case PQT_CLICK:
+                        manejarClick();
                         break;
 
                     default:
@@ -545,23 +552,9 @@ public class ConexionConCliente extends Thread {
             byte heading = dis.readByte();
 
             // @TODO: Prevenir speed hack
-            // @TODO: Cancelar /salir
-            if (usuario.isParalizado()) {
-                enviarMensaje("No puedes moverte porque estás paralizado.");
-                return true;
+            if (!usuario.mover(Orientacion.valueOf(heading))) {
+                enviarUsuarioPosicion();
             }
-            if (usuario.isMeditando()) {
-                // Detenemos la meditacion
-                usuario.setMeditando(false);
-                // @TODO: Enviar efecto 0
-                return true;
-            }
-            // Movemos al jugador
-            if (usuario.isDescansando()) {
-                usuario.setDescansando(false);
-            }
-            // @TODO: Solo el ladron y el bandido pueden caminar ocultos
-            usuario.mover(Orientacion.valueOf(heading));
             return true;
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
@@ -632,5 +625,23 @@ public class ConexionConCliente extends Thread {
 
     public boolean isConectado() {
         return socket.isConnected();
+    }
+
+    public boolean manejarClick() {
+        try {
+            int x= dis.readInt();
+            int y= dis.readInt();
+            // @TODO: Validar coordenadas
+            Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
+            if (b.getCharindex() > 0) {
+                enviarMensaje("Ves a alguien.");
+                return true;
+            } 
+            enviarMensaje("No ves nada.");
+            return true;
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+        return false;
     }
 }

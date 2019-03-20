@@ -368,17 +368,41 @@ public class Usuario {
      *
      * @param orientacion
      */
-    public void mover(Orientacion orientacion) {
+    public boolean mover(Orientacion orientacion) {
+
+        // @TODO: Cancelar /salir
+        if (isParalizado()) {
+            Servidor.getServidor().getConexion(this)
+                    .enviarMensaje("No puedes moverte porque estás paralizado.");
+            return false;
+        }
+        if (isMeditando()) {
+            // Detenemos la meditacion
+            setMeditando(false);
+            // @TODO: Enviar efecto 0
+            return false;
+        }
+        if (isDescansando()) {
+            // Dejamos de descansar
+            setDescansando(false);
+        }
+        // @TODO: Solo el ladron y el bandido pueden caminar ocultos
+
         Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
 
         if (!Logica.isPosicionValida(coordenada.getMapa(), nuevaPosicion.getX(), nuevaPosicion.getY(), false, true)) {
-            Servidor.getServidor().getConexion(this).enviarUsuarioPosicion();
-            return;
+            return false;
         }
 
+        // Acualizamos la posicion del usuario
+        this.coordenada.setPosicion(nuevaPosicion);
+
+        // Le avisamos a los otros clientes que el usuario se movio
         Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
             conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
         });
+        
+        return true;
     }
 
     /**
@@ -436,5 +460,14 @@ public class Usuario {
      */
     public void setCoordenada(Coordenada coordenada) {
         this.coordenada = coordenada;
+    }
+
+    /**
+     * Enviar un mensaje al usuario
+     *
+     * @param mensaje
+     */
+    public void enviarMensaje(String mensaje) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
