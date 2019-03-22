@@ -16,7 +16,10 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.mundo.Orientacion;
+import ar.net.argentum.servidor.mundo.Personaje;
+import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +34,7 @@ import org.apache.log4j.Logger;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Usuario {
+public class Usuario implements Atacable {
 
     private static final Logger LOGGER = Logger.getLogger(Usuario.class);
 
@@ -333,9 +336,9 @@ public class Usuario {
     public void setMeditando(boolean meditando) {
         this.meditando = meditando;
         if (meditando) {
-            Servidor.getServidor().getConexion(this).enviarMensaje("Has comenzado a meditar.");
+            enviarMensaje("Has comenzado a meditar.");
         } else {
-            Servidor.getServidor().getConexion(this).enviarMensaje("Dejas de meditar.");
+            enviarMensaje("Dejas de meditar.");
         }
     }
 
@@ -354,9 +357,9 @@ public class Usuario {
     public void setDescansando(boolean descansando) {
         this.descansando = descansando;
         if (descansando) {
-            Servidor.getServidor().getConexion(this).enviarMensaje("Has comenzado a descascar.");
+            enviarMensaje("Has comenzado a descascar.");
         } else {
-            Servidor.getServidor().getConexion(this).enviarMensaje("Has dejado de descansar.");
+            enviarMensaje("Has dejado de descansar.");
         }
     }
 
@@ -372,8 +375,7 @@ public class Usuario {
 
         // @TODO: Cancelar /salir
         if (isParalizado()) {
-            Servidor.getServidor().getConexion(this)
-                    .enviarMensaje("No puedes moverte porque estás paralizado.");
+            enviarMensaje("No puedes moverte porque estás paralizado.");
             return false;
         }
         if (isMeditando()) {
@@ -389,8 +391,8 @@ public class Usuario {
         // @TODO: Solo el ladron y el bandido pueden caminar ocultos
 
         Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
-
         if (!Logica.isPosicionValida(coordenada.getMapa(), nuevaPosicion.getX(), nuevaPosicion.getY(), false, true)) {
+            enviarMensaje("Posicion invalida.");
             return false;
         }
 
@@ -401,7 +403,7 @@ public class Usuario {
         Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
             conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
         });
-        
+
         return true;
     }
 
@@ -468,6 +470,167 @@ public class Usuario {
      * @param mensaje
      */
     public void enviarMensaje(String mensaje) {
+        getConexion().enviarMensaje(mensaje);
+    }
+
+    /**
+     * El usuario realiza un golpe de ataque
+     *
+     * @return
+     */
+    public boolean golpea() {
+        // @TODO: Cancelar /salir
+        if (isMeditando()) {
+            // No podes golpear si estas meditando
+            return false;
+        }
+        if (isDescansando()) {
+            // Dejamos de descansar
+            setDescansando(false);
+        }
+        // @TODO: Sacar ocultarse
+
+        Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
+        Mapa m = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+        Baldosa b = m.getBaldosa(nuevaPosicion);
+
+        if (b.getCharindex() == 0) {
+            enviarMensaje("Le pegaste al aire capo");
+            return true;
+        }
+
+        if (b.getCharindex() == getCharindex()) {
+            enviarMensaje("No podes atacarte a vos mismo.");
+            return false;
+        }
+
+        Personaje victima = Servidor.getServidor().getPersonaje(charindex);
+
+        enviarMensaje("Le pegaste a " + victima.getNombre());
+
+//        // Le avisamos a los otros clientes que el usuario se movio
+//        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
+//            conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
+//        });
+        return true;
+    }
+
+    @Override
+    public boolean recibeAtaque(Personaje atacante) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * Desconectar al usuario
+     */
+    public void desconectar() {
+        getConexion().desconectar();
+    }
+
+    /**
+     * Desconectar al usuario enviando un mensaje
+     *
+     * @param mensaje Mensaje a enviar al usuario
+     */
+    public void desconectar(String mensaje) {
+
+        getConexion().desconectar(mensaje);
+    }
+
+    /**
+     * Evento que se produce cuando el usuario se conecta
+     *
+     * @return
+     */
+    public boolean alConectarse() {
+        if (getCoordenada().getMapa() == 0) {
+            getCoordenada().setMapa(1);
+            getCoordenada().getPosicion().setX(50);
+            getCoordenada().getPosicion().setY(50);
+        }
+
+        Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+        Baldosa baldosa = mapa.getBaldosa(getCoordenada().getPosicion());
+
+        if (baldosa.getCharindex() != 0) {
+            // Ya hay alguien parado en esa posicion
+            desconectar("Hay alguien parado en tu posicion, intenta luego.");
+        }
+
+        // Posicionamos al personaje en el mundo
+        baldosa.setCharindex(getCharindex());
+
+        setConectado(true);
+        guardar();
+
+        getConexion().enviarUsuarioNombre();
+        getConexion().enviarUsuarioCambiaMapa();
+        getConexion().enviarUsuarioPosicion();
+        getConexion().enviarUsuarioStats();
+        getConexion().usuarioInventarioActualizar();
+
+        // Avisamos a los clientes conectados que dibujen este personaje
+        Servidor.getServidor().todosMenosUsuarioArea(this, (u, conexion) -> {
+            conexion.enviarPersonajeCrear(
+                    getCharindex(),
+                    getOrientacion().valor(),
+                    getCoordenada().getPosicion().getX(),
+                    getCoordenada().getPosicion().getY(),
+                    getCuerpo(),
+                    getCabeza(),
+                    getArma(),
+                    getEscudo(),
+                    getCasco());
+        });
+
+        // Le indicamos al cliente de este usuario que dibuje los otros personajes en el area
+        for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
+            Usuario u = conn.getUsuario();
+            try {
+                getConexion().enviarPersonajeCrear(
+                        getCharindex() == u.getCharindex() ? 1 : u.getCharindex(),
+                        u.getOrientacion().valor(),
+                        u.getCoordenada().getPosicion().getX(),
+                        u.getCoordenada().getPosicion().getY(),
+                        u.getCuerpo(),
+                        u.getCabeza(),
+                        u.getArma(),
+                        u.getEscudo(),
+                        u.getCasco());
+            } catch (Exception ex) {
+                LOGGER.fatal(null, ex);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Evento que se produce cuando el usuario se deconecta
+     */
+    public void alDesconectarse() {
+        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", getNombre());
+        setConectado(false);
+        guardar();
+
+        Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+
+        // Eliminamos el personaje del mundo
+        mapa.getBaldosa(getCoordenada().getPosicion()).setCharindex(0);
+
+        // Le avisamos a los otros clientes que eliminen el personaje que le corresponde a este usuario
+        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
+            conexion.enviarPersonajeQuitar(getCharindex());
+        });
+    }
+
+    /**
+     * Devuelve la instancia de la conexion con el cliente de este usuario
+     *
+     * @return
+     */
+    @JsonIgnore
+    public ConexionConCliente getConexion() {
+        return Servidor.getServidor().getConexion(this);
     }
 }

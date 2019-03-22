@@ -57,6 +57,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_PERSONAJE_ANIMACION = 0x15;
     protected static final byte PQT_PERSONAJE_QUITAR = 0x16;
     protected static final byte PQT_CLICK = 0x17;
+    protected static final byte PQT_USUARIO_GOLPEA = 0x18;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -74,10 +75,6 @@ public class ConexionConCliente extends Thread {
      */
     protected final DataOutputStream dos;
 
-//    /**
-//     * Referencia a nuestra coleccion de conexiones
-//     */
-//    protected final Map<Usuario, ConexionConCliente> conexiones;
     /**
      * El usuario esta conectado?
      */
@@ -171,6 +168,10 @@ public class ConexionConCliente extends Thread {
                         manejarClick();
                         break;
 
+                    case PQT_USUARIO_GOLPEA:
+                        manejarUsuarioGolpea();
+                        break;
+
                     default:
                         LOGGER.fatal("Recibimos un paquete que no supimos manejar!");
                         desconectar("Paquete invalido.");
@@ -190,18 +191,9 @@ public class ConexionConCliente extends Thread {
             dos.close();
 
             if (usuario != null) {
-                Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", usuario.getNombre());
-                usuario.setConectado(false);
-                usuario.guardar();
+                // Disparamos el evento
+                usuario.alDesconectarse();
 
-                Mapa mapa = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa());
-
-                // Eliminamos el personaje del mundo
-                mapa.getBaldosa(usuario.getCoordenada().getPosicion()).setCharindex(0);
-
-                Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
-                    conexion.enviarPersonajeQuitar(usuario.getCharindex());
-                });
                 // Eliminamos la conexion de nuestra lista
                 Servidor.getServidor().eliminarConexion(usuario);
             }
@@ -212,10 +204,8 @@ public class ConexionConCliente extends Thread {
 
     /**
      * Desconectar al usuario
-     *
-     * @throws IOException
      */
-    public void desconectar() throws IOException {
+    public void desconectar() {
         desconectar("");
     }
 
@@ -310,73 +300,11 @@ public class ConexionConCliente extends Thread {
                     return false;
                 }
 
-                if (usuario.getCoordenada().getMapa() == 0) {
-                    usuario.getCoordenada().setMapa(1);
-                    usuario.getCoordenada().getPosicion().setX(50);
-                    usuario.getCoordenada().getPosicion().setY(50);
-                }
-
-                Mapa mapa = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa());
-                Baldosa baldosa = mapa.getBaldosa(usuario.getCoordenada().getPosicion());
-
-                if (baldosa.getCharindex() != 0) {
-                    // Ya hay alguien parado en esa posicion
-                    desconectar("Hay alguien parado en tu posicion, intenta luego.");
-                }
-
-                // Creamos el personaje en la posicion del mundo
-//                Personaje pers = new PersonajeImpl();
-//                pers.setNombre(usuario.getNombre());
-//                pers.setAnimacionArma(1);
-//                pers.setAnimacionCuerpo(usuario.getCuerpo());
-//                pers.setAnimacionCabeza(usuario.getCabeza());
-//                pers.setPosicion(usuario.getCoordenada().getPosicion());
-//                mapa.getPersonajes().add(pers);
-                baldosa.setCharindex(usuario.getCharindex());
-
-                usuario.setConectado(true);
-                usuario.guardar();
-
                 this.username = nombre;
 
-                enviarUsuarioNombre();
-                enviarUsuarioCambiaMapa();
-                enviarUsuarioPosicion();
-                enviarUsuarioStats();
-                usuarioInventarioActualizar();
+                // Disparamos el evento que indica que el usuario se conecto
+                usuario.alConectarse();
 
-                // Enviamos a los demas usuarios que dibujen el personaje
-                Servidor.getServidor().todosMenosUsuarioArea(usuario, (u, conexion) -> {
-                    conexion.enviarPersonajeCrear(
-                            usuario.getCharindex(),
-                            usuario.getOrientacion().valor(),
-                            usuario.getCoordenada().getPosicion().getX(),
-                            usuario.getCoordenada().getPosicion().getY(),
-                            usuario.getCuerpo(),
-                            usuario.getCabeza(),
-                            usuario.getArma(),
-                            usuario.getEscudo(),
-                            usuario.getCasco());
-                });
-
-                // Enviamos al usuario todos los personojaes
-                for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
-                    Usuario u = conn.getUsuario();
-                    try {
-                        enviarPersonajeCrear(
-                                usuario.getCharindex() == u.getCharindex() ? 1 : u.getCharindex(),
-                                u.getOrientacion().valor(),
-                                u.getCoordenada().getPosicion().getX(),
-                                u.getCoordenada().getPosicion().getY(),
-                                u.getCuerpo(),
-                                u.getCabeza(),
-                                u.getArma(),
-                                u.getEscudo(),
-                                u.getCasco());
-                    } catch (Exception ex) {
-                        LOGGER.fatal(null, ex);
-                    }
-                }
             } catch (Exception ex) {
                 desconectar("Ocurrio un error al cargar el personaje.");
                 LOGGER.fatal("Ocurrio un error al cargar el personaje.", ex);
@@ -529,7 +457,7 @@ public class ConexionConCliente extends Thread {
 
     public void enviarPersonajeCambiar(int charindex, int heading, int cuerpo, int cabeza, int arma, int escudo, int casco) {
         try {
-            dos.writeByte(PQT_PERSONAJE_CAMINAR);
+            dos.writeByte(PQT_PERSONAJE_CAMBIAR);
             dos.writeInt(charindex);
             dos.writeInt(heading);
             dos.writeInt(cuerpo);
@@ -629,19 +557,25 @@ public class ConexionConCliente extends Thread {
 
     public boolean manejarClick() {
         try {
-            int x= dis.readInt();
-            int y= dis.readInt();
+            int x = dis.readInt();
+            int y = dis.readInt();
             // @TODO: Validar coordenadas
             Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
             if (b.getCharindex() > 0) {
                 enviarMensaje("Ves a alguien.");
                 return true;
-            } 
+            }
             enviarMensaje("No ves nada.");
             return true;
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
         }
         return false;
+    }
+
+    public boolean manejarUsuarioGolpea() {
+        // @TODO: Prevenir speed hack
+        usuario.golpea();
+        return true;
     }
 }
