@@ -62,7 +62,7 @@ public class UtilMapas {
 
                         byflags = UtilLegacy.bigToLittle(f.readByte());
                         bloq = (byte) (byflags & 1);
-                        md.setBloqueado(bloq == 1);
+                        md.setBloqueado(bloq);
 
                         // Grafico de la capa 1
                         md.setGrafico(1, UtilLegacy.bigToLittle(f.readShort()));

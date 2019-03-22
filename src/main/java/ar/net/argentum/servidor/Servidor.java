@@ -211,4 +211,14 @@ public class Servidor {
     public int getJugadoresConectados() {
         return conexiones.size();
     }
+
+    /**
+     * Obtiene la instancia del personaje en base al charindex
+     *
+     * @param charindex
+     * @return
+     */
+    public Personaje getPersonaje(int charindex) {
+        return personajes.get(charindex);
+    }
 }

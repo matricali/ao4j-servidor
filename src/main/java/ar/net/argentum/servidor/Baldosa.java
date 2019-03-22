@@ -29,6 +29,8 @@ public interface Baldosa {
     public void setCharindex(int charindex);
 
     public void setBloqueado(boolean bloqueado);
+    
+    public void setBloqueado(byte bloq);
 
     public int getGrafico(int capa);
 

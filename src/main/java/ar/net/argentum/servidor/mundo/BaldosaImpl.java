@@ -111,6 +111,11 @@ public class BaldosaImpl implements Baldosa {
     public void setBloqueado(boolean bloqueado) {
         this.bloqueado = bloqueado;
     }
+    
+    @Override
+    public void setBloqueado(byte bloq) {
+        this.bloqueado = bloqueado;
+    }
 
     /**
      * @return the trigger

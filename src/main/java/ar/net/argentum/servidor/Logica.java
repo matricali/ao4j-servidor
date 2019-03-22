@@ -66,36 +66,43 @@ public class Logica {
 
         // Es un mapa valido?
         if (mapa == null) {
+            System.out.println("Mapa invalido.");
             return false;
         }
 
         if (!isDentroDelLimite(numMapa, x, y)) {
+            System.out.println("Fuera de los limites del mapa.");
             return false;
         }
 
         Baldosa baldosa = mapa.getBaldosa(x, y);
 
         if (baldosa == null) {
+            System.out.println("Baldosa invalida.");
             return false;
         }
 
         // Esta bloqueado?
         if (baldosa.isBloqueado()) {
+            System.out.println("Baldosa bloqueada.");
             return false;
         }
 
         // Hay alguien parado en la nueva posicion?
         if (baldosa.getCharindex() > 0) {
+            System.out.println("Ya hay alguien parado en la baldosa.");
             return false;
         }
 
         // Puede caminar por el agua?
         if (baldosa.isAgua() && !puedeAgua) {
+            System.out.println("El usuario no puede ir por el agua.");
             return false;
         }
 
         // Puede caminar por la tierra?
         if (baldosa.isTierra() && !puedeTierra) {
+            System.out.println("El usuario no puede ir por la tierra.");
             return false;
         }
 
