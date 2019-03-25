@@ -146,7 +146,10 @@ public class Servidor {
     public void enviarMensajeDeDifusion(String mensaje) {
         LOGGER.info("[DIFUSION] " + mensaje);
         for (ConexionConCliente conn : conexiones) {
-            if (conn.isConectado()) {
+            if (!conn.isConectado()) {
+                return;
+            }
+            if (conn.getUsuario() != null & conn.getUsuario().isConectado()) {
                 conn.enviarMensaje(mensaje);
             }
         }
@@ -187,15 +190,20 @@ public class Servidor {
         return null;
     }
 
+    public synchronized void eliminarConexion(ConexionConCliente conexion) {
+        conexiones.remove(conexion);
+    }
+
     public synchronized void eliminarConexion(Usuario usuario) {
-        LOGGER.info("Eliminando conexiones (" + conexiones.size() + ")\n" + conexiones);
         for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario() == null) {
+                continue;
+            }
             if (conn.getUsuario().getCharindex() == usuario.getCharindex()) {
-                conexiones.remove(conn);
+                eliminarConexion(conn);
                 return;
             }
         }
-        LOGGER.info("Quedaron asi (" + conexiones.size() + ")\n" + conexiones);
     }
 
     public synchronized List<ConexionConCliente> getConexiones() {

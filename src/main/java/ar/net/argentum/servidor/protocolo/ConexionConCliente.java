@@ -192,6 +192,8 @@ public class ConexionConCliente extends Thread {
                 // Disparamos el evento
                 usuario.alDesconectarse();
             }
+            // Eliminamos la conexion de nuestra lista
+            Servidor.getServidor().eliminarConexion(this);
         } catch (IOException e) {
             LOGGER.fatal(null, e);
         }
@@ -304,7 +306,7 @@ public class ConexionConCliente extends Thread {
 
                 // Disparamos el evento que indica que el usuario se conecto
                 usuario.alConectarse();
-
+                return true;
             } catch (Exception ex) {
                 desconectar("Ocurrio un error al cargar el personaje.");
                 LOGGER.fatal("Ocurrio un error al cargar el personaje.", ex);
