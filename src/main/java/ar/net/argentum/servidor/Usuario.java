@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,6 +111,7 @@ public class Usuario implements Atacable {
     protected boolean muerto = false;
     protected final int charindex;
     protected final int userindex;
+    protected HashMap<String, Habilidad> skills = new HashMap<>();
 
     public Usuario() {
         this.charindex = Servidor.crearCharindex();
@@ -744,7 +746,68 @@ public class Usuario implements Atacable {
             mana.aumentar(cantidad);
             getConexion().enviarUsuarioStats();
         }
+        subirSkill("meditar");
     }
 
+    /**
+     * @return Habilidades del personaje
+     */
+    public HashMap<String, Habilidad> getSkills() {
+        return skills;
+    }
+
+    /**
+     * @param skills Habilidades del personaje
+     */
+    public void setSkills(HashMap<String, Habilidad> skills) {
+        this.skills = skills;
+    }
+
+    /**
+     * Obtener un skill del usuario
+     *
+     * @param nombre
+     * @return
+     */
+    @JsonIgnore
+    public Habilidad getSkill(String nombre) {
+        return skills.get(nombre);
+    }
+
+    /**
+     * Aprender una nueva habilidad
+     *
+     * @param id Identificador de la habilidad
+     * @return Instancia de la habilidad aprendida
+     * @throws java.lang.InstantiationException
+     * @throws java.lang.IllegalAccessException
+     */
+    public Habilidad aprenderSkill(String id) throws InstantiationException, IllegalAccessException {
+        final Habilidad skill = Habilidades.crear(Habilidades.Soportadas.para(id));
+        enviarMensaje("Has aprendido la habilidad de " + skill.getNombre());
+        enviarMensaje(skill.getDescripcion());
+        skills.put(id, skill);
+        return skill;
+    }
+
+    /**
+     * Entrenar una habilidad
+     *
+     * @param id Identificador de la habilidad
+     */
+    public void subirSkill(String id) {
+        Habilidad skill = getSkill(id);
+        if (skill == null) {
+            try {
+                // Todavia no habiamos aprendido esta hablidad
+                skill = aprenderSkill(id);
+            } catch (InstantiationException | IllegalAccessException ex) {
+                LOGGER.fatal(null, ex);
+                return;
+            }
+        }
+        if (skill.entrenar()) {
+            enviarMensaje("Has mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
+        }
     }
 }
