@@ -575,7 +575,6 @@ public class Usuario implements Atacable {
      * @param mensaje Mensaje a enviar al usuario
      */
     public void desconectar(String mensaje) {
-
         getConexion().desconectar(mensaje);
     }
 
@@ -651,6 +650,11 @@ public class Usuario implements Atacable {
      * Evento que se produce cuando el usuario se deconecta
      */
     public void alDesconectarse() {
+        if (!isConectado()) {
+            // Si el usuario no estaba conectado no tenemos que hacer nada mas.
+            return;
+        }
+
         Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", getNombre());
         setConectado(false);
         guardar();

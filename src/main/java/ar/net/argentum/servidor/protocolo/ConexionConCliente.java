@@ -18,7 +18,6 @@ package ar.net.argentum.servidor.protocolo;
 
 import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.InventarioSlot;
-import ar.net.argentum.servidor.Mapa;
 import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
@@ -291,19 +290,20 @@ public class ConexionConCliente extends Thread {
             }
 
             try {
-                this.usuario = Usuario.cargar(nombre);
+                Usuario u = Usuario.cargar(nombre);
 
-                if (!usuario.getPassword().equals(password)) {
+                if (!u.getPassword().equals(password)) {
                     desconectar("Contraseña incorrecta.");
                     return false;
                 }
 
-                if (usuario.isConectado()) {
+                if (u.isConectado()) {
                     desconectar("El usuario ya se encuentra conectado.");
                     return false;
                 }
 
                 this.username = nombre;
+                this.usuario = u;
 
                 // Disparamos el evento que indica que el usuario se conecto
                 usuario.alConectarse();

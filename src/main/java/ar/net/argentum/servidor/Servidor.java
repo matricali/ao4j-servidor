@@ -218,6 +218,10 @@ public class Servidor {
 
     public void todosMenosUsuarioArea(Usuario usuario, EnvioAUsuario envio) {
         for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario() == null) {
+                // Hay conexiones establebecidas que todavia no estan jugando
+                continue;
+            }
             if (conn.getUsuario().getCharindex() == usuario.getCharindex()) {
                 continue;
             }
