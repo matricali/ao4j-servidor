@@ -66,7 +66,8 @@ public class Servidor {
     private final LinkedList<ConexionConCliente> conexiones;
     private final Map<Integer, Mapa> mapas;
     private final ConcurrentMap<Integer, Personaje> personajes;
-
+    private final int intervaloEventos = 40;
+    private long timerEventos = getTimer();
     private ServerSocket serverSocket;
 
     private Servidor() throws IOException {
@@ -91,6 +92,22 @@ public class Servidor {
             // Si no podemos iniciar el socket ya no hay nada que hacer :(
             return;
         }
+
+        Thread logica = new Thread() {
+            @Override
+            public void run() {
+                LOGGER.info("Iniciando thread de logica");
+                while (true) {
+                    try {
+                        procesarEventos();
+                    } catch (Exception ex) {
+                        LOGGER.fatal(null, ex);
+                    }
+                }
+            }
+        };
+
+        logica.start();
 
         // Bucle infinito
         while (true) {
@@ -220,5 +237,29 @@ public class Servidor {
      */
     public Personaje getPersonaje(int charindex) {
         return personajes.get(charindex);
+    }
+
+    /**
+     * @return Obtiene el valor actual del reloj de la maquina virtual en
+     * ejecucion
+     * @see System.nanoTime
+     */
+    private long getTimer() {
+        return System.nanoTime() / 1000000;
+    }
+
+    public void procesarEventos() {
+        if (getTimer() - timerEventos < intervaloEventos) {
+            return;
+        }
+        this.timerEventos = getTimer();
+
+        List<ConexionConCliente> lista = getConexiones();
+        // Procesar eventos de los usuarios
+        for (ConexionConCliente conexion : lista) {
+            if (conexion.getUsuario() != null && conexion.getUsuario().isConectado()) {
+                conexion.getUsuario().tick();
+            }
+        }
     }
 }

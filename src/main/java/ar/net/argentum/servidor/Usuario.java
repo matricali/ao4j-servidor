@@ -659,4 +659,10 @@ public class Usuario implements Atacable {
     public ConexionConCliente getConexion() {
         return Servidor.getServidor().getConexion(this);
     }
+
+    /**
+     * Actualizamos todo lo que tengamos que actualizar del usuario
+     */
+    public void tick() {
+    }
 }
