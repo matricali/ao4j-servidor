@@ -31,7 +31,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.text.MessageFormat;
 import org.apache.log4j.Logger;
-import org.omg.PortableServer.Servant;
 
 /**
  * Clase encargada de la comunicacion entre el cliente y el servidor
@@ -248,6 +247,10 @@ public class ConexionConCliente extends Thread {
             case "ONLINE":
                 enviarMensaje("Hay {0} jugadores conectados.", Servidor.getServidor().getJugadoresConectados());
                 return true;
+
+            case "MEDITAR":
+                usuario.meditar();
+                return true;
         }
 
         enviarMensaje("Comando invalido!");
@@ -431,6 +434,17 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(escudo);
             dos.writeInt(casco);
 
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+    }
+
+    public void enviarPersonajeAnimacion(int charindex, int efecto, int repeticiones) {
+        try {
+            dos.writeByte(PQT_PERSONAJE_ANIMACION);
+            dos.writeInt(charindex);
+            dos.writeInt(efecto);
+            dos.writeInt(repeticiones);
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
         }

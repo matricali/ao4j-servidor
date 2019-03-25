@@ -346,15 +346,30 @@ public class Usuario implements Atacable {
     }
 
     /**
-     * @param meditando the meditando to set
+     * Activa o desactiva el estado de meditacion
+     *
+     * @param meditando
      */
     @JsonIgnore
     public void setMeditando(boolean meditando) {
         this.meditando = meditando;
         if (meditando) {
-            enviarMensaje("Has comenzado a meditar.");
+            int efecto = 6;
+
+            // Le avisamos al cliente que inicie la animacion de meditar
+            getConexion().enviarPersonajeAnimacion(1, efecto, -1);
+            // Le avisamos a los otros clientes que inicien la animacion sobre el personaje
+            Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
+                conexion.enviarPersonajeAnimacion(getCharindex(), efecto, -1);
+            });
         } else {
             enviarMensaje("Dejas de meditar.");
+            // Le avisamos al cliente que pare la animacin
+            getConexion().enviarPersonajeAnimacion(1, 0, 0);
+            // Le avisamos a los otros clientes que eliminen la animacion que le corresponde a este usuario
+            Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
+                conexion.enviarPersonajeAnimacion(getCharindex(), 0, 0);
+            });
         }
     }
 
@@ -397,7 +412,6 @@ public class Usuario implements Atacable {
         if (isMeditando()) {
             // Detenemos la meditacion
             setMeditando(false);
-            // @TODO: Enviar efecto 0
             return false;
         }
         if (isDescansando()) {
@@ -661,8 +675,76 @@ public class Usuario implements Atacable {
     }
 
     /**
+     * /meditar
+     */
+    public void meditar() {
+        if (meditando) {
+            // El usuario ya estaba meditando
+            setMeditando(false);
+            return;
+        }
+
+        if (isMuerto()) {
+            enviarMensaje("Estas muerto!! Solo puedes meditar cuando estas vivo.");
+            return;
+        }
+        if (mana.max == 0) {
+            enviarMensaje("Solo las clases magicas conocen el arte de la meditacion.");
+            return;
+        }
+        // Enviamos el efecto
+        setMeditando(true);
+    }
+
+    /**
      * Actualizamos todo lo que tengamos que actualizar del usuario
      */
     public void tick() {
+        if (meditando) {
+            doMeditar();
+        }
+    }
+
+    protected void doMeditar() {
+        if (mana.estaCompleto()) {
+            enviarMensaje("Has terminado de meditar.");
+            setMeditando(false);
+        }
+
+        int MeditarSkill = 1;
+        int Suerte = 0;
+
+        if ((MeditarSkill <= 10)) {
+            Suerte = 35;
+        } else if ((MeditarSkill <= 20)) {
+            Suerte = 30;
+        } else if ((MeditarSkill <= 30)) {
+            Suerte = 28;
+        } else if ((MeditarSkill <= 40)) {
+            Suerte = 24;
+        } else if ((MeditarSkill <= 50)) {
+            Suerte = 22;
+        } else if ((MeditarSkill <= 60)) {
+            Suerte = 20;
+        } else if ((MeditarSkill <= 70)) {
+            Suerte = 18;
+        } else if ((MeditarSkill <= 80)) {
+            Suerte = 15;
+        } else if ((MeditarSkill <= 90)) {
+            Suerte = 10;
+        } else if ((MeditarSkill < 100)) {
+            Suerte = 7;
+        } else {
+            Suerte = 5;
+        }
+
+        if (Logica.verdaderoAleatorio(Suerte)) {
+            int cantidad = Logica.porcentaje(mana.getMax(), Balance.PORCENTAJE_RECUPERO_MANA);
+            enviarMensaje("Has recuperado {0} puntos de mana!", cantidad);
+            mana.aumentar(cantidad);
+            getConexion().enviarUsuarioStats();
+        }
+    }
+
     }
 }

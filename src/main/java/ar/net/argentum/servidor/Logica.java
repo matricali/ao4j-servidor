@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.mundo.Orientacion;
+import java.util.Random;
 
 /**
  *
@@ -28,6 +29,7 @@ public class Logica {
     public static final int MaxXBorder = 95;
     public static final int MinYBorder = 5;
     public static final int MaxYBorder = 95;
+    protected static final Random RANDOM = new Random();
 
     /**
      * Calcula la nueva posicion al dar un paso en una direccion especifica
@@ -121,5 +123,23 @@ public class Logica {
      */
     public static boolean isDentroDelLimite(int numMapa, int x, int y) {
         return !(x < MinXBorder || x > MaxXBorder || y < MinYBorder || y > MaxYBorder);
+    }
+
+    /**
+     * Devuelve un valor verdadero aleatorio en base a la dificultad dada
+     *
+     * @param dificultad
+     * @return
+     */
+    public static boolean verdaderoAleatorio(int dificultad) {
+        return enteroAleatorio(1, dificultad) == 1;
+    }
+
+    public static int enteroAleatorio(int minimo, int maximo) {
+        return RANDOM.nextInt(maximo - minimo) + minimo;
+    }
+
+    public static int porcentaje(int total, int porc) {
+        return total * porc / 100;
     }
 }
