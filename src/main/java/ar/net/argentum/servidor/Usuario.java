@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -471,6 +472,16 @@ public class Usuario implements Atacable {
      */
     public void enviarMensaje(String mensaje) {
         getConexion().enviarMensaje(mensaje);
+    }
+
+    /**
+     * Enviar un mensaje al usuario con formato
+     *
+     * @param mensaje
+     * @param args
+     */
+    public void enviarMensaje(String mensaje, Object... args) {
+        enviarMensaje(MessageFormat.format(mensaje, args));
     }
 
     /**
