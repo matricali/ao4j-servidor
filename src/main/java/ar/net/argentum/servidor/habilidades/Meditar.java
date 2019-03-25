@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor.habilidades;
 
 import ar.net.argentum.servidor.HabilidadBase;
+import ar.net.argentum.servidor.Logica;
 
 /**
  *
@@ -32,5 +33,36 @@ public class Meditar extends HabilidadBase {
     @Override
     public String getDescripcion() {
         return "";
+    }
+
+    @Override
+    public boolean realizar() {
+        int dificultad;
+
+        if ((nivel <= 10)) {
+            dificultad = 35;
+        } else if ((nivel <= 20)) {
+            dificultad = 30;
+        } else if ((nivel <= 30)) {
+            dificultad = 28;
+        } else if ((nivel <= 40)) {
+            dificultad = 24;
+        } else if ((nivel <= 50)) {
+            dificultad = 22;
+        } else if ((nivel <= 60)) {
+            dificultad = 20;
+        } else if ((nivel <= 70)) {
+            dificultad = 18;
+        } else if ((nivel <= 80)) {
+            dificultad = 15;
+        } else if ((nivel <= 90)) {
+            dificultad = 10;
+        } else if ((nivel < 100)) {
+            dificultad = 7;
+        } else {
+            dificultad = 5;
+        }
+
+        return Logica.verdaderoAleatorio(dificultad);
     }
 }

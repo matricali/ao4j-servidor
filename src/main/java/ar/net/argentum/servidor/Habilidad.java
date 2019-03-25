@@ -76,4 +76,11 @@ public interface Habilidad {
      * esta habilidad
      */
     public boolean entrenar();
+
+    /**
+     * Intentar realizar la habilidad
+     *
+     * @return Devuelve verdadero si logro realizar la habilidad
+     */
+    public boolean realizar();
 }

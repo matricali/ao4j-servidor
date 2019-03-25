@@ -26,7 +26,7 @@ public abstract class HabilidadBase implements Habilidad {
     /**
      * Cantidad de puntos del skill
      */
-    protected int nivel = 1;
+    protected int nivel = 0;
     /**
      * Nivel maximo posible para esta habilidad
      */

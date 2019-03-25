@@ -324,8 +324,8 @@ public class Usuario implements Atacable {
     public void setNavegando(boolean navegando) {
         this.navegando = navegando;
     }
-    
-        /**
+
+    /**
      * @return Devuelve verdadero si el personaje esta muerto.
      */
     public boolean isMuerto() {
@@ -713,40 +713,12 @@ public class Usuario implements Atacable {
             setMeditando(false);
         }
 
-        int MeditarSkill = 1;
-        int Suerte = 0;
-
-        if ((MeditarSkill <= 10)) {
-            Suerte = 35;
-        } else if ((MeditarSkill <= 20)) {
-            Suerte = 30;
-        } else if ((MeditarSkill <= 30)) {
-            Suerte = 28;
-        } else if ((MeditarSkill <= 40)) {
-            Suerte = 24;
-        } else if ((MeditarSkill <= 50)) {
-            Suerte = 22;
-        } else if ((MeditarSkill <= 60)) {
-            Suerte = 20;
-        } else if ((MeditarSkill <= 70)) {
-            Suerte = 18;
-        } else if ((MeditarSkill <= 80)) {
-            Suerte = 15;
-        } else if ((MeditarSkill <= 90)) {
-            Suerte = 10;
-        } else if ((MeditarSkill < 100)) {
-            Suerte = 7;
-        } else {
-            Suerte = 5;
-        }
-
-        if (Logica.verdaderoAleatorio(Suerte)) {
+        if (realizarHabilidad("meditar")) {
             int cantidad = Logica.porcentaje(mana.getMax(), Balance.PORCENTAJE_RECUPERO_MANA);
             enviarMensaje("Has recuperado {0} puntos de mana!", cantidad);
             mana.aumentar(cantidad);
             getConexion().enviarUsuarioStats();
         }
-        subirSkill("meditar");
     }
 
     /**
@@ -782,7 +754,7 @@ public class Usuario implements Atacable {
      * @throws java.lang.InstantiationException
      * @throws java.lang.IllegalAccessException
      */
-    public Habilidad aprenderSkill(String id) throws InstantiationException, IllegalAccessException {
+    public Habilidad aprenderHabilidad(String id) throws InstantiationException, IllegalAccessException {
         final Habilidad skill = Habilidades.crear(Habilidades.Soportadas.para(id));
         enviarMensaje("Has aprendido la habilidad de " + skill.getNombre());
         enviarMensaje(skill.getDescripcion());
@@ -795,19 +767,49 @@ public class Usuario implements Atacable {
      *
      * @param id Identificador de la habilidad
      */
-    public void subirSkill(String id) {
+    public void entrenarHabilidad(String id) {
         Habilidad skill = getSkill(id);
         if (skill == null) {
             try {
                 // Todavia no habiamos aprendido esta hablidad
-                skill = aprenderSkill(id);
+                skill = aprenderHabilidad(id);
             } catch (InstantiationException | IllegalAccessException ex) {
                 LOGGER.fatal(null, ex);
                 return;
             }
         }
+        entrenarHabilidad(skill);
+    }
+
+    private void entrenarHabilidad(Habilidad skill) {
         if (skill.entrenar()) {
             enviarMensaje("Has mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
         }
+    }
+
+    /**
+     * Calculamos si el usuario logra realizar una habilidad, si lo logra
+     * tambien aumentamos la experiencia de la habilidad.
+     *
+     * @param id Identificador de la habilidad
+     * @return Devuelve verdadero si el usuario ha logrado realizar la habilidad
+     */
+    public boolean realizarHabilidad(String id) {
+        Habilidad skill = getSkill(id);
+        if (skill == null) {
+            try {
+                // Todavia no habiamos aprendido esta hablidad
+                skill = aprenderHabilidad(id);
+            } catch (InstantiationException | IllegalAccessException ex) {
+                LOGGER.fatal(null, ex);
+                return false;
+            }
+        }
+        boolean resultado = skill.realizar();
+        if (resultado) {
+            // Si logramos realizar la habilidad aumentamos la experiencia de la misma
+            entrenarHabilidad(skill);
+        }
+        return resultado;
     }
 }
