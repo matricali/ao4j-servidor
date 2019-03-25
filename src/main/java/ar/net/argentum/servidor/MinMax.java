@@ -53,4 +53,26 @@ public class MinMax {
     public void setMax(int max) {
         this.max = max;
     }
+
+    /**
+     * @return true si lla barra esta completa
+     */
+    public boolean estaCompleto() {
+        return min >= max;
+    }
+
+    /**
+     * Aumentar la barra, si llega al maximo devuelve verdadero
+     *
+     * @param cantidad
+     * @return
+     */
+    public boolean aumentar(int cantidad) {
+        this.min += cantidad;
+        if (min >= max) {
+            this.min = max;
+            return true;
+        }
+        return false;
+    }
 }
