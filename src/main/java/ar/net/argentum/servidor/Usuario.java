@@ -107,6 +107,7 @@ public class Usuario implements Atacable {
     protected boolean navegando = false;
     protected boolean meditando = false;
     protected boolean descansando = false;
+    protected boolean muerto = false;
     protected final int charindex;
     protected final int userindex;
 
@@ -320,6 +321,20 @@ public class Usuario implements Atacable {
      */
     public void setNavegando(boolean navegando) {
         this.navegando = navegando;
+    }
+    
+        /**
+     * @return Devuelve verdadero si el personaje esta muerto.
+     */
+    public boolean isMuerto() {
+        return muerto;
+    }
+
+    /**
+     * @param muerto
+     */
+    public void setMuerto(boolean muerto) {
+        this.muerto = muerto;
     }
 
     /**
