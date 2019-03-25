@@ -604,6 +604,8 @@ public class Usuario implements Atacable {
         setConectado(true);
         guardar();
 
+        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} ha ingresado al juego.", nombre);
+
         getConexion().enviarUsuarioNombre();
         getConexion().enviarUsuarioCambiaMapa();
         getConexion().enviarUsuarioPosicion();
@@ -654,10 +656,10 @@ public class Usuario implements Atacable {
             // Si el usuario no estaba conectado no tenemos que hacer nada mas.
             return;
         }
-
-        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", getNombre());
         setConectado(false);
         guardar();
+
+        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", getNombre());
 
         Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
 

@@ -191,9 +191,6 @@ public class ConexionConCliente extends Thread {
             if (usuario != null) {
                 // Disparamos el evento
                 usuario.alDesconectarse();
-
-                // Eliminamos la conexion de nuestra lista
-                Servidor.getServidor().eliminarConexion(usuario);
             }
         } catch (IOException e) {
             LOGGER.fatal(null, e);
@@ -313,9 +310,6 @@ public class ConexionConCliente extends Thread {
                 LOGGER.fatal("Ocurrio un error al cargar el personaje.", ex);
                 return false;
             }
-
-            Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} ha ingresado al juego.", nombre);
-            return true;
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
         }
