@@ -56,6 +56,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_PERSONAJE_QUITAR = 0x16;
     protected static final byte PQT_CLICK = 0x17;
     protected static final byte PQT_USUARIO_GOLPEA = 0x18;
+    protected static final byte PQT_USUARIO_EXPERIENCIA = 0x19;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -399,6 +400,18 @@ public class ConexionConCliente extends Thread {
             // Sed
             dos.writeInt(usuario.getSed().getMin());
             dos.writeInt(usuario.getSed().getMax());
+
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+    }
+    
+    public void enviarUsuarioExperiencia() {
+        try {
+            dos.writeByte(PQT_USUARIO_EXPERIENCIA);
+            dos.writeInt(usuario.getNivel());
+            dos.writeInt(usuario.getExperienciaActual());
+            dos.writeInt(usuario.getExperienciaSiguienteNivel());
 
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);

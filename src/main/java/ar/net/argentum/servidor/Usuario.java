@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Usuario implements Atacable {
+public class Usuario implements Atacable, GanaExperiencia {
 
     private static final Logger LOGGER = Logger.getLogger(Usuario.class);
 
@@ -77,6 +77,12 @@ public class Usuario implements Atacable {
     protected boolean conectado;
     @JsonProperty
     protected Coordenada coordenada;
+    @JsonProperty
+    protected int nivel = 1;
+    @JsonProperty
+    protected int experienciaActual = 0;
+    @JsonProperty
+    protected int experienciaSiguienteNivel = 300;
     @JsonProperty
     protected Map<Integer, InventarioSlot> inventario;
     @JsonProperty
@@ -218,6 +224,74 @@ public class Usuario implements Atacable {
      */
     public Coordenada getCoordenada() {
         return coordenada;
+    }
+
+    @Override
+    public int getNivel() {
+        return nivel;
+    }
+
+    /**
+     * @param nivel Nuevo nivel del usuario
+     */
+    public void setNivel(int nivel) {
+        this.nivel = nivel;
+    }
+
+    @Override
+    public int getExperienciaActual() {
+        return experienciaActual;
+    }
+
+    /**
+     * @see ganarExperiencia
+     * @param experiencia Establecer experiencia del usuario
+     */
+    public void setExperienciaActual(int experiencia) {
+        this.experienciaActual = experiencia;
+    }
+    
+    @Override
+    public int getExperienciaSiguienteNivel() {
+        return experienciaSiguienteNivel;
+    }
+
+    /**
+     * @see ganarExperiencia
+     * @param experiencia Establecer experiencia necesaria para pasar de nivel
+     */
+    public void setExperienciaSiguienteNivel(int experiencia) {
+        this.experienciaSiguienteNivel = experiencia;
+    }
+
+    /**
+     * Aumentar los puntos de experiencia del usuario, si esta conectado le
+     * enviamos un mensaje de notificacion
+     *
+     * @param exp
+     */
+    @Override
+    public void ganarExperiencia(int exp) {
+        if (nivel >= Balance.NIVEL_MAX) {
+            // Si ya tenemos el nivel maximo no podemos ganar experiencia.
+            return;
+        }
+        this.experienciaActual += exp;
+        enviarMensaje("Has ganado {0} puntos de experiencia!", exp);
+        while (experienciaActual >= experienciaSiguienteNivel) {
+            // Alcanzamos un nuevo nivel
+            ++this.nivel;
+            this.experienciaActual -= experienciaSiguienteNivel;
+            this.experienciaSiguienteNivel = Balance.calcularExperienciaParaPasarNivel(nivel, experienciaSiguienteNivel);
+            alSubirDeNivel();
+        }
+        getConexion().enviarUsuarioExperiencia();
+    }
+
+    protected void alSubirDeNivel() {
+        enviarMensaje("Has subido de nivel!");
+        // @TODO: Enviar sonido
+        getConexion().enviarUsuarioExperiencia();
     }
 
     /**
@@ -609,6 +683,7 @@ public class Usuario implements Atacable {
         getConexion().enviarUsuarioNombre();
         getConexion().enviarUsuarioCambiaMapa();
         getConexion().enviarUsuarioPosicion();
+        getConexion().enviarUsuarioExperiencia();
         getConexion().enviarUsuarioStats();
         getConexion().usuarioInventarioActualizar();
 

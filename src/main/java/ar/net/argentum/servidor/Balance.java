@@ -26,4 +26,33 @@ public abstract class Balance {
     public static final int PORCENTAJE_RECUPERO_MANA = 6;
     public static final int EXP_SKILL_ACIERTO = 50;
     public static final int EXP_SKILL_FALLO = 20;
+    /**
+     * Nivel maximo posible para los usuarios
+     */
+    public static final int NIVEL_MAX = 50;
+
+    /**
+     * Calcular la nueva experiencia para pasar de nivel.
+     *
+     * @since Nueva subida de exp x lvl. Pablo (ToxicWaste)
+     *
+     * @param nuevoNivel
+     * @param experienciaActual
+     * @return Nueva experiencia para pasar de nivel
+     */
+    public static int calcularExperienciaParaPasarNivel(int nuevoNivel, int experienciaActual) {
+        if (nuevoNivel < 15) {
+            return (int) (experienciaActual * 1.4);
+        } else if (nuevoNivel < 21) {
+            return (int) (experienciaActual * 1.35);
+        } else if (nuevoNivel < 26) {
+            return (int) (experienciaActual * 1.3);
+        } else if (nuevoNivel < 35) {
+            return (int) (experienciaActual * 1.2);
+        } else if (nuevoNivel < 40) {
+            return (int) (experienciaActual * 1.3);
+        }
+        return (int) (experienciaActual * 1.375);
+    }
+
 }
