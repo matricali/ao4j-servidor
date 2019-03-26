@@ -55,4 +55,13 @@ public abstract class Balance {
         return (int) (experienciaActual * 1.375);
     }
 
+    /**
+     * Calculamos la recompensa en puntos de experiencia al subir de nivel una
+     * habilidad
+     *
+     * @return Puntos de experiencia a ganar
+     */
+    public static int calcularExperienciaGanadaAlSubirHabilidad(int nivelHabilidad) {
+        return 50 * nivelHabilidad;
+    }
 }

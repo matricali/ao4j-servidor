@@ -865,7 +865,9 @@ public class Usuario implements Atacable, GanaExperiencia {
 
     private void entrenarHabilidad(Habilidad skill, boolean acierto) {
         if (skill.entrenar(acierto)) {
+            // Subimos de nivel al entrenar la habilidad
             enviarMensaje("Has mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
+            ganarExperiencia(Balance.calcularExperienciaGanadaAlSubirHabilidad(skill.getNivel()));
         }
     }
 
