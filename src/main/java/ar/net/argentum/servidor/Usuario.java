@@ -772,8 +772,9 @@ public class Usuario implements Atacable {
      * Entrenar una habilidad
      *
      * @param id Identificador de la habilidad
+     * @param acierto Verdadero si se ha tenido suerte al realizar la habilidad
      */
-    public void entrenarHabilidad(String id) {
+    public void entrenarHabilidad(String id, boolean acierto) {
         Habilidad skill = getSkill(id);
         if (skill == null) {
             try {
@@ -784,11 +785,11 @@ public class Usuario implements Atacable {
                 return;
             }
         }
-        entrenarHabilidad(skill);
+        entrenarHabilidad(skill, acierto);
     }
 
-    private void entrenarHabilidad(Habilidad skill) {
-        if (skill.entrenar()) {
+    private void entrenarHabilidad(Habilidad skill, boolean acierto) {
+        if (skill.entrenar(acierto)) {
             enviarMensaje("Has mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
         }
     }
@@ -812,10 +813,10 @@ public class Usuario implements Atacable {
             }
         }
         boolean resultado = skill.realizar();
-        if (resultado) {
-            // Si logramos realizar la habilidad aumentamos la experiencia de la misma
-            entrenarHabilidad(skill);
-        }
+
+        // Ganamos experiencia en nuestra habilidad
+        entrenarHabilidad(skill, resultado);
+
         return resultado;
     }
 }

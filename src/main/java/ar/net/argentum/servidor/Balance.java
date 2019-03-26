@@ -24,4 +24,6 @@ package ar.net.argentum.servidor;
 public abstract class Balance {
 
     public static final int PORCENTAJE_RECUPERO_MANA = 6;
+    public static final int EXP_SKILL_ACIERTO = 50;
+    public static final int EXP_SKILL_FALLO = 20;
 }

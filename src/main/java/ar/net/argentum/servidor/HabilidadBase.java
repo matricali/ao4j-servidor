@@ -71,12 +71,12 @@ public abstract class HabilidadBase implements Habilidad {
     }
 
     @Override
-    public boolean entrenar() {
+    public boolean entrenar(boolean acierto) {
         if (nivel >= nivelMax) {
             // Si ya tenemos la habilidad al maximo, entonces no entrenamos nada :D
             return false;
         }
-        this.experiencia += 25;
+        this.experiencia += acierto ? Balance.EXP_SKILL_ACIERTO : Balance.EXP_SKILL_FALLO;
         if (experiencia >= siguienteNivel) {
             ++this.nivel;
             this.experiencia = experiencia - siguienteNivel;

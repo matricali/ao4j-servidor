@@ -72,10 +72,11 @@ public interface Habilidad {
     /**
      * Ganar experiencia en esta habilidad
      *
+     * @param acierto Verdadero si se ha tenido suerte al realizar la habilidad
      * @return Devuelve verdadero si se ha conseguido un nuevo punto al entrenar
      * esta habilidad
      */
-    public boolean entrenar();
+    public boolean entrenar(boolean acierto);
 
     /**
      * Intentar realizar la habilidad
