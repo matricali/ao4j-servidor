@@ -502,8 +502,9 @@ public class Usuario implements Atacable, GanaExperiencia {
             return false;
         }
 
-        // Acualizamos la posicion del usuario
+        // Acualizamos la posicion y orientacion del usuario
         this.coordenada.setPosicion(nuevaPosicion);
+        setOrientacion(orientacion);
 
         // Le avisamos a los otros clientes que el usuario se movio
         Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
