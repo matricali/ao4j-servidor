@@ -57,6 +57,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_CLICK = 0x17;
     protected static final byte PQT_USUARIO_GOLPEA = 0x18;
     protected static final byte PQT_USUARIO_EXPERIENCIA = 0x19;
+    protected static final byte PQT_USUARIO_EQUIPAR_SLOT = 0x20;
     protected static final byte PQT_MUNDO_REPRODUCIR_SONIDO = 0x21;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
@@ -170,6 +171,10 @@ public class ConexionConCliente extends Thread {
 
                     case PQT_USUARIO_GOLPEA:
                         manejarUsuarioGolpea();
+                        break;
+
+                    case PQT_USUARIO_EQUIPAR_SLOT:
+                        manejarUsuarioEquiparSlot();
                         break;
 
                     default:
@@ -406,7 +411,7 @@ public class ConexionConCliente extends Thread {
             LOGGER.fatal(null, ex);
         }
     }
-    
+
     public void enviarUsuarioExperiencia() {
         try {
             dos.writeByte(PQT_USUARIO_EXPERIENCIA);
@@ -609,5 +614,16 @@ public class ConexionConCliente extends Thread {
         // @TODO: Prevenir speed hack
         usuario.golpea();
         return true;
+    }
+
+    public boolean manejarUsuarioEquiparSlot() {
+        try {
+            int invslot = dis.readInt();
+            LOGGER.debug("PQT_USUARIO_EQUIPAR_SLOT<<" + invslot);
+            usuario.inventarioEquiparSlot(invslot);
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+        return false;
     }
 }

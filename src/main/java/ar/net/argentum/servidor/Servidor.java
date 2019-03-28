@@ -237,6 +237,34 @@ public class Servidor {
         }
     }
 
+    /**
+     * Enviar algo a todos los usuarios en un area dada
+     * @param centro
+     * @param distancia
+     * @param envio 
+     */
+    public void todosArea(Coordenada centro, int distancia, EnvioAUsuario envio) {
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario() == null) {
+                // Hay conexiones establebecidas que todavia no estan jugando
+                continue;
+            }
+            if (conn.getUsuario().getCoordenada().getMapa() != centro.getMapa()) {
+                // No estamos nisiquiera en el mismo mapa xD
+                continue;
+            }
+            // Calculamos la distancia
+            final Posicion p1 = centro.getPosicion();
+            final Posicion p2 = conn.getUsuario().getCoordenada().getPosicion();
+
+            if (Logica.calcularDistancia(p2, p2) > distancia) {
+                // Esta fuera del area deseada
+                continue;
+            }
+            envio.enviar(conn.getUsuario().getCharindex(), conn);
+        }
+    }
+
     public int getJugadoresConectados() {
         return conexiones.size();
     }

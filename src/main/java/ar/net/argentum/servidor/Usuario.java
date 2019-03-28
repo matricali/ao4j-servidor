@@ -119,9 +119,22 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected boolean meditando = false;
     protected boolean descansando = false;
     protected boolean muerto = false;
+    protected boolean newbie = true;
+    protected boolean mimetizado = false;
+    protected boolean desnudo = false;
     protected final int charindex;
     protected final int userindex;
     protected HashMap<String, Habilidad> skills = new HashMap<>();
+
+    // Inventario
+    protected int WeaponEqpObjIndex = 0;
+    protected int WeaponEqpSlot = 0;
+    protected int ShieldEqpObjIndex = 0;
+    protected int ShieldEqpSlot = 0;
+    protected int HelmEqpObjIndex = 0;
+    protected int HelmEqpSlot = 0;
+    protected int ArmorEqpObjIndex = 0;
+    protected int ArmorEqpSlot = 0;
 
     public Usuario() {
         this.charindex = Servidor.crearCharindex();
@@ -861,5 +874,203 @@ public class Usuario implements Atacable, GanaExperiencia {
         entrenarHabilidad(skill, resultado);
 
         return resultado;
+    }
+
+    /**
+     * @return Verdadero si el usuario es newbie
+     */
+    public boolean isNewbie() {
+        return newbie;
+    }
+
+    /**
+     * @param newbie Verdadero si el usuario es newbie
+     */
+    public void setNewbie(boolean newbie) {
+        this.newbie = newbie;
+    }
+
+    /**
+     * Intentar equipar el objeto que se encuentra en un hueco especifico del
+     * inventario
+     *
+     * @param invslot
+     * @return
+     */
+    public boolean inventarioEquiparSlot(int invslot) {
+        if (isMuerto()) {
+            enviarMensaje("No puedes equiparte objetos si estas muerto.");
+            return false;
+        }
+
+        if (invslot < 0 || invslot > inventario.size()) {
+            // Slot invalido
+            return false;
+        }
+
+        InventarioSlot slot = getInventarioSlot(invslot);
+
+        if (slot == null) {
+            return false;
+        }
+
+        // Si esta equipado lo quitamos
+        if (slot.isEquipado()) {
+            return inventarioDesequiparSlot(invslot);
+        }
+
+        if (slot.getObjeto().isNewbie() && !isNewbie()) {
+            enviarMensaje("Solo los newbies pueden usar este objeto.");
+            return false;
+        }
+
+        switch (slot.getObjeto().getTipo()) {
+            case ARMA:
+                // Si tiene otra arma equipada, entonces la desequipamos
+                if (WeaponEqpObjIndex > 0) {
+                    inventarioDesequiparSlot(WeaponEqpSlot);
+                }
+
+                WeaponEqpObjIndex = slot.getObjetoId();
+                WeaponEqpSlot = invslot;
+
+                // Enviamos un sonido en el area
+                Servidor.getServidor().todosArea(getCoordenada(), 30, (usuario, conexion) -> {
+                    conexion.enviarMundoReproducirSonido(Sonidos.SND_SACARARMA, getCoordenada().getPosicion());
+                });
+
+                setArma(slot.getObjeto().getAnimacion());
+                actualizarApariencia();
+                break;
+            case ESCUDO:
+                // Si tiene otro escudo equipado, entonces lo desequipamos
+                if (ShieldEqpObjIndex > 0) {
+                    inventarioDesequiparSlot(ShieldEqpSlot);
+                }
+
+                ShieldEqpObjIndex = slot.getObjetoId();
+                ShieldEqpSlot = invslot;
+
+                setEscudo(slot.getObjeto().getAnimacion());
+                actualizarApariencia();
+                break;
+            case CASCO:
+                // Si tiene otro casco equipado, entonces lo desequipamos
+                if (HelmEqpObjIndex > 0) {
+                    inventarioDesequiparSlot(HelmEqpSlot);
+                }
+
+                HelmEqpObjIndex = slot.getObjetoId();
+                HelmEqpSlot = invslot;
+
+                setCasco(slot.getObjeto().getAnimacion());
+                actualizarApariencia();
+                break;
+            case VESTIMENTA:
+                // Si tiene otra ropa equipada, entonces la desequipamos
+                if (ArmorEqpObjIndex > 0) {
+                    inventarioDesequiparSlot(ArmorEqpSlot);
+                }
+
+                ArmorEqpObjIndex = slot.getObjetoId();
+                ArmorEqpSlot = invslot;
+
+                setCuerpo(slot.getObjeto().getAnimacion());
+                setDesnudo(false);
+                actualizarApariencia();
+                break;
+        }
+
+        // Si llegamos hasta aca es porque logramos equipar el objeto
+        slot.setEquipado(true);
+        getConexion().usuarioInventarioActualizarSlot(invslot);
+        return true;
+    }
+
+    public boolean inventarioDesequiparSlot(int invslot) {
+        if (invslot < 1 || invslot > inventario.size()) {
+            // Slot invalido
+            return false;
+        }
+
+        InventarioSlot slot = getInventarioSlot(invslot);
+
+        if (slot == null) {
+            return false;
+        }
+
+        switch (slot.getObjeto().getTipo()) {
+            case ARMA:
+                WeaponEqpSlot = 0;
+                WeaponEqpObjIndex = 0;
+                slot.setEquipado(false);
+                if (!mimetizado) {
+                    setArma(0);
+                    actualizarApariencia();
+                }
+                break;
+            case ESCUDO:
+                ShieldEqpSlot = 0;
+                ShieldEqpObjIndex = 0;
+                slot.setEquipado(false);
+                if (!mimetizado) {
+                    setEscudo(0);
+                    actualizarApariencia();
+                }
+                break;
+            case CASCO:
+                HelmEqpSlot = 0;
+                HelmEqpObjIndex = 0;
+                slot.setEquipado(false);
+                if (!mimetizado) {
+                    setCasco(0);
+                    actualizarApariencia();
+                }
+                break;
+            case VESTIMENTA:
+                ArmorEqpSlot = 0;
+                ArmorEqpObjIndex = 0;
+                setDesnudo(true);
+                slot.setEquipado(false);
+                if (!mimetizado) {
+                    int cuerpoDesnudo = Servidor.getServidor().getRaza(getRaza()).getCuerpo();
+                    setCuerpo(cuerpoDesnudo);
+                    actualizarApariencia();
+                }
+                break;
+        }
+
+        getConexion().usuarioInventarioActualizarSlot(invslot);
+        return true;
+    }
+
+    /**
+     * Envia a todos los clientes cercanos el cambio de apariencia sobre el
+     * personaje del usuario
+     */
+    public void actualizarApariencia() {
+        for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
+            conn.enviarPersonajeCambiar(
+                    getCharindex() == conn.getUsuario().getCharindex() ? 1 : getCharindex(),
+                    getOrientacion().valor(),
+                    getCuerpo(),
+                    getCabeza(),
+                    getArma(),
+                    getEscudo(),
+                    getCasco());
+        }
+    }
+    /**
+     * @return the desnudo
+     */
+    public boolean isDesnudo() {
+        return desnudo;
+    }
+
+    /**
+     * @param desnudo the desnudo to set
+     */
+    public void setDesnudo(boolean desnudo) {
+        this.desnudo = desnudo;
     }
 }
