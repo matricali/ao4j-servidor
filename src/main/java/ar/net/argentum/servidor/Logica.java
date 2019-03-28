@@ -142,4 +142,13 @@ public class Logica {
     public static int porcentaje(int total, int porc) {
         return total * porc / 100;
     }
+
+    public static int calcularDistancia(Posicion a, Posicion b) {
+        return Math.abs(a.getX() - b.getX()) + Math.abs(a.getY() - b.getY());
+    }
+
+    public static int calcularDistancia(Coordenada c1, Coordenada c2) {
+        return calcularDistancia(c1.getPosicion(), c2.getPosicion())
+                + (Math.abs(c1.getMapa() - c2.getMapa()) * 100);
+    }
 }
