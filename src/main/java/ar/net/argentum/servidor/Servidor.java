@@ -20,8 +20,12 @@ import ar.net.argentum.servidor.configuracion.ConfiguracionGeneral;
 import ar.net.argentum.servidor.mundo.Personaje;
 import ar.net.argentum.servidor.mundo.UtilMapas;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
@@ -69,10 +73,14 @@ public class Servidor {
     private final int intervaloEventos = 40;
     private long timerEventos = getTimer();
     private ServerSocket serverSocket;
+    private final Map<String, Clase> clases;
+    private final Map<String, Raza> razas;
 
     private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
+        this.clases = cargarClases("datos/clases.json");
+        this.razas = cargarRazas("datos/razas.json");
         this.objetosdb = new ObjetosDB("datos/objetos.json");
         this.mapas = new ConcurrentHashMap<>();
         this.personajes = new ConcurrentHashMap<>();
@@ -301,5 +309,41 @@ public class Servidor {
                 conexion.getUsuario().tick();
             }
         }
+    }
+
+    private Map<String, Clase> cargarClases(String archivo) {
+        LOGGER.info("Cargando clases (" + archivo + ")...");
+        try {
+            File f = new File(archivo);
+            InputStream is = new FileInputStream(f);
+            ObjectMapper mapper = new ObjectMapper();
+
+            return mapper.readValue(is, new TypeReference<Map<String, Clase>>() {
+            });
+        } catch (IOException ex) {
+            throw new RuntimeException("Error al cargar clases", ex);
+        }
+    }
+
+    private Map<String, Raza> cargarRazas(String archivo) {
+        LOGGER.info("Cargando razas (" + archivo + ")...");
+        try {
+            File f = new File(archivo);
+            InputStream is = new FileInputStream(f);
+            ObjectMapper mapper = new ObjectMapper();
+
+            return mapper.readValue(is, new TypeReference<Map<String, Raza>>() {
+            });
+        } catch (IOException ex) {
+            throw new RuntimeException("Error al cargar razas", ex);
+        }
+    }
+
+    public final Clase getClase(String nombre) {
+        return clases.get(nombre);
+    }
+
+    public final Raza getRaza(String nombre) {
+        return razas.get(nombre);
     }
 }
