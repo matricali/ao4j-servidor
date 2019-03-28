@@ -32,6 +32,7 @@ public class ObjetoMetadata {
     protected int maxItems;
     boolean apunala;
     boolean achuchilla;
+    protected boolean newbie;
     protected int animacion;
 
     public ObjetoMetadata(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
@@ -76,6 +77,20 @@ public class ObjetoMetadata {
      */
     public int getMaxItems() {
         return maxItems;
+    }
+
+    /**
+     * @return Verdadero si el objeto es NEWBIE
+     */
+    public boolean isNewbie() {
+        return newbie;
+    }
+
+    /**
+     * @param newbie Verdadero si el objeto es NEWBIE
+     */
+    public void setNewbie(boolean newbie) {
+        this.newbie = newbie;
     }
 
     /**
