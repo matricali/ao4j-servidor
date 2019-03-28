@@ -583,23 +583,6 @@ public class ConexionConCliente extends Thread {
         return false;
     }
 
-    public void ChangeUserChar(Usuario usuario, Orientacion orientacion, int cuerpo, int head, int arma, int escudo, int casco) {
-        for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
-            if (usuario.getCharindex() == conn.getUsuario().getCharindex()) {
-                continue;
-            }
-            conn.enviarPersonajeCambiar(
-                    usuario.getCharindex(),
-                    usuario.getOrientacion().valor(),
-                    usuario.getCuerpo(),
-                    usuario.getCabeza(),
-                    usuario.getArma(),
-                    usuario.getEscudo(),
-                    usuario.getCasco());
-        }
-
-    }
-
     public boolean isConectado() {
         return socket.isConnected();
     }
