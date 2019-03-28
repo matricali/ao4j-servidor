@@ -19,6 +19,7 @@ package ar.net.argentum.servidor.protocolo;
 import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.InventarioSlot;
 import ar.net.argentum.servidor.ObjetoMetadata;
+import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
 import ar.net.argentum.servidor.mundo.Orientacion;
@@ -596,11 +597,16 @@ public class ConexionConCliente extends Thread {
         try {
             int x = dis.readInt();
             int y = dis.readInt();
+            LOGGER.debug("PQT_CLICK<<" + x + "<<" + y);
             // @TODO: Validar coordenadas
-            Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
-            if (b.getCharindex() > 0) {
-                enviarMensaje("Ves a alguien.");
-                return true;
+            try {
+                Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
+                if (b.getCharindex() > 0) {
+                    enviarMensaje("Ves a alguien.");
+                    return true;
+                }
+            } catch (Exception ex) {
+                LOGGER.fatal(null, ex);
             }
             enviarMensaje("No ves nada.");
             return true;
@@ -611,6 +617,7 @@ public class ConexionConCliente extends Thread {
     }
 
     public boolean manejarUsuarioGolpea() {
+        LOGGER.debug("PQT_USUARIO_GOLPEA<<");
         // @TODO: Prevenir speed hack
         usuario.golpea();
         return true;
