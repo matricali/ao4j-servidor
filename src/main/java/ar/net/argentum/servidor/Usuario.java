@@ -258,7 +258,7 @@ public class Usuario implements Atacable, GanaExperiencia {
 
     protected void alSubirDeNivel() {
         enviarMensaje("Has subido de nivel!");
-        // @TODO: Enviar sonido
+        getConexion().enviarMundoReproducirSonido(Sonidos.SND_NIVEL);
         getConexion().enviarUsuarioExperiencia();
     }
 
@@ -577,7 +577,7 @@ public class Usuario implements Atacable, GanaExperiencia {
         Baldosa b = m.getBaldosa(nuevaPosicion);
 
         if (b.getCharindex() == 0) {
-            enviarMensaje("Le pegaste al aire capo");
+            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
             return true;
         }
 

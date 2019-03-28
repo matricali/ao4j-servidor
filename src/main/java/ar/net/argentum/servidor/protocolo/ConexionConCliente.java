@@ -57,6 +57,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_CLICK = 0x17;
     protected static final byte PQT_USUARIO_GOLPEA = 0x18;
     protected static final byte PQT_USUARIO_EXPERIENCIA = 0x19;
+    protected static final byte PQT_MUNDO_REPRODUCIR_SONIDO = 0x21;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -488,6 +489,31 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(arma);
             dos.writeInt(escudo);
             dos.writeInt(casco);
+
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+    }
+
+    public void enviarMundoReproducirSonido(int sonido) {
+        enviarMundoReproducirSonido(
+                sonido,
+                getUsuario().getCoordenada().getPosicion());
+    }
+
+    public void enviarMundoReproducirSonido(int sonido, Posicion pos) {
+        enviarMundoReproducirSonido(
+                sonido,
+                pos.getX(),
+                pos.getY());
+    }
+
+    public void enviarMundoReproducirSonido(int sonido, int x, int y) {
+        try {
+            dos.writeByte(PQT_MUNDO_REPRODUCIR_SONIDO);
+            dos.writeInt(sonido);
+            dos.writeInt(x);
+            dos.writeInt(y);
 
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
