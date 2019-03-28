@@ -21,39 +21,45 @@ package ar.net.argentum.servidor;
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public enum ObjetoTipo {
-    otUseOnce(1),
-    otWeapon(2),
-    otarmadura(3),
-    otArboles(4),
-    otGuita(5),
-    otPuertas(6),
-    otContenedores(7),
-    otCarteles(8),
-    otLlaves(9),
-    otForos(10),
-    otPociones(11),
-    otBebidas(13),
-    otLeña(14),
-    otFogata(15),
-    otescudo(16),
-    otcasco(17),
-    otAnillo(18),
-    otTeleport(19),
-    otYacimiento(22),
-    otMinerales(23),
-    otPergaminos(24),
-    otInstrumentos(26),
-    otYunque(27),
-    otFragua(28),
-    otBarcos(31),
-    otFlechas(32),
-    otBotellaVacia(33),
-    otBotellaLlena(34),
-    otManchas(35), // No se usa
-    otArbolElfico(36),
-    otMochilas(37),
-    otYacimientoPez(38),
-    otCualquiera(1000);
+    ALIMENTO(1),
+    ARMA(2),
+    VESTIMENTA(3),
+    ARBOL(4),
+    DINERO(5),
+    PUERTA(6),
+    CONTENEDOR(7),
+    CARTEL(8),
+    LLAVE(9),
+    FORO(10),
+    POCION(11),
+    LIBRO(12),
+    BEBIDA(13),
+    MADERA(14),
+    FOGATA(15),
+    ESCUDO(16),
+    CASCO(17),
+    ANILLO(18),
+    TELETRANSPORTE(19),
+    MUEBLE(20),
+    JOYA(21),
+    YACIMIENTO(22),
+    MINERAL(23),
+    PERGAMINO(24),
+    AURA(25),
+    INSTRUMENTO(26),
+    YUNQUE(27),
+    FRAGUA(28),
+    GEMA(29),
+    FLOR(30),
+    BARCO(31),
+    FLECHA(32),
+    BOTELLA_VACIA(33),
+    BOTELLA_LLENA(34),
+    MANCHA(35), // No se usa
+    ARBOL_ELFICO(36),
+    MOCHILA(37),
+    YACIMIENTO_PEZ(38),
+    CUALQUIERA(1000);
 
     private final int tipo;
 
@@ -63,5 +69,20 @@ public enum ObjetoTipo {
 
     public int valor() {
         return tipo;
+    }
+
+    /**
+     * Obtener tipo de objeto desde un un identificador entero dado
+     *
+     * @param valor
+     * @return
+     */
+    public static ObjetoTipo valueOf(int valor) throws IllegalArgumentException {
+        for (ObjetoTipo o : ObjetoTipo.values()) {
+            if (o.valor() == valor) {
+                return o;
+            }
+        }
+        throw new IllegalArgumentException("Tipo de objeto invalido (" + valor + ")");
     }
 }
