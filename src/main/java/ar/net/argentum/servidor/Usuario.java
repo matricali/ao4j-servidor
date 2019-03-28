@@ -124,6 +124,9 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected boolean desnudo = false;
     protected final int charindex;
     protected final int userindex;
+    protected String raza;
+    protected String genero;
+    protected String clase;
     protected HashMap<String, Habilidad> skills = new HashMap<>();
 
     // Inventario
@@ -1061,6 +1064,34 @@ public class Usuario implements Atacable, GanaExperiencia {
         }
     }
     /**
+     * @return the raza
+     */
+    public String getRaza() {
+        return raza;
+    }
+
+    /**
+     * @param raza the raza to set
+     */
+    public void setRaza(String raza) {
+        this.raza = raza;
+    }
+
+    /**
+     * @return the clase
+     */
+    public String getClase() {
+        return clase;
+    }
+
+    /**
+     * @param clase the clase to set
+     */
+    public void setClase(String clase) {
+        this.clase = clase;
+    }
+
+    /**
      * @return the desnudo
      */
     public boolean isDesnudo() {
@@ -1072,5 +1103,19 @@ public class Usuario implements Atacable, GanaExperiencia {
      */
     public void setDesnudo(boolean desnudo) {
         this.desnudo = desnudo;
+    }
+
+    /**
+     * @return the genero
+     */
+    public String getGenero() {
+        return genero;
+    }
+
+    /**
+     * @param genero the genero to set
+     */
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 }
