@@ -69,6 +69,10 @@ public class Usuario implements Atacable, GanaExperiencia {
         return usuario;
     }
 
+    private static File getArchivo(String nombre) {
+        return new File("datos/personajes/" + nombre.toLowerCase() + ".json");
+    }
+
     @JsonProperty
     protected String nombre;
     @JsonProperty
@@ -124,30 +128,6 @@ public class Usuario implements Atacable, GanaExperiencia {
         this.userindex = Servidor.crearUserindex();
     }
 
-//    @Override
-//    public int hashCode() {
-//        int hash = 5;
-//        hash = 53 * hash + this.charindex;
-//        return hash;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        final Usuario other = (Usuario) obj;
-//        if (this.charindex != other.charindex) {
-//            return false;
-//        }
-//        return true;
-//    }
     /**
      * @return the nombre
      */
@@ -199,10 +179,6 @@ public class Usuario implements Atacable, GanaExperiencia {
         }
     }
 
-    private static File getArchivo(String nombre) {
-        return new File("datos/personajes/" + nombre.toLowerCase() + ".json");
-    }
-
     public InventarioSlot getInventarioSlot(int slot) {
         return inventario.get(slot);
     }
@@ -210,14 +186,6 @@ public class Usuario implements Atacable, GanaExperiencia {
     public void setInventarioSlot(int slot, final InventarioSlot inv) {
         inventario.put(slot, inv);
     }
-//
-//    @SuppressWarnings("unchecked")
-//    @JsonProperty("inventario")
-//    private void unpackNested(Map<String, Object> brand) {
-//        this.brandName = (String) brand.get("name");
-//        Map<String, String> owner = (Map<String, String>) brand.get("owner");
-//        this.ownerName = owner.get("name");
-//    }
 
     /**
      * @return the coordenada
@@ -250,7 +218,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     public void setExperienciaActual(int experiencia) {
         this.experienciaActual = experiencia;
     }
-    
+
     @Override
     public int getExperienciaSiguienteNivel() {
         return experienciaSiguienteNivel;
@@ -322,9 +290,6 @@ public class Usuario implements Atacable, GanaExperiencia {
         this.cabeza = cabeza;
     }
 
-    /**
-     * @return the vida
-     */
     public MinMax getVida() {
         return vida;
     }
