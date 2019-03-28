@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor;
 
 /**
+ * Metadata de un objeto
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
@@ -31,6 +32,7 @@ public class ObjetoMetadata {
     protected int maxItems;
     boolean apunala;
     boolean achuchilla;
+    protected int animacion;
 
     public ObjetoMetadata(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
         this.id = id;
@@ -74,6 +76,24 @@ public class ObjetoMetadata {
      */
     public int getMaxItems() {
         return maxItems;
+    }
+
+    /**
+     * ID de animacion, es usado por objetos que se pueden vestir
+     *
+     * @return Animacion
+     */
+    public int getAnimacion() {
+        return animacion;
+    }
+
+    /**
+     * Establecer ID de animacion, es usado por objetos que se pueden vestir
+     *
+     * @param animacion the animacion to set
+     */
+    public void setAnimacion(int animacion) {
+        this.animacion = animacion;
     }
 
 }

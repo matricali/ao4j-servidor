@@ -56,6 +56,8 @@ public class ObjetosDB {
 
             String nombre;
             int grhIndex;
+            int tipoObjeto;
+            int animacion;
 
             // Leer 1 por 1
             for (int i = 1; i < cantObjetos; ++i) {
@@ -64,7 +66,11 @@ public class ObjetosDB {
                     if (jo != null) {
                         nombre = jo.getString("Name");
                         grhIndex = jo.getInt("GrhIndex");
-                        ObjetoMetadata nobjeto = new ObjetoMetadata(i, nombre, ObjetoTipo.otUseOnce, grhIndex, 0, 10000);
+                        tipoObjeto = Integer.valueOf(jo.getString("ObjType"));
+                        ObjetoMetadata nobjeto = new ObjetoMetadata(i, nombre, ObjetoTipo.valueOf(tipoObjeto), grhIndex, 0, 10000);
+                        if (jo.has("Anim")) {
+                            nobjeto.setAnimacion(Integer.valueOf(jo.getString("Anim")));
+                        }
                         objetos[i] = nobjeto;
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }
