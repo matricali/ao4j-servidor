@@ -84,4 +84,19 @@ public class MinMax {
         }
         return false;
     }
+
+    /**
+     * Disminuir la barra, si llega al minimo devuelve verdadero
+     *
+     * @param cantidad
+     * @return
+     */
+    public boolean disminuir(int cantidad) {
+        this.min -= cantidad;
+        if (min <= 0) {
+            this.min = 0;
+            return true;
+        }
+        return false;
+    }
 }
