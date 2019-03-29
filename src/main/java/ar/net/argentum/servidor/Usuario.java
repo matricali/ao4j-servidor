@@ -138,6 +138,9 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected int HelmEqpSlot = 0;
     protected int ArmorEqpObjIndex = 0;
     protected int ArmorEqpSlot = 0;
+    // Contadores
+    protected int contadorFrio = 0;
+    protected int contadorEnergia = 0;
 
     public Usuario() {
         this.charindex = Servidor.crearCharindex();
@@ -768,8 +771,64 @@ public class Usuario implements Atacable, GanaExperiencia {
         if (isMuerto()) {
             return;
         }
+
+        doFrio();
+        doRecuperarEnergia();
+
         if (isMeditando()) {
             doMeditar();
+        }
+    }
+
+    /**
+     * Procesar contador de frio
+     */
+    protected void doFrio() {
+        if (!isDesnudo()) {
+            // Si el personaje esta vestido, entonces no tiene frio
+            return;
+        }
+        if (contadorFrio < Balance.FRIO_INTERVALO) {
+            ++contadorFrio;
+            return;
+        }
+        alTenerFrio();
+    }
+
+    /**
+     * Evento que se produce cuando el usuario tiene frio
+     */
+    protected void alTenerFrio() {
+        contadorFrio = 0;
+        int energia = Logica.porcentaje(getStamina().getMax(), Balance.FRIO_PORCENTAJE_STAMINA);
+        getStamina().disminuir(energia);
+        getConexion().enviarUsuarioStats();
+    }
+
+    /**
+     * Procesar contador de recupero de energia
+     */
+    protected void doRecuperarEnergia() {
+        if (isDesnudo()) {
+            // Si el personaje esta desnudo, entonces no recupera energia
+            return;
+        }
+        if (contadorEnergia < Balance.ENERGIA_INTERVALO) {
+            ++contadorEnergia;
+            return;
+        }
+        alRecuperarEnergia();
+    }
+
+    /**
+     * Evento que se produce cuando el usuario recupera energia
+     */
+    protected void alRecuperarEnergia() {
+        contadorEnergia = 0;
+        if (!getStamina().estaCompleto()) {
+            int energia = Logica.porcentaje(getStamina().getMax(), Balance.ENERGIA_PORCENTAJE_RECUPERO);
+            getStamina().aumentar(energia);
+            getConexion().enviarUsuarioStats();
         }
     }
 

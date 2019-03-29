@@ -31,6 +31,11 @@ public abstract class Balance {
      */
     public static final int NIVEL_MAX = 50;
 
+    public static final int FRIO_INTERVALO = 5;
+    public static final int FRIO_PORCENTAJE_STAMINA = 5;
+    public static final int ENERGIA_INTERVALO = 5;
+    public static final int ENERGIA_PORCENTAJE_RECUPERO = 5;
+
     /**
      * Calcular la nueva experiencia para pasar de nivel.
      *
