@@ -765,7 +765,10 @@ public class Usuario implements Atacable, GanaExperiencia {
      * Actualizamos todo lo que tengamos que actualizar del usuario
      */
     public void tick() {
-        if (meditando) {
+        if (isMuerto()) {
+            return;
+        }
+        if (isMeditando()) {
             doMeditar();
         }
     }
