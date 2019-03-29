@@ -580,6 +580,7 @@ public class Usuario implements Atacable, GanaExperiencia {
      * @return
      */
     public boolean golpea() {
+        // @TODO: Verificar intervalos
         // @TODO: Cancelar /salir
         if (isMeditando()) {
             // No podes golpear si estas meditando
@@ -591,12 +592,25 @@ public class Usuario implements Atacable, GanaExperiencia {
         }
         // @TODO: Sacar ocultarse
 
+        // Verificamos que tengamos energia para luchar
+        if (getStamina().getMin() < Balance.COMBATE_ENERGIA_NECESARIA) {
+            if ("MUJER".equals(getGenero())) {
+                enviarMensaje("Estas muy cansada para luchar.");
+                return false;
+            }
+            enviarMensaje("Estas muy cansado para luchar.");
+            return false;
+        }
+
         Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
         Mapa m = Servidor.getServidor().getMapa(getCoordenada().getMapa());
         Baldosa b = m.getBaldosa(nuevaPosicion);
 
         if (b.getCharindex() == 0) {
+            // Arrojamos un golpe al aire, enviamos el sonido y disminuimos la energia
             getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
+            getConexion().enviarUsuarioStats();
             return true;
         }
 
@@ -608,6 +622,8 @@ public class Usuario implements Atacable, GanaExperiencia {
         Personaje victima = Servidor.getServidor().getPersonaje(charindex);
 
         enviarMensaje("Le pegaste a " + victima.getNombre());
+        getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
+        getConexion().enviarUsuarioStats();
 
 //        // Le avisamos a los otros clientes que el usuario se movio
 //        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {

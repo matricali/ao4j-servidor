@@ -31,6 +31,7 @@ public abstract class Balance {
      */
     public static final int NIVEL_MAX = 50;
 
+    public static final int COMBATE_ENERGIA_NECESARIA = 10;
     public static final int FRIO_INTERVALO = 5;
     public static final int FRIO_PORCENTAJE_STAMINA = 5;
     public static final int ENERGIA_INTERVALO = 5;
