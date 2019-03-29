@@ -65,6 +65,20 @@ public class Servidor {
         servidor.iniciar();
     }
 
+    public static synchronized int crearUserindex() {
+        ultimoUseridex++;
+
+        LOGGER.info("Generado nuevo userindex >>" + ultimoUseridex);
+        return ultimoUseridex;
+    }
+
+    public static synchronized int crearCharindex() {
+        ultimoCharindex++;
+
+        LOGGER.info("Generado nuevo charindex >>" + ultimoCharindex);
+        return ultimoCharindex;
+    }
+
     private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
     private final LinkedList<ConexionConCliente> conexiones;
@@ -218,20 +232,6 @@ public class Servidor {
         return conexiones;
     }
 
-    public static synchronized int crearUserindex() {
-        ultimoUseridex++;
-
-        LOGGER.info("Generado nuevo userindex >>" + ultimoUseridex);
-        return ultimoUseridex;
-    }
-
-    public static synchronized int crearCharindex() {
-        ultimoCharindex++;
-
-        LOGGER.info("Generado nuevo charindex >>" + ultimoCharindex);
-        return ultimoCharindex;
-    }
-
     public void todosMenosUsuarioArea(Usuario usuario, EnvioAUsuario envio) {
         for (ConexionConCliente conn : conexiones) {
             if (conn.getUsuario() == null) {
@@ -247,9 +247,10 @@ public class Servidor {
 
     /**
      * Enviar algo a todos los usuarios en un area dada
+     *
      * @param centro
      * @param distancia
-     * @param envio 
+     * @param envio
      */
     public void todosArea(Coordenada centro, int distancia, EnvioAUsuario envio) {
         for (ConexionConCliente conn : conexiones) {
