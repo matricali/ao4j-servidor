@@ -71,6 +71,9 @@ public class ObjetosDB {
                         if (jo.has("Anim")) {
                             nobjeto.setAnimacion(Integer.valueOf(jo.getString("Anim")));
                         }
+                        if (jo.has("NumRopaje")) {
+                            nobjeto.setRopaje(Integer.valueOf(jo.getString("NumRopaje")));
+                        }
                         objetos[i] = nobjeto;
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }

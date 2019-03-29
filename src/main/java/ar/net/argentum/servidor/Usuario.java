@@ -978,7 +978,7 @@ public class Usuario implements Atacable, GanaExperiencia {
                 ArmorEqpObjIndex = slot.getObjetoId();
                 ArmorEqpSlot = invslot;
 
-                setCuerpo(slot.getObjeto().getAnimacion());
+                setCuerpo(slot.getObjeto().getRopaje());
                 setDesnudo(false);
                 actualizarApariencia();
                 break;

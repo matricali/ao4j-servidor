@@ -34,6 +34,7 @@ public class ObjetoMetadata {
     boolean achuchilla;
     protected boolean newbie;
     protected int animacion;
+    protected int ropaje;
 
     public ObjetoMetadata(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
         this.id = id;
@@ -109,6 +110,20 @@ public class ObjetoMetadata {
      */
     public void setAnimacion(int animacion) {
         this.animacion = animacion;
+    }
+
+    /**
+     * @return ID de cuerpo para la vestimenta
+     */
+    public int getRopaje() {
+        return ropaje;
+    }
+
+    /**
+     * @param ropaje ID de cuerpo para la vestimenta
+     */
+    public void setRopaje(int ropaje) {
+        this.ropaje = ropaje;
     }
 
 }
