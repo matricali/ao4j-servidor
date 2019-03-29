@@ -84,7 +84,7 @@ public class Servidor {
     private final LinkedList<ConexionConCliente> conexiones;
     private final Map<Integer, Mapa> mapas;
     private final ConcurrentMap<Integer, Personaje> personajes;
-    private final int intervaloEventos = 40;
+    private final int intervaloEventos = 250;
     private long timerEventos = getTimer();
     private ServerSocket serverSocket;
     private final Map<String, Clase> clases;
