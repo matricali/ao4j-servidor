@@ -1,0 +1,170 @@
+{
+    "GUERRERO": {
+        "nombre": "Guerrero",
+        "modificadores": {
+            "evasion": 1,
+            "ataqueArmas": 1,
+            "ataqueProyectiles": 0.8,
+            "ataqueMano": 0.6,
+            "dañoArmas": 1.1,
+            "dañoProyectiles": 0.9,
+            "dañoMano": 0.4,
+            "escudo": 1,
+            "vida": 10
+        }
+    },
+    "CAZADOR": {
+        "nombre": "Cazador",
+        "modificadores": {
+            "evasion": 0.9,
+            "ataqueArmas": 0.8,
+            "ataqueProyectiles": 1,
+            "ataqueMano": 0.5,
+            "dañoArmas": 0.9,
+            "dañoProyectiles": 1.1,
+            "dañoMano": 0.4,
+            "escudo": 0.8,
+            "vida": 9.5
+        }
+    },
+    "PALADIN": {
+        "nombre": "Paladín",
+        "modificadores": {
+            "evasion": 0.9,
+            "ataqueArmas": 0.95,
+            "ataqueProyectiles": 0.75,
+            "ataqueMano": 0.4,
+            "dañoArmas": 0.925,
+            "dañoProyectiles": 0.8,
+            "dañoMano": 0.4,
+            "escudo": 1,
+            "vida": 9.5
+        }
+    },
+    "BANDIDO": {
+        "nombre": "Bandido",
+        "modificadores": {
+            "evasion": 0.7,
+            "ataqueArmas": 0.85,
+            "ataqueProyectiles": 0.8,
+            "ataqueMano": 0.95,
+            "dañoArmas": 0.85,
+            "dañoProyectiles": 0.7,
+            "dañoMano": 1.05,
+            "escudo": 2,
+            "vida": 9.5
+        }
+    },
+    "ASESINO": {
+        "nombre": "Asesino",
+        "modificadores": {
+            "evasion": 1.1,
+            "ataqueArmas": 0.9,
+            "ataqueProyectiles": 0.75,
+            "ataqueMano": 0.4,
+            "dañoArmas": 0.9,
+            "dañoProyectiles": 0.8,
+            "dañoMano": 0.4,
+            "escudo": 0.8,
+            "vida": 8.5
+        }
+    },
+    "PIRATA": {
+        "nombre": "Pirata",
+        "modificadores": {
+            "evasion": 1.25,
+            "ataqueArmas": 0.9,
+            "ataqueProyectiles": 0.9,
+            "ataqueMano": 0.5,
+            "dañoArmas": 0.95,
+            "dañoProyectiles": 0.8,
+            "dañoMano": 0.4,
+            "escudo": 0.6,
+            "vida": 9.5
+        }
+    },
+    "LADRON": {
+        "nombre": "Ladrón",
+        "modificadores": {
+            "evasion": 1.1,
+            "ataqueArmas": 0.8,
+            "ataqueProyectiles": 0.85,
+            "ataqueMano": 0.8,
+            "dañoArmas": 0.75,
+            "dañoProyectiles": 0.85,
+            "dañoMano": 1.05,
+            "escudo": 0.7,
+            "vida": 10
+        }
+    },
+    "CLERIGO": {
+        "nombre": "Clérigo",
+        "modificadores": {
+            "evasion": 0.8,
+            "ataqueArmas": 0.85,
+            "ataqueProyectiles": 0.7,
+            "ataqueMano": 0.4,
+            "dañoArmas": 0.8,
+            "dañoProyectiles": 0.7,
+            "dañoMano": 0.4,
+            "escudo": 0.85,
+            "vida": 8.5
+        }
+    },
+    "BARDO": {
+        "nombre": "Bardo",
+        "modificadores": {
+            "evasion": 1.075,
+            "ataqueArmas": 0.7,
+            "ataqueProyectiles": 0.7,
+            "ataqueMano": 0.4,
+            "dañoArmas": 0.75,
+            "dañoProyectiles": 0.7,
+            "dañoMano": 0.4,
+            "escudo": 0.8,
+            "vida": 8.5
+        }
+    },
+    "MAGO": {
+        "nombre": "Mago",
+        "modificadores": {
+            "evasion": 0.4,
+            "ataqueArmas": 0.5,
+            "ataqueProyectiles": 0.5,
+            "ataqueMano": 0.3,
+            "dañoArmas": 0.5,
+            "dañoProyectiles": 0.5,
+            "dañoMano": 0.4,
+            "escudo": 0.6,
+            "vida": 7.5
+        }
+    },
+    "DRUIDA": {
+        "nombre": "Druida",
+        "modificadores": {
+            "evasion": 0.75,
+            "ataqueArmas": 0.65,
+            "ataqueProyectiles": 0.75,
+            "ataqueMano": 0.4,
+            "dañoArmas": 0.7,
+            "dañoProyectiles": 0.75,
+            "dañoMano": 0.4,
+            "escudo": 0.75,
+            "vida": 8.5
+        }
+    },
+    "TRABAJADOR": {
+        "nombre": "Trabajador",
+        "modificadores": {
+            "evasion": 0.8,
+            "ataqueArmas": 0.8,
+            "ataqueProyectiles": 0.7,
+            "ataqueMano": 0.5,
+            "dañoArmas": 0.8,
+            "dañoProyectiles": 0.7,
+            "dañoMano": 0.4,
+            "escudo": 0.7,
+            "vida": 9.5
+        }
+    }
+}
