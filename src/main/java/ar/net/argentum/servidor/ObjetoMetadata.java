@@ -45,6 +45,15 @@ public class ObjetoMetadata {
         this.maxItems = maxItems;
     }
 
+    public ObjetoMetadata(ObjetoMetadata original) {
+        this.id = original.id;
+        this.nombre = original.nombre;
+        this.tipo = original.tipo;
+        this.grhIndex = original.grhIndex;
+        this.grhSecundario = original.grhSecundario;
+        this.maxItems = original.maxItems;
+    }
+
     /**
      * @return the id
      */
