@@ -18,7 +18,6 @@ package ar.net.argentum.servidor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.json.JSONPropertyIgnore;
 
 /**
  *
