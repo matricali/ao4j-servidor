@@ -35,6 +35,7 @@ public class ObjetoMetadata {
     protected boolean newbie;
     protected int animacion;
     protected int ropaje;
+    protected boolean agarrable = true;
 
     public ObjetoMetadata(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
         this.id = id;
@@ -133,6 +134,20 @@ public class ObjetoMetadata {
      */
     public void setRopaje(int ropaje) {
         this.ropaje = ropaje;
+    }
+
+    /**
+     * @return Verdadero si el objeto puede ser agarrado
+     */
+    public boolean isAgarrable() {
+        return agarrable;
+    }
+
+    /**
+     * @param Verdadero si el objeto puede ser agarrado
+     */
+    public void setAgarrable(boolean agarrable) {
+        this.agarrable = agarrable;
     }
 
 }
