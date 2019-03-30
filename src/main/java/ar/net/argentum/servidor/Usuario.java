@@ -721,6 +721,14 @@ public class Usuario implements Atacable, GanaExperiencia {
             }
         }
 
+        // Enviamos los objetos que hay en el mapa
+        for (Map.Entry<Posicion, Objeto> entry : mapa.getObjetos().entrySet()) {
+            getConexion().enviarMundoObjeto(
+                    entry.getKey().getX(),
+                    entry.getKey().getY(),
+                    entry.getValue());
+        }
+
         return true;
     }
 
