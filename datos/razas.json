@@ -1,0 +1,62 @@
+{
+    "HUMANO": {
+        "nombre": "Humano",
+        "descripcion": "",
+        "cuerpo": 21,
+        "modificadores": {
+            "fuerza": 1,
+            "agilidad": 1,
+            "inteligencia": 0,
+            "carisma": 0,
+            "constitucion": 2
+        }
+    },
+    "ELFO": {
+        "nombre": "Elfo",
+        "descripcion": "",
+        "cuerpo": 210,
+        "modificadores": {
+            "fuerza": -1,
+            "agilidad": 3,
+            "inteligencia": 2,
+            "carisma": 2,
+            "constitucion": 1
+        }
+    },
+    "ELFO_OSCURO": {
+        "nombre": "Elfo Oscuro",
+        "descripcion": "",
+        "cuerpo": 32,
+        "modificadores": {
+            "fuerza": 2,
+            "agilidad": 3,
+            "inteligencia": 2,
+            "carisma": -3,
+            "constitucion": 0
+        }
+    },
+    "ENANO": {
+        "nombre": "Enano",
+        "descripcion": "",
+        "cuerpo": 53,
+        "modificadores": {
+            "fuerza": 3,
+            "agilidad": 0,
+            "inteligencia": -2,
+            "carisma": -2,
+            "constitucion": 3
+        }
+    },
+    "GNOMO": {
+        "nombre": "Gnomo",
+        "descripcion": "",
+        "cuerpo": 222,
+        "modificadores": {
+            "fuerza": -2,
+            "agilidad": 3,
+            "inteligencia": 4,
+            "carisma": 1,
+            "constitucion": 0
+        }
+    }
+}
