@@ -16,9 +16,9 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.mundo.MapaAntiguo;
 import ar.net.argentum.servidor.configuracion.ConfiguracionGeneral;
 import ar.net.argentum.servidor.mundo.Personaje;
-import ar.net.argentum.servidor.mundo.UtilMapas;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -187,7 +187,7 @@ public class Servidor {
             if (f.getName().endsWith(".map")) {
                 String nmapa = f.getName().substring(0, f.getName().length() - 4).substring(4);
                 int numMapa = Integer.valueOf(nmapa);
-                Mapa mapa = UtilMapas.cargarMapa(numMapa, f.getName());
+                Mapa mapa = new MapaAntiguo(numMapa);
                 mapas.put(numMapa, mapa);
             }
         }

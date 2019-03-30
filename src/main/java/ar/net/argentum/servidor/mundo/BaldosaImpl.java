@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor.mundo;
 
 import ar.net.argentum.servidor.Baldosa;
+import ar.net.argentum.servidor.Objeto;
 
 /**
  *
@@ -29,9 +30,9 @@ public class BaldosaImpl implements Baldosa {
      */
     protected int capas[] = new int[4];
     /**
-     * ID del objeto arrojado en esta posicion
+     * Objeto arrojado en esta posicion
      */
-    protected int objeto;
+    protected Objeto objeto;
     /**
      * ID del personaje parado en esta posicion
      */
@@ -68,7 +69,7 @@ public class BaldosaImpl implements Baldosa {
      * @return the objeto
      */
     @Override
-    public int getObjeto() {
+    public Objeto getObjeto() {
         return objeto;
     }
 
@@ -76,7 +77,7 @@ public class BaldosaImpl implements Baldosa {
      * @param objeto the objeto to set
      */
     @Override
-    public void setObjeto(int objeto) {
+    public void setObjeto(Objeto objeto) {
         this.objeto = objeto;
     }
 
@@ -111,10 +112,10 @@ public class BaldosaImpl implements Baldosa {
     public void setBloqueado(boolean bloqueado) {
         this.bloqueado = bloqueado;
     }
-    
+
     @Override
     public void setBloqueado(byte bloq) {
-        this.bloqueado = bloqueado;
+        this.bloqueado = (byte) 1 == bloq;
     }
 
     /**
@@ -143,5 +144,10 @@ public class BaldosaImpl implements Baldosa {
     @Override
     public boolean isTierra() {
         return !isAgua();
+    }
+
+    @Override
+    public boolean hayObjeto() {
+        return objeto != null;
     }
 }

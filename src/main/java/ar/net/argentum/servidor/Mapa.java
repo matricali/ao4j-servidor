@@ -17,26 +17,166 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.mundo.Personaje;
+import ar.net.argentum.servidor.mundo.Terreno;
+import ar.net.argentum.servidor.mundo.Zona;
 import java.util.Collection;
 import java.util.Map;
 
 /**
+ * Representa un mapa del mundo de Argentum Online
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public interface Mapa {
 
-    public String getNombre();
+    public int getVersion();
 
-    public void setBaldosa(int x, int y, Baldosa baldosa);
-
-    public void setBaldosa(Posicion posicion, Baldosa baldosa);
-
-    public Baldosa getBaldosa(int x, int y);
-
-    public Baldosa getBaldosa(Posicion posicion);
-
+    /**
+     * @return Numero del mapa
+     */
     public int getNumero();
 
+    /**
+     * @return Nombre del mapa
+     */
+    public String getNombre();
+
+    /**
+     * @return ID de la musica ambiental
+     */
+    public int getMusica();
+
+    /**
+     * @return Verdadero si esta permitido utilizar magia en el mapa
+     */
+    public boolean magiaTieneEfecto();
+
+    /**
+     * @return Tipo de terreno
+     */
+    public Terreno getTerreno();
+
+    /**
+     * @return the zona
+     */
+    public Zona getZona();
+
+    /**
+     * @return the restringir
+     */
+    public String getRestriccion();
+
+    /**
+     * @return Verdadero si el mapa posee alguna restriccion
+     */
+    public boolean tieneRestriccion();
+
+    /**
+     * @return Verdadero si debe realizarse un worldsave de este mapa
+     */
+    public boolean respaldoActivado();
+
+    /**
+     * @return Verdadero si se puede asesinar personajes en el mapa
+     */
+    public boolean asesinatoPermitido();
+
+    /**
+     * Realizar un respaldo del mapa
+     *
+     * @return Verdadero si el respaldo se ha realizado exitosamente
+     */
+    public boolean guardarRespaldo();
+
+    /**
+     * Cargar respaldo del mapa
+     *
+     * @return Verdadero si la carga se ha realizado exitosamente
+     */
+    public boolean cargarRespaldo();
+
+    /**
+     * @param x
+     * @param y
+     * @return Baldosa ubicada en la posicion indicada
+     */
+    public Baldosa getBaldosa(int x, int y);
+
+    /**
+     * @param posicion
+     * @return Baldosa ubicada en la posicion indicada
+     */
+    public Baldosa getBaldosa(Posicion posicion);
+
+    /**
+     * @return Coleccion de personajes ubicados en el mapa
+     */
     public Collection<Personaje> getPersonajes();
+
+    /**
+     * @param x
+     * @param y
+     * @return Objeto de la posicion dada
+     */
+    public Objeto getObjeto(int x, int y);
+
+    /**
+     * @param pos
+     * @return Objeto de la posicion dada
+     */
+    public Objeto getObjeto(Posicion pos);
+
+    /**
+     * Establece un objeto en la posicion dada y envia la informacion a los
+     * clientes
+     *
+     * @param x
+     * @param y
+     * @param obj
+     */
+    public void setObjeto(int x, int y, Objeto obj);
+
+    /**
+     * Establece un objeto en la posicion dada y envia la informacion a los
+     * clientes
+     *
+     * @param pos
+     * @param obj
+     */
+    public void setObjeto(Posicion pos, Objeto obj);
+
+    /**
+     * Eliminar el objeto situado en la posicion dada
+     *
+     * @param x
+     * @param y
+     */
+    public void quitarObjeto(int x, int y);
+
+    /**
+     * Eliminar el objeto situado en la posicion dada
+     *
+     * @param pos
+     */
+    public void quitarObjeto(Posicion pos);
+
+    /**
+     * @param x
+     * @param y
+     * @return Verdadero si hay un objeto en la posicion indicada
+     */
+    public boolean hayObjeto(int x, int y);
+
+    /**
+     * @param pos
+     * @return Verdadero si hay un objeto en la posicion indicada
+     */
+    public boolean hayObjeto(Posicion pos);
+
+    /**
+     * Obtiene un hashmap con los objetos en el mapa
+     *
+     * @return
+     */
+    public Map<Posicion, Objeto> getObjetos();
 }

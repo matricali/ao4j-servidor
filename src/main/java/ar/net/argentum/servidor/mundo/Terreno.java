@@ -14,49 +14,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package ar.net.argentum.servidor;
+package ar.net.argentum.servidor.mundo;
 
 /**
+ * Tipos de terreno
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public interface Baldosa {
-
-    public void setGrafico(int capa, int grhIndex);
-
-    /**
-     * 
-     * @param objeto 
-     */
-    public void setObjeto(Objeto objeto);
-
-    public void setCharindex(int charindex);
-
-    public void setBloqueado(boolean bloqueado);
-    
-    public void setBloqueado(byte bloq);
-
-    public int getGrafico(int capa);
-
-    /**
-     * @return Objeto arrojado en la baldosa
-     */
-    public Objeto getObjeto();
-    
-    /**
-     * @return Verdadero si hay un objeto en la baldosa
-     */
-    public boolean hayObjeto();
-
-    public int getCharindex();
-
-    public boolean isBloqueado();
-
-    public short getTrigger();
-
-    public void setTrigger(short trigger);
-
-    public boolean isAgua();
-
-    public boolean isTierra();
+public enum Terreno {
+    BOSQUE,
+    NIEVE,
+    DESIERTO,
 }
