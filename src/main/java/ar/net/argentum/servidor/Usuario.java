@@ -132,6 +132,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected String genero;
     protected String clase;
     protected HashMap<String, Habilidad> skills = new HashMap<>();
+    protected HashMap<String, Integer> atributos = new HashMap<>();
 
     // Inventario
     protected int WeaponEqpObjIndex = 0;
@@ -1303,6 +1304,20 @@ public class Usuario implements Atacable, GanaExperiencia {
                     getCasco());
         }
     }
+    /**
+     * @return Mapa con atributos del usuario
+     */
+    public HashMap<String, Integer> getAtributos() {
+        return atributos;
+    }
+
+    /**
+     * @param atributos Mapa con atributos del usuario
+     */
+    public void setAtributos(HashMap<String, Integer> atributos) {
+        this.atributos = atributos;
+    }
+
     /**
      * @return the raza
      */
