@@ -74,6 +74,9 @@ public class ObjetosDB {
                         if (jo.has("NumRopaje")) {
                             nobjeto.setRopaje(Integer.valueOf(jo.getString("NumRopaje")));
                         }
+                        if (jo.has("Newbie")) {
+                            nobjeto.setNewbie(jo.getString("Newbie").equals("1"));
+                        }
                         objetos[i] = nobjeto;
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }
