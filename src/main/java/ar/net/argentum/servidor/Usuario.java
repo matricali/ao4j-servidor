@@ -1185,6 +1185,78 @@ public class Usuario implements Atacable, GanaExperiencia {
         return false;
     }
 
+    public boolean inventarioAgarrarObjeto() {
+        if (isMuerto()) {
+            // Si esta muerto no puede agarrar objetos.
+            return false;
+        }
+
+        Mapa mapa = getMapaActual();
+        Posicion pos = getCoordenada().getPosicion();
+
+        if (!mapa.hayObjeto(pos)) {
+            // No hay ningun objeto para agarrar
+            enviarMensaje("No hay nada aqui.");
+            return false;
+        }
+
+        Objeto obj = mapa.getObjeto(pos);
+
+        if (!obj.getMetadata().isAgarrable()) {
+            // El objeto no se puede agarrar
+            enviarMensaje("No puedes agarrar este objeto.");
+            return false;
+        }
+
+        if (obj.getMetadata().getTipo() == ObjetoTipo.DINERO) {
+            // Las monedas las agregamos directamente a la billetera
+            agregarDinero(obj.getCantidad());
+            mapa.quitarObjeto(pos);
+            return true;
+        }
+
+        // Intentamos meter el objeto en el inventario
+        if (!inventarioMeterObjeto(obj)) {
+            enviarMensaje("No puedes cargar mas objetos.");
+            return false;
+        }
+        
+        mapa.quitarObjeto(pos);
+        return true;
+    }
+
+    public boolean inventarioMeterObjeto(Objeto obj) {
+        // Ya tenemos un objeto del mismo tipo?
+        for (Map.Entry<Integer, InventarioSlot> entry : inventario.entrySet()) {
+            if (entry.getValue().getObjetoId() == obj.getId()) {
+                InventarioSlot slot = entry.getValue();
+                if (slot.getCantidad() + obj.getCantidad() <= slot.getObjeto().getMaxItems()) {
+                    // Entra el objeto en el pilon existente
+                    slot.setCantidad(slot.getCantidad() + obj.cantidad);
+                    getConexion().usuarioInventarioActualizarSlot(entry.getKey());
+                    return true;
+                }
+            }
+        }
+
+        // Buscamos un slot libre
+        for (int i = 0; i < inventarioCantSlots; ++i) {
+            if (!inventario.containsKey(i)) {
+                // Encontramos un slot vacio
+                InventarioSlot slot = new InventarioSlot();
+                slot.setCantidad(obj.cantidad);
+                slot.setObjetoId(obj.getId());
+                slot.setEquipado(false);
+                inventario.put(i, slot);
+                getConexion().usuarioInventarioActualizarSlot(i);
+                return true;
+            }
+        }
+
+        // No tenemos lugar donde poner el objeto
+        return false;
+    }
+
     /**
      * Eliminamos un objeto del inventario, si esta equipado lo desequipamos
      *
