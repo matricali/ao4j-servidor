@@ -274,6 +274,35 @@ public class Servidor {
         }
     }
 
+    /**
+     * Enviar algo a todos los usuarios en un mapa
+     *
+     * @param numMapa
+     * @param envio
+     */
+    public void todosMapa(int numMapa, EnvioAUsuario envio) {
+        for (ConexionConCliente conn : conexiones) {
+            if (conn.getUsuario() == null) {
+                // Hay conexiones establebecidas que todavia no estan jugando
+                continue;
+            }
+            if (conn.getUsuario().getCoordenada().getMapa() != numMapa) {
+                continue;
+            }
+            envio.enviar(conn.getUsuario().getCharindex(), conn);
+        }
+    }
+
+    /**
+     * Enviar algo a todos los usuarios en un mapa
+     *
+     * @param mapa
+     * @param envio
+     */
+    public void todosMapa(Mapa mapa, EnvioAUsuario envio) {
+        todosMapa(mapa.getNumero(), envio);
+    }
+
     public int getJugadoresConectados() {
         return conexiones.size();
     }
