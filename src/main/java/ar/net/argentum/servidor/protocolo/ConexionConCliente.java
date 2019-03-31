@@ -338,14 +338,26 @@ public class ConexionConCliente extends Thread {
 
     public void usuarioInventarioActualizarSlot(int slot) {
         InventarioSlot is = usuario.getInventarioSlot(slot);
-        if (is == null) {
-            return;
-        }
-        ObjetoMetadata om = is.getObjeto();
-        if (om == null) {
-            return;
-        }
+
         try {
+
+            if (is == null) {
+                dos.writeByte(PQT_ACTUALIZAR_INVENTARIO);
+                dos.writeInt(slot);
+                dos.writeInt(0);
+                dos.writeInt(0);
+                dos.writeInt(0);
+                dos.writeUTF("");
+                dos.writeInt(0);
+                dos.writeBoolean(false);
+                return;
+            }
+
+            ObjetoMetadata om = is.getObjeto();
+            if (om == null) {
+                return;
+            }
+
             dos.writeByte(PQT_ACTUALIZAR_INVENTARIO);
             dos.writeInt(slot);
             dos.writeInt(om.getId());
