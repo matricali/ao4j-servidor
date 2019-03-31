@@ -62,6 +62,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_USUARIO_EQUIPAR_SLOT = 0x20;
     protected static final byte PQT_MUNDO_REPRODUCIR_SONIDO = 0x21;
     protected static final byte PQT_MUNDO_OBJETO = 0x22;
+    protected static final byte PQT_USUARIO_TIRAR_OBJETO = 0x24;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -178,6 +179,10 @@ public class ConexionConCliente extends Thread {
 
                     case PQT_USUARIO_EQUIPAR_SLOT:
                         manejarUsuarioEquiparSlot();
+                        break;
+
+                    case PQT_USUARIO_TIRAR_OBJETO:
+                        manejarUsuarioTirarObjeto();
                         break;
 
                     default:
@@ -673,6 +678,18 @@ public class ConexionConCliente extends Thread {
         }
         enviarMundoObjeto(x, y, obj.getId(), obj.getMetadata().getGrhIndex(),
                 obj.getCantidad(), obj.getMetadata().getNombre());
+    }
+
+    public boolean manejarUsuarioTirarObjeto() {
+        try {
+            int invslot = dis.readInt();
+            int cantidad = dis.readInt();
+            LOGGER.debug("PQT_USUARIO_TIRAR_OBJETO<<" + invslot + "<<" + cantidad);
+            usuario.inventarioTirarObjeto(invslot, cantidad);
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+        return false;
     }
 
 }

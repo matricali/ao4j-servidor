@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 /**
+ * Representa un juegador
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
@@ -89,6 +90,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected int experienciaSiguienteNivel = 300;
     @JsonProperty
     protected Map<Integer, InventarioSlot> inventario;
+    protected int inventarioCantSlots = 20;
     @JsonProperty
     protected int cuerpo;
     @JsonProperty
@@ -992,7 +994,7 @@ public class Usuario implements Atacable, GanaExperiencia {
             return false;
         }
 
-        if (invslot < 0 || invslot > inventario.size()) {
+        if (!inventario.containsKey(invslot)) {
             // Slot invalido
             return false;
         }
@@ -1077,7 +1079,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     }
 
     public boolean inventarioDesequiparSlot(int invslot) {
-        if (invslot < 1 || invslot > inventario.size()) {
+        if (!inventario.containsKey(invslot)) {
             // Slot invalido
             return false;
         }
@@ -1129,6 +1131,76 @@ public class Usuario implements Atacable, GanaExperiencia {
                 break;
         }
 
+        getConexion().usuarioInventarioActualizarSlot(invslot);
+        return true;
+    }
+
+    /**
+     * Utilizar un objeto del inventario
+     *
+     * @param invslot ID del hueco
+     * @param cantidad
+     * @return Verdadero si se ha logrado arrojar el item al suelo
+     */
+    public boolean inventarioTirarObjeto(int invslot, int cantidad) {
+        InventarioSlot slot = getInventarioSlot(invslot);
+
+        if (slot == null) {
+            return false;
+        }
+
+        ObjetoMetadata meta = slot.getObjeto();
+
+        if (meta == null) {
+            return false;
+        }
+
+        if (slot.isEquipado()) {
+            inventarioDesequiparSlot(invslot);
+        }
+
+        int cantActual = slot.getCantidad();
+        int arrojar = cantidad;
+
+        if (cantActual < cantidad) {
+            arrojar = cantActual;
+        }
+
+        Mapa mapa = getMapaActual();
+
+        if (mapa.hayObjeto(getCoordenada().getPosicion())) {
+            // Ya hay un objeto en esta posicion, no podemos arrojas uno nuevo
+            return false;
+        }
+
+        slot.setCantidad(cantActual - arrojar);
+        if (slot.getCantidad() == 0) {
+            inventario.remove(invslot);
+        }
+        getConexion().usuarioInventarioActualizarSlot(invslot);
+
+        Objeto obj = new Objeto(meta.getId(), arrojar);
+        mapa.setObjeto(getCoordenada().getPosicion(), obj);
+
+        return false;
+    }
+
+    /**
+     * Eliminamos un objeto del inventario, si esta equipado lo desequipamos
+     *
+     * @param invslot
+     * @return Verdadero si se ha eliminado un objeto correctamente
+     */
+    public boolean inventarioQuitarObjeto(int invslot) {
+        if (!inventario.containsKey(invslot)) {
+            return false;
+        }
+        InventarioSlot slot = inventario.get(invslot);
+        if (slot.isEquipado()) {
+            // Si esta equipado, primero lo tenemos que desequipar
+            inventarioDesequiparSlot(invslot);
+        }
+        inventario.remove(invslot);
         getConexion().usuarioInventarioActualizarSlot(invslot);
         return true;
     }
