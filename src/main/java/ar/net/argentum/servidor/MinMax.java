@@ -99,4 +99,26 @@ public class MinMax {
         }
         return false;
     }
+
+    /**
+     * Aumentar el maximo de la barra
+     *
+     * @param cantidad
+     */
+    public void aumentarMax(int cantidad) {
+        this.max += cantidad;
+    }
+
+    /**
+     * Disminuir el maximo de la barra, si el valor actual es mayor al nuevo
+     * maximo lo actualizamos
+     *
+     * @param cantidad
+     */
+    public void disminuirMax(int cantidad) {
+        this.max -= cantidad;
+        if (min > max) {
+            this.min = max;
+        }
+    }
 }
