@@ -113,6 +113,8 @@ public class Usuario implements Atacable, GanaExperiencia {
     @JsonProperty
     protected MinMax sed = new MinMax();
     @JsonProperty
+    protected MinMax golpe = new MinMax();
+    @JsonProperty
     protected Orientacion orientacion = Orientacion.SUR;
     @JsonProperty
     protected boolean paralizado = false;
@@ -341,6 +343,13 @@ public class Usuario implements Atacable, GanaExperiencia {
      */
     public MinMax getSed() {
         return sed;
+    }
+
+    /**
+     * @return Golpe minimo y maximo
+     */
+    public MinMax getGolpe() {
+        return golpe;
     }
 
     /**
