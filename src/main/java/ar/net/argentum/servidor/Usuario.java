@@ -142,6 +142,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected int HelmEqpSlot = 0;
     protected int ArmorEqpObjIndex = 0;
     protected int ArmorEqpSlot = 0;
+    protected int dinero = 0;
     // Contadores
     protected int contadorFrio = 0;
     protected int contadorEnergia = 0;
@@ -1356,5 +1357,22 @@ public class Usuario implements Atacable, GanaExperiencia {
      */
     public void setGenero(String genero) {
         this.genero = genero;
+    }
+    public void agregarDinero(int cantidad) {
+        this.setDinero(this.getDinero() + cantidad);
+    }
+
+    /**
+     * @return the dinero
+     */
+    public int getDinero() {
+        return dinero;
+    }
+
+    /**
+     * @param dinero the dinero to set
+     */
+    public void setDinero(int dinero) {
+        this.dinero = dinero;
     }
 }
