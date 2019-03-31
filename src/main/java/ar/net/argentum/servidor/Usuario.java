@@ -285,6 +285,56 @@ public class Usuario implements Atacable, GanaExperiencia {
         enviarMensaje("Has subido de nivel!");
         getConexion().enviarMundoReproducirSonido(Sonidos.SND_NIVEL);
         getConexion().enviarUsuarioExperiencia();
+
+        // Aumentar vida
+        int aumentoVida = Balance.calcularAumentoVida(getClase(), getAtributos().get("constitucion"));
+        if (aumentoVida > 0) {
+            getVida().aumentarMax(aumentoVida);
+            enviarMensaje("Has ganado {0} puntos de vida.", aumentoVida);
+        }
+
+        // Aumentamos el la energia
+        int aumentoStamina = Balance.calcularAumentoEnergia(getClase());
+        if (aumentoStamina > 0) {
+            getStamina().aumentarMax(aumentoStamina);
+            enviarMensaje("Has ganado {0} puntos de energia.", aumentoStamina);
+        }
+
+        // Aumentar mana
+        int aumentoMana = Balance.calcularAumentoMana(getClase(), getAtributos().get("inteligencia"));
+        if (aumentoMana > 0) {
+            getMana().aumentarMax(aumentoMana);
+            enviarMensaje("Has ganado {0} puntos de mana.", aumentoMana);
+        }
+
+        // Aumentamos el golpe
+        // @TODO: Golpe en nivel 36
+        int aumentarGolpe = Balance.calcularAumentoGolpe(getClase(), getNivel());
+        if (aumentarGolpe > 0) {
+            getGolpe().aumentarMax(aumentarGolpe);
+            getGolpe().aumentar(aumentarGolpe);
+            enviarMensaje("Tu golpe maximo aumento en {0} puntos.", aumentarGolpe);
+            enviarMensaje("Tu golpe minimo aumento en {0} puntos.", aumentarGolpe);
+        }
+
+        // @TODO: Aumentar skills libres
+        // Enviamos la informacion al cliente
+        getConexion().enviarUsuarioStats();
+
+        // Verificar si deja de ser NEWBIE
+        if (getNivel() > 12 && isNewbie()) {
+            // Dejamos de ser NEWBIE
+            setNewbie(false);
+            // Quitamos los objetos NEWBIE
+            for (Map.Entry<Integer, InventarioSlot> slot : inventario.entrySet()) {
+                if (slot.getValue().getObjeto().isNewbie()) {
+                    // Si el objeto es newbie, entonces lo eliminamos del inventario
+                    inventarioQuitarObjeto(slot.getKey());
+                }
+            }
+        }
+
+        guardar();
     }
 
     /**
