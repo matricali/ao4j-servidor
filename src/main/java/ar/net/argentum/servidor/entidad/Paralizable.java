@@ -16,14 +16,21 @@
  */
 package ar.net.argentum.servidor.entidad;
 
-import ar.net.argentum.servidor.Personaje;
-
 /**
- * Una entidad que puede ser objetivo de daño
+ * Representa una entidad que puede ser objetivo de paralizis
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public interface Atacable {
+public interface Paralizable {
 
-    public boolean recibeAtaque(Personaje atacante);
+    /**
+     * @return Verdadero si la entidad esta paralizada
+     */
+    boolean isParalizado();
+
+    /**
+     * @param paralizado the paralizado to set
+     */
+    void setParalizado(boolean paralizado);
+
 }

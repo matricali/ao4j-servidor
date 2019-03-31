@@ -16,7 +16,6 @@
  */
 package ar.net.argentum.servidor;
 
-import ar.net.argentum.servidor.mundo.Personaje;
 import ar.net.argentum.servidor.mundo.Terreno;
 import ar.net.argentum.servidor.mundo.Zona;
 import java.util.Collection;

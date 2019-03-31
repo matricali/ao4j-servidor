@@ -19,11 +19,11 @@ package ar.net.argentum.servidor.mundo;
 import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.Mapa;
 import ar.net.argentum.servidor.Objeto;
+import ar.net.argentum.servidor.Personaje;
 import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * Representa un mapa

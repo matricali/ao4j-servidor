@@ -16,14 +16,27 @@
  */
 package ar.net.argentum.servidor.entidad;
 
-import ar.net.argentum.servidor.Personaje;
+import ar.net.argentum.servidor.MinMax;
 
 /**
- * Una entidad que puede ser objetivo de daño
+ * Entidad que tiene vida y puede matar
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public interface Atacable {
+public interface Viviente {
 
-    public boolean recibeAtaque(Personaje atacante);
+    /**
+     * @return Vida de la entidad
+     */
+    public MinMax getVida();
+
+    /**
+     * @return Devuelve verdadero si la entidad esta muerta.
+     */
+    public boolean isMuerto();
+
+    /**
+     * Matar a la entidad
+     */
+    public void matar();
 }

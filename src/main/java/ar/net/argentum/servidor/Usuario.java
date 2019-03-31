@@ -18,10 +18,8 @@ package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.mundo.Orientacion;
-import ar.net.argentum.servidor.mundo.Personaje;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +35,7 @@ import org.apache.log4j.Logger;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Usuario implements Atacable, GanaExperiencia {
+public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
     private static final Logger LOGGER = Logger.getLogger(Usuario.class);
 
@@ -74,67 +72,44 @@ public class Usuario implements Atacable, GanaExperiencia {
         return new File("datos/personajes/" + nombre.toLowerCase() + ".json");
     }
 
-    @JsonProperty
-    protected String nombre;
-    @JsonProperty
+    protected final int userindex;
     protected String password;
-    @JsonProperty
     protected boolean conectado;
-    @JsonProperty
-    protected Coordenada coordenada;
-    @JsonProperty
+
+    // GanaExperiencia
     protected int nivel = 1;
-    @JsonProperty
     protected int experienciaActual = 0;
-    @JsonProperty
     protected int experienciaSiguienteNivel = 300;
-    @JsonProperty
-    protected Map<Integer, InventarioSlot> inventario;
+
+    protected int dinero = 0;
+
+    // PortaObjetos
+    protected HashMap<Integer, InventarioSlot> inventario;
     protected int inventarioCantSlots = 20;
-    @JsonProperty
-    protected int cuerpo;
-    @JsonProperty
-    protected int cabeza;
-    @JsonProperty
-    protected int arma;
-    @JsonProperty
-    protected int escudo;
-    @JsonProperty
-    protected int casco;
+
     // Estadisticas
-    @JsonProperty
-    protected MinMax vida = new MinMax();
-    @JsonProperty
     protected MinMax mana = new MinMax();
-    @JsonProperty
     protected MinMax stamina = new MinMax();
-    @JsonProperty
     protected MinMax hambre = new MinMax();
-    @JsonProperty
     protected MinMax sed = new MinMax();
-    @JsonProperty
     protected MinMax golpe = new MinMax();
-    @JsonProperty
-    protected Orientacion orientacion = Orientacion.SUR;
-    @JsonProperty
-    protected boolean paralizado = false;
-    @JsonProperty
+
     protected boolean navegando = false;
     protected boolean meditando = false;
     protected boolean descansando = false;
-    protected boolean muerto = false;
     protected boolean newbie = true;
-    protected boolean mimetizado = false;
     protected boolean desnudo = false;
-    protected final int charindex;
-    protected final int userindex;
+
     protected String raza;
     protected String genero;
     protected String clase;
+
+    // Habilidoso
     protected HashMap<String, Habilidad> skills = new HashMap<>();
+
     protected HashMap<String, Integer> atributos = new HashMap<>();
 
-    // Inventario
+    // Equipable
     protected int WeaponEqpObjIndex = 0;
     protected int WeaponEqpSlot = 0;
     protected int ShieldEqpObjIndex = 0;
@@ -143,58 +118,46 @@ public class Usuario implements Atacable, GanaExperiencia {
     protected int HelmEqpSlot = 0;
     protected int ArmorEqpObjIndex = 0;
     protected int ArmorEqpSlot = 0;
-    protected int dinero = 0;
+
     // Contadores
     protected int contadorFrio = 0;
     protected int contadorEnergia = 0;
 
     public Usuario() {
-        this.charindex = Servidor.crearCharindex();
         this.userindex = Servidor.crearUserindex();
     }
 
     /**
-     * @return the nombre
-     */
-    public String getNombre() {
-        return nombre;
-    }
-
-    /**
-     * @param nombre the nombre to set
-     */
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    /**
-     * @return the password
+     * @return Password del usuario
      */
     public String getPassword() {
         return password;
     }
 
     /**
-     * @param password the password to set
+     * @param password Password del usuario
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-     * @return the conectado
+     * @return Verdadero si el usuario esta conectado
      */
     public boolean isConectado() {
         return conectado;
     }
 
     /**
-     * @param conectado the conectado to set
+     * @param conectado Verdadero si el usuario esta conectado
      */
     public void setConectado(boolean conectado) {
         this.conectado = conectado;
     }
 
+    /**
+     * Guardar el estado actual del personaje
+     */
     public void guardar() {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -210,13 +173,7 @@ public class Usuario implements Atacable, GanaExperiencia {
 
     public void setInventarioSlot(int slot, final InventarioSlot inv) {
         inventario.put(slot, inv);
-    }
-
-    /**
-     * @return the coordenada
-     */
-    public Coordenada getCoordenada() {
-        return coordenada;
+        // @TODO: Mandar paquete aca
     }
 
     @Override
@@ -261,7 +218,7 @@ public class Usuario implements Atacable, GanaExperiencia {
      * Aumentar los puntos de experiencia del usuario, si esta conectado le
      * enviamos un mensaje de notificacion
      *
-     * @param exp
+     * @param exp Cantidad de experiencia
      */
     @Override
     public void ganarExperiencia(int exp) {
@@ -281,6 +238,9 @@ public class Usuario implements Atacable, GanaExperiencia {
         getConexion().enviarUsuarioExperiencia();
     }
 
+    /**
+     * Evento que se produce al subir de nivel
+     */
     protected void alSubirDeNivel() {
         enviarMensaje("Has subido de nivel!");
         getConexion().enviarMundoReproducirSonido(Sonidos.SND_NIVEL);
@@ -338,60 +298,28 @@ public class Usuario implements Atacable, GanaExperiencia {
     }
 
     /**
-     * @return the cuerpo
-     */
-    public int getCuerpo() {
-        return cuerpo;
-    }
-
-    /**
-     * @param cuerpo the cuerpo to set
-     */
-    public void setCuerpo(int cuerpo) {
-        this.cuerpo = cuerpo;
-    }
-
-    /**
-     * @return the cabeza
-     */
-    public int getCabeza() {
-        return cabeza;
-    }
-
-    /**
-     * @param cabeza the cabeza to set
-     */
-    public void setCabeza(int cabeza) {
-        this.cabeza = cabeza;
-    }
-
-    public MinMax getVida() {
-        return vida;
-    }
-
-    /**
-     * @return the mana
+     * @return Mana del usuario
      */
     public MinMax getMana() {
         return mana;
     }
 
     /**
-     * @return the stamina
+     * @return Energia del usuario
      */
     public MinMax getStamina() {
         return stamina;
     }
 
     /**
-     * @return the hambre
+     * @return Hambre del usuario
      */
     public MinMax getHambre() {
         return hambre;
     }
 
     /**
-     * @return the sed
+     * @return Sed del usuario
      */
     public MinMax getSed() {
         return sed;
@@ -405,63 +333,21 @@ public class Usuario implements Atacable, GanaExperiencia {
     }
 
     /**
-     * @return the orientacion
-     */
-    public Orientacion getOrientacion() {
-        return orientacion;
-    }
-
-    /**
-     * @param orientacion the orientacion to set
-     */
-    public void setOrientacion(Orientacion orientacion) {
-        this.orientacion = orientacion;
-    }
-
-    /**
-     * @return the paralizado
-     */
-    public boolean isParalizado() {
-        return paralizado;
-    }
-
-    /**
-     * @param paralizado the paralizado to set
-     */
-    public void setParalizado(boolean paralizado) {
-        this.paralizado = paralizado;
-    }
-
-    /**
-     * @return the navegando
+     * @return Verdadero si el usuario esta navegando
      */
     public boolean isNavegando() {
         return navegando;
     }
 
     /**
-     * @param navegando the navegando to set
+     * @param navegando Verdadero si el usuario esta navegando
      */
     public void setNavegando(boolean navegando) {
         this.navegando = navegando;
     }
 
     /**
-     * @return Devuelve verdadero si el personaje esta muerto.
-     */
-    public boolean isMuerto() {
-        return muerto;
-    }
-
-    /**
-     * @param muerto
-     */
-    public void setMuerto(boolean muerto) {
-        this.muerto = muerto;
-    }
-
-    /**
-     * @return the meditando
+     * @return Verdadero si el usuario esta meditando
      */
     @JsonIgnore
     public boolean isMeditando() {
@@ -471,7 +357,7 @@ public class Usuario implements Atacable, GanaExperiencia {
     /**
      * Activa o desactiva el estado de meditacion
      *
-     * @param meditando
+     * @param meditando Verdadero si el usuario esta meditando
      */
     @JsonIgnore
     public void setMeditando(boolean meditando) {
@@ -517,14 +403,7 @@ public class Usuario implements Atacable, GanaExperiencia {
         }
     }
 
-    /**
-     * Mover el usuario en una direccion dada y enviar el mensaje al cliente de
-     * todos los usuarios en el area.
-     *
-     * @see MoveUserChar
-     *
-     * @param orientacion
-     */
+    @Override
     public boolean mover(Orientacion orientacion) {
 
         // @TODO: Cancelar /salir
@@ -543,79 +422,7 @@ public class Usuario implements Atacable, GanaExperiencia {
         }
         // @TODO: Solo el ladron y el bandido pueden caminar ocultos
 
-        Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
-        if (!Logica.isPosicionValida(coordenada.getMapa(), nuevaPosicion.getX(), nuevaPosicion.getY(), false, true)) {
-            enviarMensaje("Posicion invalida.");
-            return false;
-        }
-
-        // Acualizamos la posicion y orientacion del usuario
-        this.coordenada.setPosicion(nuevaPosicion);
-        setOrientacion(orientacion);
-
-        // Le avisamos a los otros clientes que el usuario se movio
-        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
-            conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
-        });
-
-        return true;
-    }
-
-    /**
-     * @return the charindex
-     */
-    @JsonIgnore
-    public int getCharindex() {
-        return charindex;
-    }
-
-    /**
-     * @return the arma
-     */
-    public int getArma() {
-        return arma;
-    }
-
-    /**
-     * @param arma the arma to set
-     */
-    public void setArma(int arma) {
-        this.arma = arma;
-    }
-
-    /**
-     * @return the escudo
-     */
-    public int getEscudo() {
-        return escudo;
-    }
-
-    /**
-     * @param escudo the escudo to set
-     */
-    public void setEscudo(int escudo) {
-        this.escudo = escudo;
-    }
-
-    /**
-     * @return the casco
-     */
-    public int getCasco() {
-        return casco;
-    }
-
-    /**
-     * @param casco the casco to set
-     */
-    public void setCasco(int casco) {
-        this.casco = casco;
-    }
-
-    /**
-     * @param coordenada the coordenada to set
-     */
-    public void setCoordenada(Coordenada coordenada) {
-        this.coordenada = coordenada;
+        return super.mover(orientacion);
     }
 
     /**
@@ -693,11 +500,6 @@ public class Usuario implements Atacable, GanaExperiencia {
 //            conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
 //        });
         return true;
-    }
-
-    @Override
-    public boolean recibeAtaque(Personaje atacante) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -1042,6 +844,14 @@ public class Usuario implements Atacable, GanaExperiencia {
         this.newbie = newbie;
     }
 
+    public void setInventario(HashMap<Integer, InventarioSlot> inventario) {
+        this.inventario = inventario;
+    }
+
+    public HashMap<Integer, InventarioSlot> getInventario() {
+        return inventario;
+    }
+
     /**
      * Intentar equipar el objeto que se encuentra en un hueco especifico del
      * inventario
@@ -1200,6 +1010,31 @@ public class Usuario implements Atacable, GanaExperiencia {
      * Utilizar un objeto del inventario
      *
      * @param invslot ID del hueco
+     */
+    public boolean inventarioUsarItem(int invslot) {
+        InventarioSlot slot = getInventarioSlot(invslot);
+
+        if (slot == null) {
+            return false;
+        }
+
+        ObjetoMetadata obj = slot.getObjeto();
+
+        if (obj == null) {
+            return false;
+        }
+
+        switch (obj.getTipo()) {
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Utilizar un objeto del inventario
+     *
+     * @param invslot ID del hueco
      * @param cantidad
      * @return Verdadero si se ha logrado arrojar el item al suelo
      */
@@ -1281,7 +1116,7 @@ public class Usuario implements Atacable, GanaExperiencia {
             enviarMensaje("No puedes cargar mas objetos.");
             return false;
         }
-        
+
         mapa.quitarObjeto(pos);
         return true;
     }
@@ -1354,6 +1189,21 @@ public class Usuario implements Atacable, GanaExperiencia {
                     getCasco());
         }
     }
+
+    @Override
+    public void matar() {
+        vida.setMin(0);
+        getConexion().enviarUsuarioStats();
+        // Evento
+        alMorir();
+    }
+
+    public void alMorir() {
+        enviarMensaje("Has muerto!");
+        // @TODO: Dar cuerpo de fantasmita
+        // @TODO: Arrojar items al suelo
+    }
+
     /**
      * @return Mapa con atributos del usuario
      */
@@ -1424,10 +1274,6 @@ public class Usuario implements Atacable, GanaExperiencia {
         this.genero = genero;
     }
 
-    protected Mapa getMapaActual() {
-        return Servidor.getServidor().getMapa(getCoordenada().getMapa());
-    }
-
     public void agregarDinero(int cantidad) {
         this.setDinero(this.getDinero() + cantidad);
     }
@@ -1444,5 +1290,10 @@ public class Usuario implements Atacable, GanaExperiencia {
      */
     public void setDinero(int dinero) {
         this.dinero = dinero;
+    }
+
+    @Override
+    public boolean recibeAtaque(Personaje atacante) {
+        return false;
     }
 }
