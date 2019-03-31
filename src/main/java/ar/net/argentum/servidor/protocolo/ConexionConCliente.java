@@ -18,6 +18,7 @@ package ar.net.argentum.servidor.protocolo;
 
 import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.InventarioSlot;
+import ar.net.argentum.servidor.Objeto;
 import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
@@ -60,6 +61,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_USUARIO_EXPERIENCIA = 0x19;
     protected static final byte PQT_USUARIO_EQUIPAR_SLOT = 0x20;
     protected static final byte PQT_MUNDO_REPRODUCIR_SONIDO = 0x21;
+    protected static final byte PQT_MUNDO_OBJETO = 0x22;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -645,4 +647,32 @@ public class ConexionConCliente extends Thread {
         }
         return false;
     }
+    public void enviarMundoObjeto(int x, int y, int objIndex, int grhIndex,
+            int cantidad, String nombre) {
+
+        LOGGER.debug("PQT_MUNDO_OBJETO>>" + x + ">>" + y + ">>" + objIndex + ">>"
+                + grhIndex + ">>" + cantidad + ">>" + nombre);
+        try {
+            dos.writeByte(PQT_MUNDO_OBJETO);
+            dos.writeInt(x);
+            dos.writeInt(y);
+            dos.writeInt(objIndex);
+            dos.writeInt(grhIndex);
+            dos.writeInt(cantidad);
+            dos.writeUTF(nombre);
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+    }
+
+    public void enviarMundoObjeto(int x, int y, Objeto obj) {
+        if (obj == null) {
+            // Quitamos el objeto
+            enviarMundoObjeto(x, y, 0, 0, 0, "");
+            return;
+        }
+        enviarMundoObjeto(x, y, obj.getId(), obj.getMetadata().getGrhIndex(),
+                obj.getCantidad(), obj.getMetadata().getNombre());
+    }
+
 }
