@@ -1358,6 +1358,11 @@ public class Usuario implements Atacable, GanaExperiencia {
     public void setGenero(String genero) {
         this.genero = genero;
     }
+
+    protected Mapa getMapaActual() {
+        return Servidor.getServidor().getMapa(getCoordenada().getMapa());
+    }
+
     public void agregarDinero(int cantidad) {
         this.setDinero(this.getDinero() + cantidad);
     }
