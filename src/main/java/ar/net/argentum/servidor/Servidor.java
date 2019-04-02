@@ -32,7 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -81,8 +80,8 @@ public class Servidor {
     private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
     private final LinkedList<ConexionConCliente> conexiones;
-    private final Map<Integer, Mapa> mapas;
-    private final ConcurrentMap<Integer, Personaje> personajes;
+    private final ConcurrentHashMap<Integer, Mapa> mapas;
+    private final ConcurrentHashMap<Integer, Personaje> personajes;
     private final int intervaloEventos = 250;
     private long timerEventos = getTimer();
     private ServerSocket serverSocket;
@@ -318,6 +317,10 @@ public class Servidor {
      */
     public Personaje getPersonaje(int charindex) {
         return personajes.get(charindex);
+    }
+    
+    public void agregarPersonaje(Personaje p) {
+        personajes.put(p.getCharindex(), p);
     }
 
     /**

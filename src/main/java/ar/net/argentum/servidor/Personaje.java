@@ -53,6 +53,7 @@ public abstract class Personaje implements Viviente, Paralizable {
 
     public Personaje() {
         this.charindex = Servidor.crearCharindex();
+        Servidor.getServidor().agregarPersonaje(this);
     }
 
     /**
@@ -223,6 +224,9 @@ public abstract class Personaje implements Viviente, Paralizable {
         }
 
         // Acualizamos la posicion y orientacion del personaje
+        getMapaActual().getBaldosa(getCoordenada().getPosicion()).setCharindex(0);
+        getMapaActual().getBaldosa(nuevaPosicion).setCharindex(getCharindex());
+
         this.coordenada.setPosicion(nuevaPosicion);
         setOrientacion(orientacion);
 

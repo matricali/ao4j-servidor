@@ -25,16 +25,14 @@ public interface Baldosa {
     public void setGrafico(int capa, int grhIndex);
 
     /**
-     * 
-     * @param objeto 
+     *
+     * @param objeto
      */
     public void setObjeto(Objeto objeto);
 
     public void setCharindex(int charindex);
 
     public void setBloqueado(boolean bloqueado);
-    
-    public void setBloqueado(byte bloq);
 
     public int getGrafico(int capa);
 
@@ -42,7 +40,7 @@ public interface Baldosa {
      * @return Objeto arrojado en la baldosa
      */
     public Objeto getObjeto();
-    
+
     /**
      * @return Verdadero si hay un objeto en la baldosa
      */
@@ -59,4 +57,19 @@ public interface Baldosa {
     public boolean isAgua();
 
     public boolean isTierra();
+
+    /**
+     * @return Verdadero si hay un personaje en la baldosa
+     */
+    public boolean hayAlguien();
+
+    /**
+     * @return Instancia del Personaje parado en la baldosa
+     */
+    public Personaje getPersonaje();
+
+    /**
+     * @return Instancia del Mapa al cual pertenece la baldosa
+     */
+    public Mapa getMapa();
 }

@@ -17,7 +17,10 @@
 package ar.net.argentum.servidor.mundo;
 
 import ar.net.argentum.servidor.Baldosa;
+import ar.net.argentum.servidor.Mapa;
 import ar.net.argentum.servidor.Objeto;
+import ar.net.argentum.servidor.Personaje;
+import ar.net.argentum.servidor.Servidor;
 
 /**
  *
@@ -25,6 +28,10 @@ import ar.net.argentum.servidor.Objeto;
  */
 public class BaldosaImpl implements Baldosa {
 
+    /**
+     * Mapa al cual pertenece esta baldosa
+     */
+    protected final Mapa mapa;
     /**
      * Los graficos en sus capas
      */
@@ -46,6 +53,13 @@ public class BaldosaImpl implements Baldosa {
      * Atributos especiales del tile
      */
     protected short trigger;
+
+    /**
+     * @param mapa Instancia del mapa al cual pertenece la baldosa
+     */
+    public BaldosaImpl(Mapa mapa) {
+        this.mapa = mapa;
+    }
 
     /**
      * @param capa
@@ -113,11 +127,6 @@ public class BaldosaImpl implements Baldosa {
         this.bloqueado = bloqueado;
     }
 
-    @Override
-    public void setBloqueado(byte bloq) {
-        this.bloqueado = (byte) 1 == bloq;
-    }
-
     /**
      * @return the trigger
      */
@@ -149,5 +158,20 @@ public class BaldosaImpl implements Baldosa {
     @Override
     public boolean hayObjeto() {
         return objeto != null;
+    }
+
+    @Override
+    public boolean hayAlguien() {
+        return getCharindex() > 0;
+    }
+
+    @Override
+    public synchronized Personaje getPersonaje() {
+        return Servidor.getServidor().getPersonaje(getCharindex());
+    }
+
+    @Override
+    public Mapa getMapa() {
+        return mapa;
     }
 }

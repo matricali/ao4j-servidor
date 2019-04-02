@@ -72,48 +72,46 @@ public class MapaAntiguo extends MapaAbstracto {
             byte[] cabecera = new byte[263];
             f.read(cabecera);
 
-            f.readShort();
-            f.readShort();
-            f.readShort();
-            f.readShort();
+            f.readDouble();
 
             byte flags;
             byte bloq;
 
-            for (int y = MAPA_MIN_Y; y < MAPA_MAX_Y; y++) {
-                for (int x = MAPA_MIN_X; x < MAPA_MAX_Y; x++) {
+            for (int y = MAPA_MIN_Y; y <= MAPA_MAX_Y; ++y) {
+                for (int x = MAPA_MIN_X; x <= MAPA_MAX_X; ++x) {
                     try {
-                        Baldosa md = new BaldosaImpl();
+                        Baldosa md = new BaldosaImpl(this);
 
                         flags = UtilLegacy.bigToLittle(f.readByte());
 
-                        md.setBloqueado((byte) (flags & 1));
+                        // Baldosa bloqueada?
+                        md.setBloqueado((flags & 1) == 1);
 
                         // Grafico de la capa 1
                         md.setGrafico(1, UtilLegacy.bigToLittle(f.readShort()));
 
-                        // Graficoo de la capa 2
-                        if ((byte) (flags & 2) != 0) {
+                        // Grafico de la capa 2
+                        if ((flags & 2) == 2) {
                             md.setGrafico(2, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(2, 0);
                         }
 
                         // Grafico de la capa 3
-                        if ((byte) (flags & 4) != 0) {
+                        if ((flags & 4) == 4) {
                             md.setGrafico(3, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(3, 0);
                         }
 
                         // Grafico de la capa 4
-                        if ((byte) (flags & 8) != 0) {
+                        if ((flags & 8) == 8) {
                             md.setGrafico(4, UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setGrafico(4, 0);
                         }
 
-                        if ((byte) (flags & 16) != 0) {
+                        if ((flags & 16) == 16) {
                             md.setTrigger(UtilLegacy.bigToLittle(f.readShort()));
                         } else {
                             md.setTrigger((short) 0);
@@ -182,21 +180,21 @@ public class MapaAntiguo extends MapaAbstracto {
             f.readShort();
 
             byte flags;
-            for (int y = MAPA_MIN_Y; y < MAPA_MAX_X; ++y) {
-                for (int x = MAPA_MIN_X; x < MAPA_MAX_X; ++x) {
+            for (int y = MAPA_MIN_Y; y <= MAPA_MAX_Y; ++y) {
+                for (int x = MAPA_MIN_X; x <= MAPA_MAX_X; ++x) {
                     try {
                         Baldosa md = baldosas[x][y];
 
                         flags = UtilLegacy.bigToLittle(f.readByte());
 
-                        if ((flags & 1) != 0) {
+                        if ((flags & 1) == 1) {
                             // Teletransporte
                             int tileExitMap = (int) UtilLegacy.bigToLittle(f.readShort());
                             int tileExitX = (int) UtilLegacy.bigToLittle(f.readShort());
                             int tileExitY = (int) UtilLegacy.bigToLittle(f.readShort());
                         }
 
-                        if ((flags & 2) != 0) {
+                        if ((flags & 2) == 2) {
                             // Hay un NPC ?
                             short npcIndex = UtilLegacy.bigToLittle(f.readShort());
                             if (npcIndex > 0) {
@@ -204,7 +202,7 @@ public class MapaAntiguo extends MapaAbstracto {
                             }
                         }
 
-                        if ((flags & 4) != 0) {
+                        if ((flags & 4) == 4) {
                             // Hay un objeto en el suelo
                             short objIndex = UtilLegacy.bigToLittle(f.readShort());
                             short objCantidad = UtilLegacy.bigToLittle(f.readShort());
@@ -226,8 +224,8 @@ public class MapaAntiguo extends MapaAbstracto {
     public Map<Posicion, Objeto> getObjetos() {
         Map<Posicion, Objeto> objetos = new HashMap<>();
 
-        for (int y = MAPA_MIN_Y; y < MAPA_MAX_X; ++y) {
-            for (int x = MAPA_MIN_X; x < MAPA_MAX_X; ++x) {
+        for (int y = MAPA_MIN_Y; y <= MAPA_MAX_Y; ++y) {
+            for (int x = MAPA_MIN_X; x <= MAPA_MAX_X; ++x) {
                 Baldosa b = getBaldosa(x, y);
                 if (b == null) {
                     continue;
