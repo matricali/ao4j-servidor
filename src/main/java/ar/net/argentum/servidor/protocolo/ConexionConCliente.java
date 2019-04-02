@@ -18,8 +18,10 @@ package ar.net.argentum.servidor.protocolo;
 
 import ar.net.argentum.servidor.Baldosa;
 import ar.net.argentum.servidor.InventarioSlot;
+import ar.net.argentum.servidor.Logica;
 import ar.net.argentum.servidor.Objeto;
 import ar.net.argentum.servidor.ObjetoMetadata;
+import ar.net.argentum.servidor.Personaje;
 import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
@@ -637,15 +639,42 @@ public class ConexionConCliente extends Thread {
             // Comenzamos a buscar que hay en la baldosa indicada
             try {
                 Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
-                if (b.getCharindex() > 0) {
-                    enviarMensaje("Ves a alguien.");
-                    return true;
+                boolean encontramos = false;
+                if (b.hayObjeto()) {
+                    encontramos = true;
+                    // Hay un objeto en la posicion indicada
+                    Objeto obj = b.getObjeto();
+                    switch (obj.getMetadata().getTipo()) {
+                        case PUERTA:
+                        case FORO:
+                        case CARTEL:
+                        case ARBOL:
+                        case YACIMIENTO:
+                        case TELETRANSPORTE:
+                            enviarMensaje(obj.getMetadata().getNombre());
+                            break;
+                        default:
+                            enviarMensaje("{0} - {1}", obj.getMetadata().getNombre(), obj.getCantidad());
+                    }
                 }
+
+                if (b.getCharindex() > 0) {
+                    encontramos = true;
+                    Personaje p = b.getPersonaje();
+                    if (p != null) {
+                        // @TODO: Verificar si es usuario o NPC
+                        enviarMensaje("Ves a {0}", p.getNombre());
+                        return true;
+                    }
+                }
+
+                if (!encontramos) {
+                    enviarMensaje("No hay nada interesante.");
+                }
+                return true;
             } catch (Exception ex) {
                 LOGGER.fatal(null, ex);
             }
-            enviarMensaje("No ves nada.");
-            return true;
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
         }
