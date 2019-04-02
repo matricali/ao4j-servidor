@@ -622,7 +622,19 @@ public class ConexionConCliente extends Thread {
             int x = dis.readInt();
             int y = dis.readInt();
             LOGGER.debug("PQT_CLICK<<" + x + "<<" + y);
-            // @TODO: Validar coordenadas
+
+            if (Math.abs(getUsuario().getCoordenada().getPosicion().getX() - x) > Logica.RANGO_VISION_X
+                    || Math.abs(getUsuario().getCoordenada().getPosicion().getY() - y) > Logica.RANGO_VISION_Y) {
+                // Esta fuera de su rango de vision. Cheater?
+                return false;
+            }
+
+            if (!Logica.isDentroDelLimite(getUsuario().getCoordenada().getMapa(), x, y)) {
+                // No es una posicion valida
+                return false;
+            }
+
+            // Comenzamos a buscar que hay en la baldosa indicada
             try {
                 Baldosa b = Servidor.getServidor().getMapa(usuario.getCoordenada().getMapa()).getBaldosa(x, y);
                 if (b.getCharindex() > 0) {
@@ -643,7 +655,7 @@ public class ConexionConCliente extends Thread {
     public boolean manejarUsuarioGolpea() {
         LOGGER.debug("PQT_USUARIO_GOLPEA<<");
         // @TODO: Prevenir speed hack
-        usuario.golpea();
+        usuario.doGolpear();
         return true;
     }
 

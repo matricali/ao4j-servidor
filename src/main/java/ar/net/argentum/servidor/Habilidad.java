@@ -81,7 +81,8 @@ public interface Habilidad {
     /**
      * Intentar realizar la habilidad
      *
+     * @param habilidoso Habilidoso que realiza la habilidad
      * @return Devuelve verdadero si logro realizar la habilidad
      */
-    public boolean realizar();
+    public boolean realizar(Habilidoso habilidoso);
 }

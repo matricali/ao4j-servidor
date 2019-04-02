@@ -24,11 +24,11 @@ import ar.net.argentum.servidor.Logica;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Meditar extends HabilidadBase {
+public class TacticasDeCombate extends HabilidadBase {
 
     @Override
     public String getNombre() {
-        return "Meditar";
+        return "Tacticas de combate";
     }
 
     @Override

@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.entidad.Atacable;
+import ar.net.argentum.servidor.entidad.Atacante;
 import ar.net.argentum.servidor.mundo.Orientacion;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
@@ -35,7 +37,7 @@ import org.apache.log4j.Logger;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Usuario extends Personaje implements Atacable, GanaExperiencia {
+public class Usuario extends Personaje implements Atacante, Atacable, GanaExperiencia, Habilidoso, RecibeChat {
 
     private static final Logger LOGGER = Logger.getLogger(Usuario.class);
 
@@ -84,7 +86,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
     protected int dinero = 0;
 
     // PortaObjetos
-    protected HashMap<Integer, InventarioSlot> inventario;
+    protected ConcurrentHashMap<Integer, InventarioSlot> inventario;
     protected int inventarioCantSlots = 20;
 
     // Estadisticas
@@ -103,6 +105,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
     protected String raza;
     protected String genero;
     protected String clase;
+    protected int cabezaOriginal = 1;
 
     // Habilidoso
     protected HashMap<String, Habilidad> skills = new HashMap<>();
@@ -122,6 +125,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
     // Contadores
     protected int contadorFrio = 0;
     protected int contadorEnergia = 0;
+    protected int contadorSanar = 0;
 
     public Usuario() {
         this.userindex = Servidor.crearUserindex();
@@ -227,7 +231,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
             return;
         }
         this.experienciaActual += exp;
-        enviarMensaje("Has ganado {0} puntos de experiencia!", exp);
+        enviarMensaje("§3Has ganado {0} puntos de experiencia!", exp);
         while (experienciaActual >= experienciaSiguienteNivel) {
             // Alcanzamos un nuevo nivel
             ++this.nivel;
@@ -242,7 +246,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * Evento que se produce al subir de nivel
      */
     protected void alSubirDeNivel() {
-        enviarMensaje("Has subido de nivel!");
+        enviarMensaje("§aHas subido de nivel!");
         getConexion().enviarMundoReproducirSonido(Sonidos.SND_NIVEL);
         getConexion().enviarUsuarioExperiencia();
 
@@ -372,7 +376,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
                 conexion.enviarPersonajeAnimacion(getCharindex(), efecto, -1);
             });
         } else {
-            enviarMensaje("Dejas de meditar.");
+            enviarMensaje("§7Dejas de meditar.");
             // Le avisamos al cliente que pare la animacin
             getConexion().enviarPersonajeAnimacion(1, 0, 0);
             // Le avisamos a los otros clientes que eliminen la animacion que le corresponde a este usuario
@@ -430,6 +434,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      *
      * @param mensaje
      */
+    @Override
     public void enviarMensaje(String mensaje) {
         getConexion().enviarMensaje(mensaje);
     }
@@ -440,6 +445,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * @param mensaje
      * @param args
      */
+    @Override
     public void enviarMensaje(String mensaje, Object... args) {
         enviarMensaje(MessageFormat.format(mensaje, args));
     }
@@ -449,7 +455,11 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      *
      * @return
      */
-    public boolean golpea() {
+    public boolean doGolpear() {
+        if (isMuerto()) {
+            enviarMensaje("§7Estas muerto!!");
+            return false;
+        }
         // @TODO: Verificar intervalos
         // @TODO: Cancelar /salir
         if (isMeditando()) {
@@ -464,17 +474,12 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
         // Verificamos que tengamos energia para luchar
         if (getStamina().getMin() < Balance.COMBATE_ENERGIA_NECESARIA) {
-            if ("MUJER".equals(getGenero())) {
-                enviarMensaje("Estas muy cansada para luchar.");
-                return false;
-            }
-            enviarMensaje("Estas muy cansado para luchar.");
+            enviarMensaje("§7Estás muy {0} para luchar.", "MUJER".equals(getGenero()) ? "cansada" : "cansado");
             return false;
         }
 
         Posicion nuevaPosicion = Logica.calcularPaso(getCoordenada().getPosicion(), orientacion);
-        Mapa m = Servidor.getServidor().getMapa(getCoordenada().getMapa());
-        Baldosa b = m.getBaldosa(nuevaPosicion);
+        Baldosa b = getMapaActual().getBaldosa(nuevaPosicion);
 
         if (b.getCharindex() == 0) {
             // Arrojamos un golpe al aire, enviamos el sonido y disminuimos la energia
@@ -485,21 +490,152 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         }
 
         if (b.getCharindex() == getCharindex()) {
-            enviarMensaje("No podes atacarte a vos mismo.");
+            enviarMensaje("No podes atacarte a tí mismo!");
             return false;
         }
 
-        Personaje victima = Servidor.getServidor().getPersonaje(charindex);
+        Personaje objetivo = b.getPersonaje();
 
-        enviarMensaje("Le pegaste a " + victima.getNombre());
+        if (objetivo == null) {
+            return false;
+        }
+
+        if (!Logica.enRangoDeVision(getCoordenada().getPosicion(), objetivo.getCoordenada().getPosicion())) {
+            enviarMensaje("§7Estas demasiado lejos para atacar.");
+            return false;
+        }
+
+        if (!(objetivo instanceof Atacable)) {
+            enviarMensaje("§4No puedes atacar a {0}.", objetivo.getNombre());
+            return false;
+        }
+
+        if (objetivo.isMuerto()) {
+            enviarMensaje("§7No puedes atacar a un espiritu.");
+            return false;
+        }
+
+        golpea((Atacable) objetivo);
+        return true;
+    }
+
+    public ResultadoGolpe golpea(Atacable objetivo) {
+
+        Atacable victima = (Atacable) objetivo;
+        ResultadoGolpe resultado = new ResultadoGolpe();
+
+        if (!realizarHabilidad("CombateConArmas")) {
+            enviarMensaje("§c¡¡¡Has fallado el golpe!!!");
+            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
+            getConexion().enviarUsuarioStats();
+
+            resultado.setExito(false);
+            resultado.setCausa(ResultadoGolpe.Causa.ATACANTE_FALLO);
+
+            victima.recibeAtaque(this, resultado);
+            return resultado;
+        }
+
+        // Gastamos energia al dar el golpe
         getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
         getConexion().enviarUsuarioStats();
 
-//        // Le avisamos a los otros clientes que el usuario se movio
-//        Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
-//            conexion.enviarPersonajeCaminar(charindex, orientacion.valor());
-//        });
-        return true;
+        // Realizamos el ataque sobre la victima
+        resultado = victima.recibeAtaque(this, resultado);
+
+        if (!resultado.isExito()) {
+            switch (resultado.getCausa()) {
+                case VICTIMA_RECHAZO_CON_ESCUDO:
+                    enviarMensaje("§c¡¡¡{0} rechazó el ataque con su escudo!!!", ((Personaje) objetivo).getNombre());
+                    break;
+                case VICTIMA_ESQUIVO_ATAQUE:
+                    enviarMensaje("§c¡¡¡Has fallado el golpe!!!");
+                    break;
+            }
+            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+
+            return resultado;
+        }
+
+        // Si llegamos hasta acá es porque conectamos el golpe
+        int daño = Logica.enteroAleatorio(getGolpe().getMin(), getGolpe().getMax());
+
+        getConexion().enviarMundoReproducirSonido(Sonidos.SND_IMPACTO);
+        getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
+        getConexion().enviarUsuarioStats();
+
+        // Le provocamos daño a la victima
+        ParteCuerpo lugar = ParteCuerpo.alAzar();
+        int dañoFinal = victima.recibeDañoFisico(this, lugar, daño);
+        enviarMensaje("§4¡¡Le has pegado a {0} en {1} por {2}!!", ((Personaje) objetivo).getNombre(), lugar.getDescripcion(), dañoFinal);
+
+        return resultado;
+    }
+
+    @Override
+    public ResultadoGolpe recibeAtaque(Atacante atacante, ResultadoGolpe resultado) {
+        if (!resultado.isExito() && resultado.getCausa() == ResultadoGolpe.Causa.ATACANTE_FALLO) {
+            enviarMensaje("§c¡¡{0} te atacó y falló!!", atacante.getNombre());
+            return resultado;
+        }
+
+        if (getEscudo() != 0) {
+            // Intento rechazar con escudo
+            if (realizarHabilidad("DefensaConEscudos")) {
+
+                enviarMensaje("§c¡¡¡Has rechazado el ataque de {0} con el escudo!!!", atacante.getNombre());
+                getConexion().enviarMundoReproducirSonido(Sonidos.SND_ESCUDO);
+
+                return new ResultadoGolpe(false, ResultadoGolpe.Causa.VICTIMA_RECHAZO_CON_ESCUDO);
+            }
+        }
+
+        // Intento esquivar el ataque
+        if (realizarHabilidad("TacticasDeCombate")) {
+            enviarMensaje("§c¡¡{0} te atacó y falló!!", atacante.getNombre());
+            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            return new ResultadoGolpe(false, ResultadoGolpe.Causa.VICTIMA_ESQUIVO_ATAQUE);
+        }
+
+        // No logramos evitar el ataque
+        resultado.setCausa(ResultadoGolpe.Causa.DESCONOCIDA);
+        resultado.setExito(true);
+        return resultado;
+    }
+
+    @Override
+    public int recibeDañoFisico(Atacante atacante, ParteCuerpo lugar, int daño) {
+        // @TODO: Aplicar defensa
+        enviarMensaje("§4¡¡{0} te ha pegado en {1} por {2}!!", atacante.getNombre(), lugar.getDescripcion(), daño);
+
+        boolean muere = getVida().disminuir(daño);
+
+        // Actualizamos la barra de vida
+        getConexion().enviarUsuarioStats();
+
+        if (muere) {
+            // Se murio, disparamos el evento
+            alMorir();
+            // Disparamos el evento indicandole al atacante que nos ha matado
+            atacante.alMatar(this);
+        }
+
+        return daño;
+    }
+
+    @Override
+    public void alMatar(Atacable victima) {
+        enviarMensaje("§4Has matado a {0}", victima.getNombre());
+
+        if (victima instanceof Usuario) {
+            // @TODO: Incrementar frags
+            ganarExperiencia(((Usuario) victima).getNivel() * 2);
+            return;
+        }
+
+        // @TODO: Procesar matar NPC, ganar experiencia, etc.
+        ganarExperiencia(100);
     }
 
     /**
@@ -530,7 +666,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
             getCoordenada().getPosicion().setY(50);
         }
 
-        Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+        Mapa mapa = getMapaActual();
         Baldosa baldosa = mapa.getBaldosa(getCoordenada().getPosicion());
 
         if (baldosa.getCharindex() != 0) {
@@ -544,7 +680,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         setConectado(true);
         guardar();
 
-        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} ha ingresado al juego.", nombre);
+        Servidor.getServidor().enviarMensajeDeDifusion("§7{0} ha ingresado al juego.", nombre);
 
         getConexion().enviarUsuarioNombre();
         getConexion().enviarUsuarioCambiaMapa();
@@ -608,8 +744,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         setConectado(false);
         guardar();
 
-        Servidor.getServidor().enviarMensajeDeDifusion("\u00a78{0} se ha desconectado del juego.", getNombre());
-
+        Servidor.getServidor().enviarMensajeDeDifusion("§7{0} se ha desconectado del juego.", getNombre());
         Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
 
         // Eliminamos el personaje del mundo
@@ -642,11 +777,11 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         }
 
         if (isMuerto()) {
-            enviarMensaje("Estas muerto!! Solo puedes meditar cuando estas vivo.");
+            enviarMensaje("§7Estas muerto!! Solo puedes meditar cuando estas vivo.");
             return;
         }
         if (mana.max == 0) {
-            enviarMensaje("Solo las clases magicas conocen el arte de la meditacion.");
+            enviarMensaje("§7Solo las clases magicas conocen el arte de la meditacion.");
             return;
         }
         // Enviamos el efecto
@@ -661,6 +796,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
             return;
         }
 
+        doRecuperarVida();
         doFrio();
         doRecuperarEnergia();
 
@@ -723,21 +859,50 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
     protected void doMeditar() {
         if (mana.estaCompleto()) {
-            enviarMensaje("Has terminado de meditar.");
+            enviarMensaje("§7Has terminado de meditar.");
             setMeditando(false);
         }
 
         if (realizarHabilidad("meditar")) {
             int cantidad = Logica.porcentaje(mana.getMax(), Balance.PORCENTAJE_RECUPERO_MANA);
-            enviarMensaje("Has recuperado {0} puntos de mana!", cantidad);
+            enviarMensaje("§bHas recuperado {0} puntos de mana!", cantidad);
             mana.aumentar(cantidad);
             getConexion().enviarUsuarioStats();
         }
     }
 
     /**
+     * Procesar contador de recupero de vida
+     */
+    protected void doRecuperarVida() {
+        if (getStamina().getMin() == 0) {
+            // Si el personaje no tiene energia, entonces no recupera vida
+            return;
+        }
+        if (contadorSanar < 25) { // 50
+            ++contadorSanar;
+            return;
+        }
+        alRecuperarVida();
+    }
+
+    /**
+     * Evento que se produce cuando el usuario recupera vida
+     */
+    protected void alRecuperarVida() {
+        contadorSanar = 0;
+        if (!getVida().estaCompleto()) {
+            int aumentoSalud = Logica.porcentaje(getVida().getMax(), 5);
+            getVida().aumentar(aumentoSalud);
+            getConexion().enviarUsuarioStats();
+            enviarMensaje("§a¡Has sanado!");
+        }
+    }
+
+    /**
      * @return Habilidades del personaje
      */
+    @Override
     public HashMap<String, Habilidad> getSkills() {
         return skills;
     }
@@ -745,6 +910,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
     /**
      * @param skills Habilidades del personaje
      */
+    @Override
     public void setSkills(HashMap<String, Habilidad> skills) {
         this.skills = skills;
     }
@@ -756,6 +922,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * @return
      */
     @JsonIgnore
+    @Override
     public Habilidad getSkill(String nombre) {
         return skills.get(nombre);
     }
@@ -768,9 +935,10 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * @throws java.lang.InstantiationException
      * @throws java.lang.IllegalAccessException
      */
+    @Override
     public Habilidad aprenderHabilidad(String id) throws InstantiationException, IllegalAccessException {
         final Habilidad skill = Habilidades.crear(Habilidades.Soportadas.para(id));
-        enviarMensaje("Has aprendido la habilidad de " + skill.getNombre());
+        enviarMensaje("§bHas aprendido la habilidad de " + skill.getNombre());
         enviarMensaje(skill.getDescripcion());
         skills.put(id, skill);
         return skill;
@@ -782,6 +950,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * @param id Identificador de la habilidad
      * @param acierto Verdadero si se ha tenido suerte al realizar la habilidad
      */
+    @Override
     public void entrenarHabilidad(String id, boolean acierto) {
         Habilidad skill = getSkill(id);
         if (skill == null) {
@@ -796,10 +965,17 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         entrenarHabilidad(skill, acierto);
     }
 
-    private void entrenarHabilidad(Habilidad skill, boolean acierto) {
+    /**
+     * Entrenar una habilidad
+     *
+     * @param skill Habilidad
+     * @param acierto Verdadero si se ha tenido suerte al realizar la habilidad
+     */
+    @Override
+    public void entrenarHabilidad(Habilidad skill, boolean acierto) {
         if (skill.entrenar(acierto)) {
             // Subimos de nivel al entrenar la habilidad
-            enviarMensaje("Has mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
+            enviarMensaje("§bHas mejorado tu skill {0} en un punto! Ahora tienes {1} pts.", skill.getNombre(), skill.getNivel());
             ganarExperiencia(Balance.calcularExperienciaGanadaAlSubirHabilidad(skill.getNivel()));
         }
     }
@@ -811,6 +987,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * @param id Identificador de la habilidad
      * @return Devuelve verdadero si el usuario ha logrado realizar la habilidad
      */
+    @Override
     public boolean realizarHabilidad(String id) {
         Habilidad skill = getSkill(id);
         if (skill == null) {
@@ -822,7 +999,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
                 return false;
             }
         }
-        boolean resultado = skill.realizar();
+        boolean resultado = skill.realizar(this);
 
         // Ganamos experiencia en nuestra habilidad
         entrenarHabilidad(skill, resultado);
@@ -844,11 +1021,11 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         this.newbie = newbie;
     }
 
-    public void setInventario(HashMap<Integer, InventarioSlot> inventario) {
+    public void setInventario(ConcurrentHashMap<Integer, InventarioSlot> inventario) {
         this.inventario = inventario;
     }
 
-    public HashMap<Integer, InventarioSlot> getInventario() {
+    public ConcurrentHashMap<Integer, InventarioSlot> getInventario() {
         return inventario;
     }
 
@@ -861,7 +1038,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      */
     public boolean inventarioEquiparSlot(int invslot) {
         if (isMuerto()) {
-            enviarMensaje("No puedes equiparte objetos si estas muerto.");
+            enviarMensaje("§7No puedes equiparte objetos si estas muerto.");
             return false;
         }
 
@@ -882,7 +1059,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         }
 
         if (slot.getObjeto().isNewbie() && !isNewbie()) {
-            enviarMensaje("Solo los newbies pueden usar este objeto.");
+            enviarMensaje("§7Solo los newbies pueden usar este objeto.");
             return false;
         }
 
@@ -941,6 +1118,8 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
                 setDesnudo(false);
                 actualizarApariencia();
                 break;
+            default:
+                return false;
         }
 
         // Si llegamos hasta aca es porque logramos equipar el objeto
@@ -1092,7 +1271,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
         if (!mapa.hayObjeto(pos)) {
             // No hay ningun objeto para agarrar
-            enviarMensaje("No hay nada aqui.");
+            enviarMensaje("§7No hay nada aqui.");
             return false;
         }
 
@@ -1100,7 +1279,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
         if (!obj.getMetadata().isAgarrable()) {
             // El objeto no se puede agarrar
-            enviarMensaje("No puedes agarrar este objeto.");
+            enviarMensaje("§7No puedes agarrar este objeto.");
             return false;
         }
 
@@ -1113,7 +1292,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
 
         // Intentamos meter el objeto en el inventario
         if (!inventarioMeterObjeto(obj)) {
-            enviarMensaje("No puedes cargar mas objetos.");
+            enviarMensaje("§cNo puedes cargar mas objetos.");
             return false;
         }
 
@@ -1177,6 +1356,7 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
      * Envia a todos los clientes cercanos el cambio de apariencia sobre el
      * personaje del usuario
      */
+    @Override
     public void actualizarApariencia() {
         for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
             conn.enviarPersonajeCambiar(
@@ -1198,10 +1378,24 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         alMorir();
     }
 
-    public void alMorir() {
-        enviarMensaje("Has muerto!");
-        // @TODO: Dar cuerpo de fantasmita
+    public boolean alMorir() {
+        // @TODO: Disparar evento cancelable
+        setMuerto(true);
+        enviarMensaje("§4Has muerto!");
         // @TODO: Arrojar items al suelo
+        // Desequipamos todo
+        for (Map.Entry<Integer, InventarioSlot> entry : inventario.entrySet()) {
+            inventarioDesequiparSlot(entry.getKey());
+        }
+
+        // Enviamos el sonido (Esta parte es la mejor)
+        getConexion().enviarMundoReproducirSonido(Sonidos.SND_USERMUERTE);
+
+        // Damos la apariencia de fantasma
+        setCuerpo(8);
+        setCabeza(500);
+        actualizarApariencia();
+        return true;
     }
 
     /**
@@ -1292,8 +1486,51 @@ public class Usuario extends Personaje implements Atacable, GanaExperiencia {
         this.dinero = dinero;
     }
 
-    @Override
-    public boolean recibeAtaque(Personaje atacante) {
+    private boolean doNavegar() {
+//        Posicion siguientePaso = Logica.calcularPaso(getCoordenada().getPosicion(), getOrientacion());
+//        if (siguientePaso == null) {
+//            return false;
+//        }
+//        Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+//        if (mapa == null) {
+//            return false;
+//        }
+//        Baldosa baldosa = mapa.getBaldosa(siguientePaso);
+//        if (baldosa == null) {
+//            return false;
+//        }
+//        if (isNavegando()) {
+//            if (baldosa.isAgua()) {
+//                enviarMensaje("No te podes bajar del barco en el agua.");
+//                return false;
+//            }
+//            
+//        }
         return false;
+    }
+
+    public void revivir() {
+        if (!isMuerto()) {
+            // Si no esta muerto, entonces no hacemos nada.
+            return;
+        }
+        setMuerto(false);
+        getVida().setMin(1);
+        getConexion().enviarUsuarioStats();
+
+        setCuerpo(Servidor.getServidor().getRaza(getRaza()).getCuerpo());
+        setCabeza(getCabezaOriginal());
+        actualizarApariencia();
+
+        getConexion().enviarMundoReproducirSonido(Sonidos.SND_RESUCITAR);
+        enviarMensaje("§3Has sido revivido!");
+    }
+
+    public int getCabezaOriginal() {
+        return cabezaOriginal;
+    }
+
+    public void setCabezaOriginal(int cabezaOriginal) {
+        this.cabezaOriginal = cabezaOriginal;
     }
 }

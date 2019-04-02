@@ -16,7 +16,10 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.habilidades.CombateConArmas;
+import ar.net.argentum.servidor.habilidades.DefensaConEscudos;
 import ar.net.argentum.servidor.habilidades.Meditar;
+import ar.net.argentum.servidor.habilidades.TacticasDeCombate;
 
 /**
  *
@@ -42,7 +45,10 @@ public final class Habilidades {
      * nuevas clases que implementen la interfaz Habilidad
      */
     public static enum Soportadas {
-        MEDITAR("meditar", Meditar.class);
+        MEDITAR("meditar", Meditar.class),
+        DEFENSA_CON_ESCUDOS("DefensaConEscudos", DefensaConEscudos.class),
+        TACTICAS_DE_COMBATE("TacticasDeCombate", TacticasDeCombate.class),
+        COMBATE_CON_ARMAS("CombateConArmas", CombateConArmas.class);
 
         private final Class<?> clase;
         private final String identificador;

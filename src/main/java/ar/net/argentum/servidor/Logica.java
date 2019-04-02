@@ -29,6 +29,8 @@ public class Logica {
     public static final int MaxXBorder = 95;
     public static final int MinYBorder = 5;
     public static final int MaxYBorder = 95;
+    public static final int RANGO_VISION_X = 8;
+    public static final int RANGO_VISION_Y = 6;
     protected static final Random RANDOM = new Random();
 
     /**
@@ -150,5 +152,16 @@ public class Logica {
     public static int calcularDistancia(Coordenada c1, Coordenada c2) {
         return calcularDistancia(c1.getPosicion(), c2.getPosicion())
                 + (Math.abs(c1.getMapa() - c2.getMapa()) * 100);
+    }
+
+    /**
+     * @param a
+     * @param b
+     * @return Verdadero si el punto b esta dentro del rango de vision del punto
+     *
+     */
+    public static boolean enRangoDeVision(Posicion a, Posicion b) {
+        return (Math.abs(a.getY() - b.getY()) < RANGO_VISION_Y
+                && Math.abs(a.getX() - b.getX()) < RANGO_VISION_X);
     }
 }

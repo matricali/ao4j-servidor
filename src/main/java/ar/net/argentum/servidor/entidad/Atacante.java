@@ -16,38 +16,22 @@
  */
 package ar.net.argentum.servidor.entidad;
 
-import ar.net.argentum.servidor.ParteCuerpo;
-import ar.net.argentum.servidor.ResultadoGolpe;
-
 /**
- * Una entidad que puede ser objetivo de daño
+ * Representa una entidad que ataca Atacables
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public interface Atacable {
+public interface Atacante {
 
     /**
-     * La entidad recibe un ataque
+     * Recibe la notificacion que ha matado a alguien
      *
-     * @param atacante
-     * @param resultado
-     * @return Devuelte un nuevo ResultadoGolpe luego de aplicar posibles
-     * defensas
+     * @param victima
      */
-    public ResultadoGolpe recibeAtaque(Atacante atacante, ResultadoGolpe resultado);
+    public void alMatar(Atacable victima);
 
     /**
-     * La entidad recibe daño fisico
-     *
-     * @param atacante
-     * @param lugar Lugar del cuerpo donde se recibe el ataque
-     * @param daño Cantidad de daño inicial
-     * @return Cantidad de daño final aplicado luego de aplicar modificadores
-     */
-    public int recibeDañoFisico(Atacante atacante, ParteCuerpo lugar, int daño);
-
-    /**
-     * @return Nombre para mostrar
+     * @return Nombre para mostrar del atacante
      */
     public String getNombre();
 }
