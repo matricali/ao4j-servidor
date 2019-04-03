@@ -37,6 +37,14 @@ public class ObjetosDB {
     public static ObjetoMetadata obtener(int id) {
         return objetos[id];
     }
+    
+    public static ObjetoMetadata obtenerCopia(int id) {
+        ObjetoMetadata original = obtener(id);
+        switch (original.getTipo()) {
+            default:
+                return new ObjetoMetadataBasica(original);
+        }
+    }
 
     public ObjetosDB(String archivo) {
         LOGGER.info("Cargando objetos (" + archivo + ")...");
@@ -57,7 +65,10 @@ public class ObjetosDB {
             String nombre;
             int grhIndex;
             int tipoObjeto;
+            int tipo;
             int animacion;
+            ObjetoTipo tipoObjeto;
+            ObjetoMetadata metadata;
 
             // Leer 1 por 1
             for (int i = 1; i < cantObjetos; ++i) {
@@ -66,18 +77,24 @@ public class ObjetosDB {
                     if (jo != null) {
                         nombre = jo.getString("Name");
                         grhIndex = jo.getInt("GrhIndex");
-                        tipoObjeto = Integer.valueOf(jo.getString("ObjType"));
-                        ObjetoMetadata nobjeto = new ObjetoMetadata(i, nombre, ObjetoTipo.valueOf(tipoObjeto), grhIndex, 0, 10000);
-                        if (jo.has("Anim")) {
-                            nobjeto.setAnimacion(Integer.valueOf(jo.getString("Anim")));
+                        tipo = Integer.valueOf(jo.getString("ObjType"));
+                        tipoObjeto = ObjetoTipo.valueOf(tipo);
+
+                        switch (tipoObjeto) {
+                            default:
+                                metadata = new ObjetoMetadataBasica(i, nombre, ObjetoTipo.valueOf(tipo), grhIndex, 0, 10000);
+                                if (jo.has("Anim")) {
+                                    metadata.setAnimacion(Integer.valueOf(jo.getString("Anim")));
+                                }
+                                if (jo.has("NumRopaje")) {
+                                    metadata.setRopaje(Integer.valueOf(jo.getString("NumRopaje")));
+                                }
+                                if (jo.has("Newbie")) {
+                                    metadata.setNewbie(jo.getString("Newbie").equals("1"));
+                                }
                         }
-                        if (jo.has("NumRopaje")) {
-                            nobjeto.setRopaje(Integer.valueOf(jo.getString("NumRopaje")));
-                        }
-                        if (jo.has("Newbie")) {
-                            nobjeto.setNewbie(jo.getString("Newbie").equals("1"));
-                        }
-                        objetos[i] = nobjeto;
+
+                        objetos[i] = metadata;
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }
                 } catch (Exception ex) {

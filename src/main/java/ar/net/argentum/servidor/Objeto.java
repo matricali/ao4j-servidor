@@ -33,7 +33,7 @@ public class Objeto {
 
     public Objeto(int id, int cantidad) {
         this.id = id;
-        this.metadata = new ObjetoMetadata(ObjetosDB.obtener(id));
+        this.metadata = ObjetosDB.obtenerCopia(id);
         this.cantidad = cantidad;
     }
 
