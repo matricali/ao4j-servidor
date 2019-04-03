@@ -275,6 +275,19 @@ public class ConexionConCliente extends Thread {
             case "MEDITAR":
                 usuario.meditar();
                 return true;
+
+            case "DEBUGEXP":
+                int cantidad = Integer.valueOf(args[1]);
+                getUsuario().ganarExperiencia(cantidad);
+                return true;
+
+            case "DEBUGREVIVIR":
+                if (!getUsuario().isMuerto()) {
+                    getUsuario().enviarMensaje("No estas muerto :/");
+                    return true;
+                }
+                getUsuario().revivir();
+                return true;
         }
 
         enviarMensaje("Comando invalido!");
