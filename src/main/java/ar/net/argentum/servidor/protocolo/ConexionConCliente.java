@@ -21,9 +21,11 @@ import ar.net.argentum.servidor.InventarioSlot;
 import ar.net.argentum.servidor.Logica;
 import ar.net.argentum.servidor.Objeto;
 import ar.net.argentum.servidor.ObjetoMetadata;
+import ar.net.argentum.servidor.ObjetoMetadataPuerta;
 import ar.net.argentum.servidor.Personaje;
 import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
+import ar.net.argentum.servidor.Sonidos;
 import ar.net.argentum.servidor.Usuario;
 import ar.net.argentum.servidor.mundo.Orientacion;
 import java.io.DataInputStream;
@@ -66,6 +68,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_MUNDO_OBJETO = 0x22;
     protected static final byte PQT_USUARIO_TIRAR_OBJETO = 0x24;
     protected static final byte PQT_USUARIO_AGARRAR_OBJETO = 0x25;
+    protected static final byte PQT_MUNDO_BALDOSA_BLOQUEADA = 0x26;
 
     protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
     /**
@@ -646,6 +649,29 @@ public class ConexionConCliente extends Thread {
                     Objeto obj = b.getObjeto();
                     switch (obj.getMetadata().getTipo()) {
                         case PUERTA:
+                            if (Logica.calcularDistancia(getUsuario().getCoordenada().getPosicion(), new Posicion(x, y)) < 3) {
+
+                                ObjetoMetadataPuerta omp = (ObjetoMetadataPuerta) obj.getMetadata();
+                                if (omp.getLlave() != 0) {
+                                    enviarMensaje(obj.getMetadata().getNombre());
+                                    enviarMensaje("§7La puerta esta cerrada con llave.");
+                                    break;
+                                }
+                                // @TODO: El sonido lo tendria que emitir la baldosa
+                                getUsuario().emitirSonido(Sonidos.SND_PUERTA);
+                                Objeto nuevaPuerta;
+                                if (omp.isCerrada()) {
+                                    nuevaPuerta = new Objeto(omp.getPuertaAbierta());
+                                    b.getMapa().setBloqueado(x, y, false);
+                                    b.getMapa().setBloqueado(x - 1, y, false);
+                                } else {
+                                    nuevaPuerta = new Objeto(omp.getPuertaCerrada());
+                                    b.getMapa().setBloqueado(x, y, true);
+                                    b.getMapa().setBloqueado(x - 1, y, true);
+                                }
+                                b.getMapa().setObjeto(x, y, nuevaPuerta);
+                                break;
+                            }
                         case FORO:
                         case CARTEL:
                         case ARBOL:
@@ -744,5 +770,16 @@ public class ConexionConCliente extends Thread {
         usuario.inventarioAgarrarObjeto();
 
         return false;
+    }
+
+    public void enviarMundoBaldosaBloqueada(int x, int y, boolean b) {
+        try {
+            dos.writeByte(PQT_MUNDO_BALDOSA_BLOQUEADA);
+            dos.writeInt(x);
+            dos.writeInt(y);
+            dos.writeBoolean(b);
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
     }
 }

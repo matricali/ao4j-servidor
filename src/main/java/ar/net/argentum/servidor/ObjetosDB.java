@@ -41,6 +41,8 @@ public class ObjetosDB {
     public static ObjetoMetadata obtenerCopia(int id) {
         ObjetoMetadata original = obtener(id);
         switch (original.getTipo()) {
+            case PUERTA:
+                return (ObjetoMetadata) new ObjetoMetadataPuerta((ObjetoMetadataPuerta) original);
             default:
                 return new ObjetoMetadataBasica(original);
         }
@@ -64,7 +66,6 @@ public class ObjetosDB {
 
             String nombre;
             int grhIndex;
-            int tipoObjeto;
             int tipo;
             int animacion;
             ObjetoTipo tipoObjeto;
@@ -81,6 +82,13 @@ public class ObjetosDB {
                         tipoObjeto = ObjetoTipo.valueOf(tipo);
 
                         switch (tipoObjeto) {
+                            case PUERTA:
+                                int puertaAbierta = Integer.valueOf(jo.getString("IndexAbierta"));
+                                int puertaCerrada = Integer.valueOf(jo.getString("IndexCerrada"));
+                                boolean cerrada = jo.getString("Abierta").equals("1");
+                                int llave = Integer.valueOf(jo.getString("Llave"));
+                                metadata = new ObjetoMetadataPuerta(i, nombre, grhIndex, puertaCerrada, puertaAbierta, cerrada, llave);
+                                break;
                             default:
                                 metadata = new ObjetoMetadataBasica(i, nombre, ObjetoTipo.valueOf(tipo), grhIndex, 0, 10000);
                                 if (jo.has("Anim")) {
