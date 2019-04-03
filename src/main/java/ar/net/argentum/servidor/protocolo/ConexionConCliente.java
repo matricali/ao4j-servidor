@@ -66,6 +66,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_USUARIO_EQUIPAR_SLOT = 0x20;
     protected static final byte PQT_MUNDO_REPRODUCIR_SONIDO = 0x21;
     protected static final byte PQT_MUNDO_OBJETO = 0x22;
+    protected static final byte PQT_USUARIO_USAR_OBJETO = 0x23;
     protected static final byte PQT_USUARIO_TIRAR_OBJETO = 0x24;
     protected static final byte PQT_USUARIO_AGARRAR_OBJETO = 0x25;
     protected static final byte PQT_MUNDO_BALDOSA_BLOQUEADA = 0x26;
@@ -724,6 +725,18 @@ public class ConexionConCliente extends Thread {
         }
         return false;
     }
+
+    public boolean manejarUsuarioUsarItem() {
+        try {
+            int invslot = dis.readInt();
+            LOGGER.debug("PQT_USUARIO_USAR_ITEM<<" + invslot);
+            usuario.inventarioUsarItem(invslot);
+        } catch (IOException ex) {
+            LOGGER.fatal(null, ex);
+        }
+        return false;
+    }
+
     public void enviarMundoObjeto(int x, int y, int objIndex, int grhIndex,
             int cantidad, String nombre) {
 
