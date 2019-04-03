@@ -258,4 +258,14 @@ public abstract class Personaje implements Viviente, Paralizable {
     protected Mapa getMapaActual() {
         return Servidor.getServidor().getMapa(getCoordenada().getMapa());
     }
+
+    /**
+     * @see Sonidos
+     * @param sonido 
+     */
+    public void emitirSonido(int sonido) {
+        Servidor.getServidor().todosMapa(getCoordenada().getMapa(), (charindex, conexion) -> {
+            conexion.enviarMundoReproducirSonido(sonido, getCoordenada().getPosicion());
+        });
+    }
 }

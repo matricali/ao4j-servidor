@@ -247,7 +247,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
      */
     protected void alSubirDeNivel() {
         enviarMensaje("§aHas subido de nivel!");
-        getConexion().enviarMundoReproducirSonido(Sonidos.SND_NIVEL);
+        emitirSonido(Sonidos.SND_NIVEL);
         getConexion().enviarUsuarioExperiencia();
 
         // Aumentar vida
@@ -483,7 +483,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         if (b.getCharindex() == 0) {
             // Arrojamos un golpe al aire, enviamos el sonido y disminuimos la energia
-            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            emitirSonido(Sonidos.SND_SWING);
             getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
             getConexion().enviarUsuarioStats();
             return true;
@@ -526,7 +526,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         if (!realizarHabilidad("CombateConArmas")) {
             enviarMensaje("§c¡¡¡Has fallado el golpe!!!");
-            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            emitirSonido(Sonidos.SND_SWING);
             getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
             getConexion().enviarUsuarioStats();
 
@@ -553,7 +553,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                     enviarMensaje("§c¡¡¡Has fallado el golpe!!!");
                     break;
             }
-            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            emitirSonido(Sonidos.SND_SWING);
 
             return resultado;
         }
@@ -561,7 +561,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         // Si llegamos hasta acá es porque conectamos el golpe
         int daño = Logica.enteroAleatorio(getGolpe().getMin(), getGolpe().getMax());
 
-        getConexion().enviarMundoReproducirSonido(Sonidos.SND_IMPACTO);
+        emitirSonido(Sonidos.SND_IMPACTO);
         getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
         getConexion().enviarUsuarioStats();
 
@@ -585,7 +585,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
             if (realizarHabilidad("DefensaConEscudos")) {
 
                 enviarMensaje("§c¡¡¡Has rechazado el ataque de {0} con el escudo!!!", atacante.getNombre());
-                getConexion().enviarMundoReproducirSonido(Sonidos.SND_ESCUDO);
+                emitirSonido(Sonidos.SND_ESCUDO);
 
                 return new ResultadoGolpe(false, ResultadoGolpe.Causa.VICTIMA_RECHAZO_CON_ESCUDO);
             }
@@ -594,7 +594,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         // Intento esquivar el ataque
         if (realizarHabilidad("TacticasDeCombate")) {
             enviarMensaje("§c¡¡{0} te atacó y falló!!", atacante.getNombre());
-            getConexion().enviarMundoReproducirSonido(Sonidos.SND_SWING);
+            emitirSonido(Sonidos.SND_SWING);
             return new ResultadoGolpe(false, ResultadoGolpe.Causa.VICTIMA_ESQUIVO_ATAQUE);
         }
 
@@ -1074,9 +1074,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 WeaponEqpSlot = invslot;
 
                 // Enviamos un sonido en el area
-                Servidor.getServidor().todosArea(getCoordenada(), 30, (usuario, conexion) -> {
-                    conexion.enviarMundoReproducirSonido(Sonidos.SND_SACARARMA, getCoordenada().getPosicion());
-                });
+                emitirSonido(Sonidos.SND_SACARARMA);
 
                 setArma(slot.getObjeto().getAnimacion());
                 actualizarApariencia();
@@ -1389,7 +1387,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         // Enviamos el sonido (Esta parte es la mejor)
-        getConexion().enviarMundoReproducirSonido(Sonidos.SND_USERMUERTE);
+        emitirSonido(Sonidos.SND_USERMUERTE);
 
         // Damos la apariencia de fantasma
         setCuerpo(8);
@@ -1522,7 +1520,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         setCabeza(getCabezaOriginal());
         actualizarApariencia();
 
-        getConexion().enviarMundoReproducirSonido(Sonidos.SND_RESUCITAR);
+        emitirSonido(Sonidos.SND_RESUCITAR);
         enviarMensaje("§3Has sido revivido!");
     }
 
