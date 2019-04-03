@@ -175,4 +175,17 @@ public abstract class MapaAbstracto implements Mapa {
     public boolean hayObjeto(Posicion pos) {
         return hayObjeto(pos.getX(), pos.getY());
     }
+    
+    @Override
+    public void setBloqueado(int x, int y, boolean bloq) {
+        getBaldosa(x, y).setBloqueado(bloq);
+        Servidor.getServidor().todosMapa(numero, (usuario, conexion) -> {
+            conexion.enviarMundoBaldosaBloqueada(x, y, bloq);
+        });
+    }
+    
+    @Override
+    public void setBloqueado(Posicion pos, boolean bloq) {
+        setBloqueado(pos.getX(), pos.getY(), bloq);
+    }
 }

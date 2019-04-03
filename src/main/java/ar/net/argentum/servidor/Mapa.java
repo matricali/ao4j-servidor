@@ -178,4 +178,19 @@ public interface Mapa {
      * @return
      */
     public Map<Posicion, Objeto> getObjetos();
+
+    /**
+     * Bloquea o desbloquea una posicion y le avisa a los clientes
+     * @param x
+     * @param y
+     * @param b 
+     */
+    public void setBloqueado(int x, int y, boolean b);
+
+    /**
+     *  Bloquea o desbloquea una posicion y le avisa a los clientes
+     * @param pos
+     * @param b 
+     */
+    public void setBloqueado(Posicion pos, boolean b);
 }
