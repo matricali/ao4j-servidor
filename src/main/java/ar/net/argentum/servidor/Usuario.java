@@ -18,6 +18,7 @@ package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.entidad.Atacante;
+import ar.net.argentum.servidor.habilidades.Meditar;
 import ar.net.argentum.servidor.mundo.Orientacion;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -367,8 +368,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
     public void setMeditando(boolean meditando) {
         this.meditando = meditando;
         if (meditando) {
-            int efecto = 6;
-
+            final int efecto = Meditar.getEfecto(nivel);
             // Le avisamos al cliente que inicie la animacion de meditar
             getConexion().enviarPersonajeAnimacion(1, efecto, -1);
             // Le avisamos a los otros clientes que inicien la animacion sobre el personaje

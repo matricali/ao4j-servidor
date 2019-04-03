@@ -66,4 +66,17 @@ public class Meditar extends HabilidadBase {
 
         return Logica.verdaderoAleatorio(dificultad);
     }
+
+    public static int getEfecto(int nivel) {
+        if (nivel < 15) {
+            return 4;
+        } else if (nivel < 25) {
+            return 5;
+        } else if (nivel < 35) {
+            return 6;
+        } else if (nivel < 45) {
+            return 16;
+        }
+        return 34;
+    }
 }
