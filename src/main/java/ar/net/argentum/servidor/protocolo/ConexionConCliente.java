@@ -288,6 +288,13 @@ public class ConexionConCliente extends Thread {
                 }
                 getUsuario().revivir();
                 return true;
+
+            case "DEBUGOBJ":
+                Objeto obj = new Objeto(
+                        Integer.valueOf(args[1]),
+                        args.length > 2 ? Integer.valueOf(args[2]) : 1);
+                getUsuario().inventarioMeterObjeto(obj);
+                return true;
         }
 
         enviarMensaje("Comando invalido!");
