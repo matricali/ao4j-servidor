@@ -16,10 +16,13 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.objetos.Equipable;
+import ar.net.argentum.servidor.objetos.Arma;
 import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.entidad.Atacante;
 import ar.net.argentum.servidor.habilidades.Meditar;
 import ar.net.argentum.servidor.mundo.Orientacion;
+import ar.net.argentum.servidor.objetos.Vestimenta;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1076,7 +1079,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 // Enviamos un sonido en el area
                 emitirSonido(Sonidos.SND_SACARARMA);
 
-                setArma(slot.getObjeto().getAnimacion());
+                setArma(((Arma) slot.getObjeto()).getAnimacionAltos());
                 actualizarApariencia();
                 break;
             case ESCUDO:
@@ -1088,7 +1091,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 ShieldEqpObjIndex = slot.getObjetoId();
                 ShieldEqpSlot = invslot;
 
-                setEscudo(slot.getObjeto().getAnimacion());
+                setEscudo(((Equipable) slot.getObjeto()).getAnimacionAltos());
                 actualizarApariencia();
                 break;
             case CASCO:
@@ -1100,7 +1103,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 HelmEqpObjIndex = slot.getObjetoId();
                 HelmEqpSlot = invslot;
 
-                setCasco(slot.getObjeto().getAnimacion());
+                setCasco(((Equipable) slot.getObjeto()).getAnimacionAltos());
                 actualizarApariencia();
                 break;
             case VESTIMENTA:
@@ -1112,7 +1115,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 ArmorEqpObjIndex = slot.getObjetoId();
                 ArmorEqpSlot = invslot;
 
-                setCuerpo(slot.getObjeto().getRopaje());
+                setCuerpo(((Vestimenta) slot.getObjeto()).getRopaje());
                 setDesnudo(false);
                 actualizarApariencia();
                 break;

@@ -17,17 +17,12 @@
 package ar.net.argentum.servidor;
 
 /**
+ * Las clases que implementan esta interfaz proveen caractericticas de un
+ * objeto.
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public interface ObjetoMetadata {
-
-    /**
-     * ID de animacion, es usado por objetos que se pueden vestir
-     *
-     * @return Animacion
-     */
-    int getAnimacion();
 
     /**
      * @return the grhIndex
@@ -50,11 +45,6 @@ public interface ObjetoMetadata {
     String getNombre();
 
     /**
-     * @return ID de cuerpo para la vestimenta
-     */
-    int getRopaje();
-
-    /**
      * @return the tipo
      */
     ObjetoTipo getTipo();
@@ -75,21 +65,9 @@ public interface ObjetoMetadata {
     void setAgarrable(boolean agarrable);
 
     /**
-     * Establecer ID de animacion, es usado por objetos que se pueden vestir
-     *
-     * @param animacion the animacion to set
-     */
-    void setAnimacion(int animacion);
-
-    /**
      * @param newbie Verdadero si el objeto es NEWBIE
      */
     void setNewbie(boolean newbie);
-
-    /**
-     * @param ropaje ID de cuerpo para la vestimenta
-     */
-    void setRopaje(int ropaje);
 
     public int getGrhSecundario();
 

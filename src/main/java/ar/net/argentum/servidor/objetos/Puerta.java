@@ -14,25 +14,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package ar.net.argentum.servidor;
+package ar.net.argentum.servidor.objetos;
+
+import ar.net.argentum.servidor.ObjetoTipo;
+import org.json.JSONObject;
 
 /**
  * Metadata de un objeto
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class ObjetoMetadataPuerta extends ObjetoMetadataBasica {
+public class Puerta extends ObjetoMetadataBasica {
 
     /**
      * Por defecto las puertas no deberian poder agarrarse
      */
-    protected boolean agarrable = false;
     protected final int puertaCerrada;
     protected final int puertaAbierta;
     protected boolean cerrada;
     protected final int llave;
 
-    public ObjetoMetadataPuerta(int id, String nombre, int grhIndex, int puertaCerrada, int puertaAbierta, boolean cerrada, int llave) {
+    public Puerta(JSONObject data) {
+        super(data);
+        this.tipo = ObjetoTipo.PUERTA;
+        this.agarrable = false; // Las puertas no deberian porder agarrarse
+        this.puertaAbierta = Integer.valueOf(data.getString("IndexAbierta"));
+        this.puertaCerrada = Integer.valueOf(data.getString("IndexCerrada"));
+        this.cerrada = data.getString("Abierta").equals("1");
+        this.llave = Integer.valueOf(data.getString("Llave"));
+    }
+
+    public Puerta(int id, String nombre, int grhIndex, int puertaCerrada, int puertaAbierta, boolean cerrada, int llave) {
         super(id, nombre, ObjetoTipo.PUERTA, grhIndex, 0, 1);
         this.puertaAbierta = puertaAbierta;
         this.puertaCerrada = puertaCerrada;
@@ -40,7 +52,7 @@ public class ObjetoMetadataPuerta extends ObjetoMetadataBasica {
         this.llave = llave;
     }
 
-    public ObjetoMetadataPuerta(ObjetoMetadataPuerta original) {
+    public Puerta(Puerta original) {
         super(original);
         this.puertaAbierta = original.getPuertaAbierta();
         this.puertaCerrada = original.getPuertaCerrada();

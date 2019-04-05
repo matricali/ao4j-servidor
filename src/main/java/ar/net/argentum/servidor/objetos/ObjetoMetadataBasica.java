@@ -14,7 +14,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package ar.net.argentum.servidor;
+package ar.net.argentum.servidor.objetos;
+
+import ar.net.argentum.servidor.ObjetoMetadata;
+import ar.net.argentum.servidor.ObjetoTipo;
+import org.json.JSONObject;
 
 /**
  * Metadata de un objeto
@@ -27,15 +31,20 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
     protected String nombre;
     protected ObjetoTipo tipo;
     protected int grhIndex;
-    int grhSecundario;
-
+    protected int grhSecundario;
     protected int maxItems;
-    boolean apunala;
-    boolean achuchilla;
     protected boolean newbie;
-    protected int animacion;
-    protected int ropaje;
     protected boolean agarrable = true;
+
+    public ObjetoMetadataBasica(JSONObject data) {
+        this.nombre = data.getString("Name");
+        this.grhIndex = data.getInt("GrhIndex");
+        this.maxItems = 10000;
+        this.agarrable = !data.has("Agarrable") || data.getString("Agarrable").equals("0");
+        // El objeto es newbie?
+        this.newbie = data.has("Newbie") && data.getString("Newbie").equals("1");       
+    
+    }
 
     public ObjetoMetadataBasica(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
         this.id = id;
@@ -109,42 +118,6 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
     @Override
     public void setNewbie(boolean newbie) {
         this.newbie = newbie;
-    }
-
-    /**
-     * ID de animacion, es usado por objetos que se pueden vestir
-     *
-     * @return Animacion
-     */
-    @Override
-    public int getAnimacion() {
-        return animacion;
-    }
-
-    /**
-     * Establecer ID de animacion, es usado por objetos que se pueden vestir
-     *
-     * @param animacion the animacion to set
-     */
-    @Override
-    public void setAnimacion(int animacion) {
-        this.animacion = animacion;
-    }
-
-    /**
-     * @return ID de cuerpo para la vestimenta
-     */
-    @Override
-    public int getRopaje() {
-        return ropaje;
-    }
-
-    /**
-     * @param ropaje ID de cuerpo para la vestimenta
-     */
-    @Override
-    public void setRopaje(int ropaje) {
-        this.ropaje = ropaje;
     }
 
     /**
