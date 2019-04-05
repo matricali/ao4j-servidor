@@ -16,6 +16,13 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.objetos.Puerta;
+import ar.net.argentum.servidor.objetos.Equipable;
+import ar.net.argentum.servidor.objetos.ObjetoMetadataBasica;
+import ar.net.argentum.servidor.objetos.Arma;
+import ar.net.argentum.servidor.objetos.Casco;
+import ar.net.argentum.servidor.objetos.Escudo;
+import ar.net.argentum.servidor.objetos.Vestimenta;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,12 +44,20 @@ public class ObjetosDB {
     public static ObjetoMetadata obtener(int id) {
         return objetos[id];
     }
-    
+
     public static ObjetoMetadata obtenerCopia(int id) {
         ObjetoMetadata original = obtener(id);
         switch (original.getTipo()) {
             case PUERTA:
-                return (ObjetoMetadata) new ObjetoMetadataPuerta((ObjetoMetadataPuerta) original);
+                return (ObjetoMetadata) new Puerta((Puerta) original);
+            case ARMA:
+                return (ObjetoMetadata) new Arma((Arma) original);
+            case CASCO:
+                return (ObjetoMetadata) new Casco((Casco) original);
+            case ESCUDO:
+                return (ObjetoMetadata) new Escudo((Escudo) original);
+            case VESTIMENTA:
+                return (ObjetoMetadata) new Equipable((Equipable) original);
             default:
                 return new ObjetoMetadataBasica(original);
         }
@@ -83,23 +98,23 @@ public class ObjetosDB {
 
                         switch (tipoObjeto) {
                             case PUERTA:
-                                int puertaAbierta = Integer.valueOf(jo.getString("IndexAbierta"));
-                                int puertaCerrada = Integer.valueOf(jo.getString("IndexCerrada"));
-                                boolean cerrada = jo.getString("Abierta").equals("1");
-                                int llave = Integer.valueOf(jo.getString("Llave"));
-                                metadata = new ObjetoMetadataPuerta(i, nombre, grhIndex, puertaCerrada, puertaAbierta, cerrada, llave);
+                                metadata = new Puerta(jo);
                                 break;
+                            case ARMA:
+                                metadata = new Arma(jo);
+                                break;
+                            case ESCUDO:
+                                metadata = new Escudo(jo);
+                                break;
+                            case CASCO:
+                                metadata = new Casco(jo);
+                                break;
+                            case VESTIMENTA:
+                                metadata = new Vestimenta(jo);
+                                break;
+
                             default:
                                 metadata = new ObjetoMetadataBasica(i, nombre, ObjetoTipo.valueOf(tipo), grhIndex, 0, 10000);
-                                if (jo.has("Anim")) {
-                                    metadata.setAnimacion(Integer.valueOf(jo.getString("Anim")));
-                                }
-                                if (jo.has("NumRopaje")) {
-                                    metadata.setRopaje(Integer.valueOf(jo.getString("NumRopaje")));
-                                }
-                                if (jo.has("Newbie")) {
-                                    metadata.setNewbie(jo.getString("Newbie").equals("1"));
-                                }
                         }
 
                         objetos[i] = metadata;
