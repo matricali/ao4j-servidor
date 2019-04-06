@@ -28,8 +28,8 @@ public abstract class Armadura extends Equipable {
     protected int minDefensa = 0;
     protected int maxDefensa = 0;
 
-    public Armadura(JSONObject data) {
-        super(data);
+    public Armadura(int id, JSONObject data) {
+        super(id, data);
         if (data.has("MinDef") && data.has("MaxDef")) {
             this.minDefensa = Integer.valueOf(data.getString("MinDef"));
             this.maxDefensa = Integer.valueOf(data.getString("MaxDef"));
