@@ -25,6 +25,7 @@ import ar.net.argentum.servidor.objetos.Casco;
 import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Escudo;
 import ar.net.argentum.servidor.objetos.Foro;
+import ar.net.argentum.servidor.objetos.Pocion;
 import ar.net.argentum.servidor.objetos.Vestimenta;
 import java.io.File;
 import java.io.FileInputStream;
@@ -123,6 +124,9 @@ public class ObjetosDB {
                                 break;
                             case FORO:
                                 metadata = new Foro(i, jo);
+                                break;
+                            case POCION:
+                                metadata = new Pocion(i, jo);
                                 break;
 
                             default:
