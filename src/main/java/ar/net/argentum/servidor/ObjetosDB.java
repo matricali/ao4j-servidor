@@ -31,40 +31,28 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 /**
- * Carga en memoria una copia de todos los objetos desde "objetos.dat"
+ * Carga en memoria una copia de todos los OBJETOS desde "OBJETOS.dat"
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public class ObjetosDB {
 
     private static final Logger LOGGER = Logger.getLogger(ObjetosDB.class);
-    protected static ObjetoMetadata objetos[];
+    protected static ObjetoMetadata[] OBJETOS;
 
     public static ObjetoMetadata obtener(int id) {
-        return objetos[id];
+        return OBJETOS[id];
     }
 
     public static ObjetoMetadata obtenerCopia(int id) {
-        ObjetoMetadata original = obtener(id);
-        switch (original.getTipo()) {
-            case PUERTA:
-                return (ObjetoMetadata) new Puerta((Puerta) original);
-            case ARMA:
-                return (ObjetoMetadata) new Arma((Arma) original);
-            case CASCO:
-                return (ObjetoMetadata) new Casco((Casco) original);
-            case ESCUDO:
-                return (ObjetoMetadata) new Escudo((Escudo) original);
-            case VESTIMENTA:
-                return (ObjetoMetadata) new Equipable((Equipable) original);
-            default:
-                return new ObjetoMetadataBasica(original);
-        }
+        return obtener(id).copiar();
     }
 
     public ObjetosDB(String archivo) {
@@ -81,7 +69,7 @@ public class ObjetosDB {
             int cantObjetos = init.getInt("NumOBJs");
             LOGGER.info("hay " + cantObjetos + " para cargar");
 
-            this.objetos = new ObjetoMetadata[cantObjetos + 1];
+            OBJETOS = new ObjetoMetadata[cantObjetos + 1];
 
             String nombre;
             int grhIndex;
@@ -93,47 +81,54 @@ public class ObjetosDB {
             // Leer 1 por 1
             for (int i = 1; i < cantObjetos; ++i) {
                 try {
-                    JSONObject jo = json.getJSONObject("OBJ" + i);
+                    String clave = "OBJ" + i;
+                    if (!json.has(clave)) {
+                        continue;
+                    }
+                    JSONObject jo = json.getJSONObject(clave);
                     if (jo != null) {
                         nombre = jo.getString("Name");
                         grhIndex = jo.getInt("GrhIndex");
                         tipo = Integer.valueOf(jo.getString("ObjType"));
                         tipoObjeto = ObjetoTipo.valueOf(tipo);
 
-                        switch (tipoObjeto) {
-                            case PUERTA:
-                                metadata = new Puerta(i, jo);
-                                break;
-                            case ARMA:
-                                metadata = new Arma(i, jo);
-                                break;
-                            case ESCUDO:
-                                metadata = new Escudo(i, jo);
-                                break;
-                            case CASCO:
-                                metadata = new Casco(i, jo);
-                                break;
-                            case VESTIMENTA:
-                                metadata = new Vestimenta(i, jo);
-                                break;
-                            case ALIMENTO:
-                                metadata = new Comestible(i, jo);
-                                break;
-                            case CARTEL:
-                                metadata = new Cartel(i, jo);
-                                break;
-                            case FORO:
-                                metadata = new Foro(i, jo);
-                                break;
-                            case POCION:
-                                metadata = new Pocion(i, jo);
-                                break;
+                        metadata = (ObjetoMetadata) tipoObjeto.getClase()
+                                .getDeclaredConstructor(int.class, JSONObject.class)
+                                .newInstance(i, jo);
 
-                            default:
-                                metadata = new ObjetoMetadataBasica(i, nombre, ObjetoTipo.valueOf(tipo), grhIndex, 0, 10000);
-                        }
-
-                        objetos[i] = metadata;
+//                        switch (tipoObjeto) {
+//                            case PUERTA:
+//                                metadata = new Puerta(i, jo);
+//                                break;
+//                            case ARMA:
+//                                metadata = new Arma(i, jo);
+//                                break;
+//                            case ESCUDO:
+//                                metadata = new Escudo(i, jo);
+//                                break;
+//                            case CASCO:
+//                                metadata = new Casco(i, jo);
+//                                break;
+//                            case VESTIMENTA:
+//                                metadata = new Vestimenta(i, jo);
+//                                break;
+//                            case ALIMENTO:
+//                                metadata = new Comestible(i, jo);
+//                                break;
+//                            case CARTEL:
+//                                metadata = new Cartel(i, jo);
+//                                break;
+//                            case FORO:
+//                                metadata = new Foro(i, jo);
+//                                break;
+//                            case POCION:
+//                                metadata = new Pocion(i, jo);
+//                                break;
+//
+//                            default:
+//                                metadata = new ObjetoMetadataBasica(i, nombre, ObjetoTipo.valueOf(tipo), grhIndex, 0, 10000);
+//                        }
+                        OBJETOS[i] = metadata;
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }
                 } catch (Exception ex) {

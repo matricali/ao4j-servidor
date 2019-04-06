@@ -16,6 +16,7 @@
  */
 package ar.net.argentum.servidor.objetos;
 
+import ar.net.argentum.servidor.ObjetoMetadata;
 import org.json.JSONObject;
 
 /**
@@ -24,13 +25,17 @@ import org.json.JSONObject;
  */
 public class Cartel extends ObjetoMetadataBasica {
 
-    protected String texto;
-    protected int fondo;
+    protected String texto = "";
+    protected int fondo = 0;
 
     public Cartel(int id, JSONObject data) {
         super(id, data);
-        this.texto = data.getString("Texto");
-        this.fondo = Integer.valueOf(data.getString("VGrande"));
+        if (data.has(texto)) {
+            this.texto = data.getString("Texto");
+        }
+        if (data.has("VGrande")) {
+            this.fondo = Integer.valueOf(data.getString("VGrande"));
+        }
     }
 
     public Cartel(Cartel original) {

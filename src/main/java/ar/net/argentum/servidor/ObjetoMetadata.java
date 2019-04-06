@@ -72,4 +72,9 @@ public interface ObjetoMetadata {
     public int getGrhSecundario();
 
     public void setGrhSecundario(int grafico);
+
+    /**
+     * @return Copia fresca del objeto
+     */
+    public ObjetoMetadata copiar();
 }

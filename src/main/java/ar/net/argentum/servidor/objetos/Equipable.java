@@ -23,7 +23,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Equipable extends ObjetoMetadataBasica {
+public abstract class Equipable extends ObjetoMetadataBasica {
 
     protected int ropaje = 0;
     protected int animacionAltos = 0;

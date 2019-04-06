@@ -16,6 +16,7 @@
  */
 package ar.net.argentum.servidor.objetos;
 
+import ar.net.argentum.servidor.ObjetoMetadata;
 import org.json.JSONObject;
 
 /**

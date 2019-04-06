@@ -16,28 +16,39 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.objetos.Arma;
+import ar.net.argentum.servidor.objetos.Cartel;
+import ar.net.argentum.servidor.objetos.Casco;
+import ar.net.argentum.servidor.objetos.Comestible;
+import ar.net.argentum.servidor.objetos.Escudo;
+import ar.net.argentum.servidor.objetos.Foro;
+import ar.net.argentum.servidor.objetos.ObjetoMetadataBasica;
+import ar.net.argentum.servidor.objetos.Pocion;
+import ar.net.argentum.servidor.objetos.Puerta;
+import ar.net.argentum.servidor.objetos.Vestimenta;
+
 /**
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public enum ObjetoTipo {
-    ALIMENTO(1),
-    ARMA(2),
-    VESTIMENTA(3),
+    ALIMENTO(1, Comestible.class),
+    ARMA(2, Arma.class),
+    VESTIMENTA(3, Vestimenta.class),
     ARBOL(4),
     DINERO(5),
-    PUERTA(6),
+    PUERTA(6, Puerta.class),
     CONTENEDOR(7),
-    CARTEL(8),
+    CARTEL(8, Cartel.class),
     LLAVE(9),
-    FORO(10),
-    POCION(11),
+    FORO(10, Foro.class),
+    POCION(11, Pocion.class),
     LIBRO(12),
     BEBIDA(13),
     MADERA(14),
     FOGATA(15),
-    ESCUDO(16),
-    CASCO(17),
+    ESCUDO(16, Escudo.class),
+    CASCO(17, Casco.class),
     ANILLO(18),
     TELETRANSPORTE(19),
     MUEBLE(20),
@@ -62,13 +73,24 @@ public enum ObjetoTipo {
     CUALQUIERA(1000);
 
     private final int tipo;
+    private final Class<?> clase;
+
+    ObjetoTipo(int tipo, Class<?> clase) {
+        this.tipo = tipo;
+        this.clase = clase;
+    }
 
     ObjetoTipo(int tipo) {
         this.tipo = tipo;
+        this.clase = ObjetoMetadataBasica.class;
     }
 
     public int valor() {
         return tipo;
+    }
+
+    public Class<?> getClase() {
+        return clase;
     }
 
     /**
