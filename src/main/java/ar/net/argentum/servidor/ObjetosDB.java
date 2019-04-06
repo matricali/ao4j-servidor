@@ -98,19 +98,19 @@ public class ObjetosDB {
 
                         switch (tipoObjeto) {
                             case PUERTA:
-                                metadata = new Puerta(jo);
+                                metadata = new Puerta(i, jo);
                                 break;
                             case ARMA:
-                                metadata = new Arma(jo);
+                                metadata = new Arma(i, jo);
                                 break;
                             case ESCUDO:
-                                metadata = new Escudo(jo);
+                                metadata = new Escudo(i, jo);
                                 break;
                             case CASCO:
-                                metadata = new Casco(jo);
+                                metadata = new Casco(i, jo);
                                 break;
                             case VESTIMENTA:
-                                metadata = new Vestimenta(jo);
+                                metadata = new Vestimenta(i, jo);
                                 break;
 
                             default:

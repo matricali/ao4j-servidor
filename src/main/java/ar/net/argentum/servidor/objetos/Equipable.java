@@ -29,8 +29,8 @@ public class Equipable extends ObjetoMetadataBasica {
     protected int animacionAltos = 0;
     protected int animacionBajos = 0;
 
-    public Equipable(JSONObject data) {
-        super(data);
+    public Equipable(int id, JSONObject data) {
+        super(id, data);
         if (data.has("NumRopaje")) {
             this.ropaje = Integer.valueOf(data.getString("NumRopaje"));
         }

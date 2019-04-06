@@ -34,8 +34,8 @@ public class Puerta extends ObjetoMetadataBasica {
     protected boolean cerrada;
     protected final int llave;
 
-    public Puerta(JSONObject data) {
-        super(data);
+    public Puerta(int id, JSONObject data) {
+        super(id, data);
         this.tipo = ObjetoTipo.PUERTA;
         this.agarrable = false; // Las puertas no deberian porder agarrarse
         this.puertaAbierta = Integer.valueOf(data.getString("IndexAbierta"));

@@ -24,8 +24,8 @@ import org.json.JSONObject;
  */
 public class Casco extends Armadura {
 
-    public Casco(JSONObject data) {
-        super(data);
+    public Casco(int id, JSONObject data) {
+        super(id, data);
         this.tipo = ObjetoTipo.CASCO;
     }
 

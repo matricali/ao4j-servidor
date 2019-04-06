@@ -30,8 +30,8 @@ public class Arma extends Equipable {
     protected int maxDaño;
     protected boolean apuñala = false;
 
-    public Arma(JSONObject data) {
-        super(data);
+    public Arma(int id, JSONObject data) {
+        super(id, data);
         this.tipo = ObjetoTipo.ARMA;
         this.minDaño = Integer.valueOf(data.getString("MinHit"));
         this.maxDaño = Integer.valueOf(data.getString("MaxHit"));

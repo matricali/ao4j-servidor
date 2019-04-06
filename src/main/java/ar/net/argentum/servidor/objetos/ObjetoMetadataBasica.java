@@ -36,7 +36,8 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
     protected boolean newbie;
     protected boolean agarrable = true;
 
-    public ObjetoMetadataBasica(JSONObject data) {
+    public ObjetoMetadataBasica(int id, JSONObject data) {
+        this.id = id;
         this.nombre = data.getString("Name");
         this.grhIndex = data.getInt("GrhIndex");
         this.maxItems = 10000;
