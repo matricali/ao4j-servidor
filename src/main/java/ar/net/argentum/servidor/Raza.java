@@ -16,6 +16,8 @@
  */
 package ar.net.argentum.servidor;
 
+import java.util.Map;
+
 /**
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
@@ -24,7 +26,7 @@ public class Raza {
 
     protected String nombre;
     protected String descripcion = "";
-    protected int cuerpo;
+    protected Map<String, Integer> cuerpo;
     protected ModificadoresRaza modificadores;
 
     /**
@@ -72,14 +74,23 @@ public class Raza {
     /**
      * @return the cuerpo
      */
-    public int getCuerpo() {
+    public Map<String, Integer> getCuerpo() {
         return cuerpo;
+    }
+
+    /**
+     * @param genero
+     * @return Cuerpo para el genero especificado
+     */
+    public int getCuerpo(String genero) {
+        return cuerpo.get(genero);
     }
 
     /**
      * @param cuerpo the cuerpo to set
      */
-    public void setCuerpo(int cuerpo) {
+    public void setCuerpo(Map<String, Integer> cuerpo) {
         this.cuerpo = cuerpo;
     }
+
 }

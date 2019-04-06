@@ -1225,7 +1225,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 setDesnudo(true);
                 slot.setEquipado(false);
                 if (!mimetizado) {
-                    int cuerpoDesnudo = Servidor.getServidor().getRaza(getRaza()).getCuerpo();
+                    int cuerpoDesnudo = Servidor.getServidor().getRaza(getRaza()).getCuerpo(getGenero());
                     setCuerpo(cuerpoDesnudo);
                     actualizarApariencia();
                 }
@@ -1631,7 +1631,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         getVida().setMin(1);
         getConexion().enviarUsuarioStats();
 
-        setCuerpo(Servidor.getServidor().getRaza(getRaza()).getCuerpo());
+        setCuerpo(Servidor.getServidor().getRaza(getRaza()).getCuerpo(getGenero()));
         setCabeza(getCabezaOriginal());
         actualizarApariencia();
 
