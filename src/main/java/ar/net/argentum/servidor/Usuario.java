@@ -1502,7 +1502,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         // Enviamos el sonido (Esta parte es la mejor)
-        emitirSonido(Sonidos.SND_USERMUERTE);
+        emitirSonido("MUJER".equals(getGenero()) ? Sonidos.SND_MUERTE_MUJER : Sonidos.SND_MUERTE_HOMBRE);
 
         // Damos la apariencia de fantasma
         setCuerpo(8);
