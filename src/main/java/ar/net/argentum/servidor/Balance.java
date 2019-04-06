@@ -41,6 +41,10 @@ public abstract class Balance {
     public static final int ENERGIA_INTERVALO = 5;
     public static final int ENERGIA_PORCENTAJE_RECUPERO = 5;
     public static final int NEWBIE_NIVEL_MAXIMO = 12;
+    public static final int HAMBRE_INVERVALO = 650;
+    public static final int HAMBRE_CANTIDAD = 10;
+    public static final int SED_INTERVALO = 600;
+    public static final int SED_CANTIDAD = 10;
 
     /**
      * Calcular la nueva experiencia para pasar de nivel.
@@ -157,7 +161,7 @@ public abstract class Balance {
                 return 0;
         }
     }
-    
+
     public static int calcularAumentoGolpe(String clase, int nivel) {
         switch (clase) {
             case "GUERRERO":

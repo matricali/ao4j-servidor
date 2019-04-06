@@ -27,6 +27,7 @@ public class Sonidos {
     public static final int SND_WARP = 3;
     public static final int SND_PUERTA = 5;
     public static final int SND_NIVEL = 6;
+    public static final int SND_COMIDA_1 = 7;
     public static final int SND_IMPACTO = 10;
     public static final int SND_USERMUERTE = 11;
     public static final int SND_IMPACTO2 = 12;
@@ -48,4 +49,5 @@ public class Sonidos {
     public static final int SND_HERRERO_TRABAJANDO = 41;
     public static final int SND_CARPINTERO_TRABAJANDO = 42;
     public static final int SND_BEBER = 46;
+    public static final int SND_COMIDA_2 = 82; // Comer manzana
 }

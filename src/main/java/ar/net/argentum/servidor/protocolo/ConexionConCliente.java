@@ -195,6 +195,10 @@ public class ConexionConCliente extends Thread {
                     case PQT_USUARIO_AGARRAR_OBJETO:
                         manejarUsuarioAgarrarObjeto();
                         break;
+                        
+                    case PQT_USUARIO_USAR_OBJETO:
+                        manejarUsuarioUsarItem();
+                        break;
 
                     default:
                         LOGGER.fatal("Recibimos un paquete que no supimos manejar!");

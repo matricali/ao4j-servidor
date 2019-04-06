@@ -22,6 +22,8 @@ import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.entidad.Atacante;
 import ar.net.argentum.servidor.habilidades.Meditar;
 import ar.net.argentum.servidor.mundo.Orientacion;
+import ar.net.argentum.servidor.objetos.Bebida;
+import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Vestimenta;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -130,6 +132,8 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
     protected int contadorFrio = 0;
     protected int contadorEnergia = 0;
     protected int contadorSanar = 0;
+    protected int contadorHambre = 0;
+    protected int contadorSed = 0;
 
     public Usuario() {
         this.userindex = Servidor.crearUserindex();
@@ -801,6 +805,8 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         doRecuperarVida();
         doFrio();
+        doHambre();
+        doSed();
         doRecuperarEnergia();
 
         if (isMeditando()) {
@@ -839,6 +845,10 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
     protected void doRecuperarEnergia() {
         if (isDesnudo()) {
             // Si el personaje esta desnudo, entonces no recupera energia
+            return;
+        }
+        if (getHambre().getMin() == 0 || getSed().getMin() == 0) {
+            // Si tiene hambre o sed, entonces no recupera energia
             return;
         }
         if (contadorEnergia < Balance.ENERGIA_INTERVALO) {
@@ -900,6 +910,46 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
             getConexion().enviarUsuarioStats();
             enviarMensaje("§a¡Has sanado!");
         }
+    }
+
+    /**
+     * Procesar contador de hambre
+     */
+    protected void doHambre() {
+        if (contadorHambre < Balance.HAMBRE_INVERVALO) {
+            ++contadorHambre;
+            return;
+        }
+        alTenerHambre();
+    }
+
+    /**
+     * Evento que se produce cuando tiene hambre
+     */
+    protected void alTenerHambre() {
+        contadorHambre = 0;
+        getHambre().disminuir(Balance.HAMBRE_CANTIDAD);
+        getConexion().enviarUsuarioStats();
+    }
+
+    /**
+     * Procesar contador de frio
+     */
+    protected void doSed() {
+        if (contadorSed < Balance.SED_INTERVALO) {
+            ++contadorSed;
+            return;
+        }
+        alTenerSed();
+    }
+
+    /**
+     * Evento que se produce cuando tiene sed
+     */
+    protected void alTenerSed() {
+        contadorSed = 0;
+        getSed().disminuir(Balance.SED_CANTIDAD);
+        getConexion().enviarUsuarioStats();
     }
 
     /**
@@ -1192,6 +1242,11 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
      * @param invslot ID del hueco
      */
     public boolean inventarioUsarItem(int invslot) {
+        if (isMuerto()) {
+            enviarMensaje("§7Estas muerto!! Solo puedes usar items cuando estas vivo.");
+            return false;
+        }
+
         InventarioSlot slot = getInventarioSlot(invslot);
 
         if (slot == null) {
@@ -1205,7 +1260,33 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         switch (obj.getTipo()) {
+            case ALIMENTO:
+                if (inventarioQuitarObjeto(invslot, 1)) {
+                    Comestible comida = (Comestible) obj;
 
+                    getHambre().aumentar(Logica.enteroAleatorio(comida.getMinHambre(), comida.getMaxHambre()));
+                    getConexion().enviarUsuarioStats();
+
+                    if (obj.getId() == 1 || obj.getId() == 64 || obj.getId() == 506) {
+                        emitirSonido(Sonidos.SND_COMIDA_2);
+                    } else {
+                        emitirSonido(Sonidos.SND_COMIDA_1);
+                    }
+                    return true;
+                }
+                break;
+
+            case BEBIDA:
+                if (inventarioQuitarObjeto(invslot, 1)) {
+                    Bebida bebida = (Bebida) obj;
+
+                    getSed().aumentar(Logica.enteroAleatorio(bebida.getMinSed(), bebida.getMaxSed()));
+                    getConexion().enviarUsuarioStats();
+                    emitirSonido(Sonidos.SND_BEBER);
+
+                    return true;
+                }
+                break;
         }
 
         return false;
@@ -1349,6 +1430,37 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
             inventarioDesequiparSlot(invslot);
         }
         inventario.remove(invslot);
+        getConexion().usuarioInventarioActualizarSlot(invslot);
+        return true;
+    }
+
+    /**
+     * Intentamos eliminar una cantidad especifica de objetos del inventario.
+     *
+     * @param invslot
+     * @param cantidad
+     * @return Verdadero si se ha eliminado la cantidad de objetos deseada
+     */
+    public boolean inventarioQuitarObjeto(int invslot, int cantidad) {
+        if (!inventario.containsKey(invslot)) {
+            return false;
+        }
+
+        InventarioSlot slot = inventario.get(invslot);
+
+        if (slot.getCantidad() < cantidad) {
+            // No tenemos suficiente cantidad
+            return false;
+        }
+
+        // Reducimos la cantidad
+        slot.setCantidad(slot.getCantidad() - cantidad);
+
+        if (slot.getCantidad() <= 0) {
+            // Nos quedams sin objetos, eliminaremos el slot directamente
+            return inventarioQuitarObjeto(invslot);
+        }
+
         getConexion().usuarioInventarioActualizarSlot(invslot);
         return true;
     }

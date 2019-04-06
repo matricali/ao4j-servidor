@@ -17,6 +17,7 @@
 package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.objetos.Arma;
+import ar.net.argentum.servidor.objetos.Bebida;
 import ar.net.argentum.servidor.objetos.Cartel;
 import ar.net.argentum.servidor.objetos.Casco;
 import ar.net.argentum.servidor.objetos.Comestible;
@@ -44,7 +45,7 @@ public enum ObjetoTipo {
     FORO(10, Foro.class),
     POCION(11, Pocion.class),
     LIBRO(12),
-    BEBIDA(13),
+    BEBIDA(13, Bebida.class),
     MADERA(14),
     FOGATA(15),
     ESCUDO(16, Escudo.class),
