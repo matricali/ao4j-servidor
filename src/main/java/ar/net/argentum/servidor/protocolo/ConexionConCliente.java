@@ -21,7 +21,7 @@ import ar.net.argentum.servidor.InventarioSlot;
 import ar.net.argentum.servidor.Logica;
 import ar.net.argentum.servidor.Objeto;
 import ar.net.argentum.servidor.ObjetoMetadata;
-import ar.net.argentum.servidor.ObjetoMetadataPuerta;
+import ar.net.argentum.servidor.objetos.Puerta;
 import ar.net.argentum.servidor.Personaje;
 import ar.net.argentum.servidor.Posicion;
 import ar.net.argentum.servidor.Servidor;
@@ -672,7 +672,7 @@ public class ConexionConCliente extends Thread {
                         case PUERTA:
                             if (Logica.calcularDistancia(getUsuario().getCoordenada().getPosicion(), new Posicion(x, y)) < 3) {
 
-                                ObjetoMetadataPuerta omp = (ObjetoMetadataPuerta) obj.getMetadata();
+                                Puerta omp = (Puerta) obj.getMetadata();
                                 if (omp.getLlave() != 0) {
                                     enviarMensaje(obj.getMetadata().getNombre());
                                     enviarMensaje("§7La puerta esta cerrada con llave.");
