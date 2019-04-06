@@ -24,6 +24,7 @@ import ar.net.argentum.servidor.habilidades.Meditar;
 import ar.net.argentum.servidor.mundo.Orientacion;
 import ar.net.argentum.servidor.objetos.Bebida;
 import ar.net.argentum.servidor.objetos.Comestible;
+import ar.net.argentum.servidor.objetos.Pocion;
 import ar.net.argentum.servidor.objetos.Vestimenta;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -1281,6 +1282,32 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                     Bebida bebida = (Bebida) obj;
 
                     getSed().aumentar(Logica.enteroAleatorio(bebida.getMinSed(), bebida.getMaxSed()));
+                    getConexion().enviarUsuarioStats();
+                    emitirSonido(Sonidos.SND_BEBER);
+
+                    return true;
+                }
+                break;
+
+            case POCION:
+                if (inventarioQuitarObjeto(invslot, 1)) {
+                    Pocion pocion = (Pocion) obj;
+
+                    switch (pocion.getTipoPocion()) {
+                        case NEGRA:
+                            // La negra te mata!!
+                            matar();
+                            break;
+                        case AUMENTA_VIDA:
+                            int aumentoVida = Logica.enteroAleatorio(pocion.getMinModificador(), pocion.getMaxModificador());
+                            getVida().aumentar(aumentoVida);
+                            break;
+                        case AUMENTA_MANA:
+                            int aumentoMana = Logica.enteroAleatorio(pocion.getMinModificador(), pocion.getMaxModificador());
+                            getMana().aumentar(aumentoMana);
+                            break;
+                    }
+
                     getConexion().enviarUsuarioStats();
                     emitirSonido(Sonidos.SND_BEBER);
 
