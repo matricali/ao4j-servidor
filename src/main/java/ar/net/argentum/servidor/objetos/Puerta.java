@@ -16,6 +16,7 @@
  */
 package ar.net.argentum.servidor.objetos;
 
+import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.ObjetoTipo;
 import org.json.JSONObject;
 
@@ -24,7 +25,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Puerta extends ObjetoMetadataBasica {
+public class Puerta extends ObjetoMetadataBasica implements ObjetoMetadata {
 
     /**
      * Por defecto las puertas no deberian poder agarrarse
@@ -38,8 +39,16 @@ public class Puerta extends ObjetoMetadataBasica {
         super(id, data);
         this.tipo = ObjetoTipo.PUERTA;
         this.agarrable = false; // Las puertas no deberian porder agarrarse
-        this.puertaAbierta = Integer.valueOf(data.getString("IndexAbierta"));
-        this.puertaCerrada = Integer.valueOf(data.getString("IndexCerrada"));
+        if (data.has("IndexAbierta")) {
+            this.puertaAbierta = Integer.valueOf(data.getString("IndexAbierta"));
+        } else {
+            this.puertaAbierta = id;
+        }
+        if (data.has("IndexCerrada")) {
+            this.puertaCerrada = Integer.valueOf(data.getString("IndexCerrada"));
+        } else {
+            this.puertaCerrada = id;
+        }
         this.cerrada = data.getString("Abierta").equals("1");
         this.llave = Integer.valueOf(data.getString("Llave"));
     }
@@ -87,5 +96,4 @@ public class Puerta extends ObjetoMetadataBasica {
     public int getLlave() {
         return llave;
     }
-
 }

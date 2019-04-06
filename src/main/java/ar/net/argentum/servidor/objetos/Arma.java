@@ -26,15 +26,18 @@ import org.json.JSONObject;
  */
 public class Arma extends Equipable {
 
-    protected int minDaño;
+    protected int minDaño = 0;
     protected int maxDaño;
     protected boolean apuñala = false;
 
     public Arma(int id, JSONObject data) {
         super(id, data);
         this.tipo = ObjetoTipo.ARMA;
-        this.minDaño = Integer.valueOf(data.getString("MinHit"));
-        this.maxDaño = Integer.valueOf(data.getString("MaxHit"));
+        if (data.has("MinHit")) {
+            this.minDaño = Integer.valueOf(data.getString("MinHit"));
+            this.maxDaño = data.has("MaxHit") ? Integer.valueOf(data.getString("MaxHit")) : minDaño;
+        }
+
         if (data.has("Apuñala")) {
             this.apuñala = data.getString("Apuñala").equals("1");
         }

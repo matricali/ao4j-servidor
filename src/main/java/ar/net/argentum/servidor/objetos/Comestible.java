@@ -30,7 +30,7 @@ public class Comestible extends ObjetoMetadataBasica {
     public Comestible(int id, JSONObject data) {
         super(id, data);
         this.minHambre = Integer.valueOf(data.getString("MinHam"));
-        this.maxHambre = data.has("MaxHam") ? Integer.valueOf(data.getString("MinHam")) : minHambre;
+        this.maxHambre = data.has("MaxHam") ? Integer.valueOf(data.getString("MaxHam")) : minHambre;
     }
 
     public Comestible(Comestible original) {

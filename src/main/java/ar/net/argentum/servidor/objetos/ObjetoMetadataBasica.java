@@ -38,13 +38,13 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
 
     public ObjetoMetadataBasica(int id, JSONObject data) {
         this.id = id;
+        this.tipo = ObjetoTipo.valueOf(Integer.valueOf(data.getString("ObjType")));
         this.nombre = data.getString("Name");
         this.grhIndex = data.getInt("GrhIndex");
         this.maxItems = 10000;
         this.agarrable = !data.has("Agarrable") || data.getString("Agarrable").equals("0");
         // El objeto es newbie?
-        this.newbie = data.has("Newbie") && data.getString("Newbie").equals("1");       
-    
+        this.newbie = data.has("Newbie") && data.getString("Newbie").equals("1");
     }
 
     public ObjetoMetadataBasica(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
@@ -147,4 +147,8 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
         this.grhSecundario = grafico;
     }
 
+    @Override
+    public ObjetoMetadata copiar() {
+        return new ObjetoMetadataBasica(this);
+    }
 }
