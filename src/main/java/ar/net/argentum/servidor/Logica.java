@@ -167,4 +167,23 @@ public class Logica {
         return (Math.abs(a.getY() - b.getY()) < RANGO_VISION_Y
                 && Math.abs(a.getX() - b.getX()) < RANGO_VISION_X);
     }
+
+    /**
+     * Calcular daño fisico provocado con un arma
+     *
+     * @param clase
+     * @param fuerza
+     * @param minGolpe
+     * @param maxGolpe
+     * @param minDañoArma
+     * @param maxDañoArma
+     * @return
+     */
+    public static int calcularDañoFisico(String clase, int fuerza, int minGolpe, int maxGolpe, int minDañoArma, int maxDañoArma) {
+        float modificadorClase = Servidor.getServidor().getClase(clase).getModificadores().getDañoArmas();
+        int dañoArma = enteroAleatorio(minDañoArma, maxDañoArma);
+        int dañoGolpe = enteroAleatorio(minGolpe, maxGolpe);
+
+        return (int) ((3 * dañoArma + ((maxDañoArma / 5) * Math.max(0, fuerza - 15)) + dañoGolpe) * modificadorClase);
+    }
 }
