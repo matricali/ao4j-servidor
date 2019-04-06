@@ -20,6 +20,7 @@ import ar.net.argentum.servidor.objetos.Puerta;
 import ar.net.argentum.servidor.objetos.Equipable;
 import ar.net.argentum.servidor.objetos.ObjetoMetadataBasica;
 import ar.net.argentum.servidor.objetos.Arma;
+import ar.net.argentum.servidor.objetos.Cartel;
 import ar.net.argentum.servidor.objetos.Casco;
 import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Escudo;
@@ -115,6 +116,9 @@ public class ObjetosDB {
                                 break;
                             case ALIMENTO:
                                 metadata = new Comestible(i, jo);
+                                break;
+                            case CARTEL:
+                                metadata = new Cartel(i, jo);
                                 break;
 
                             default:
