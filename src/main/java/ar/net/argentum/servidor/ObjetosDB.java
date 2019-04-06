@@ -24,6 +24,7 @@ import ar.net.argentum.servidor.objetos.Cartel;
 import ar.net.argentum.servidor.objetos.Casco;
 import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Escudo;
+import ar.net.argentum.servidor.objetos.Foro;
 import ar.net.argentum.servidor.objetos.Vestimenta;
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,6 +120,9 @@ public class ObjetosDB {
                                 break;
                             case CARTEL:
                                 metadata = new Cartel(i, jo);
+                                break;
+                            case FORO:
+                                metadata = new Foro(i, jo);
                                 break;
 
                             default:
