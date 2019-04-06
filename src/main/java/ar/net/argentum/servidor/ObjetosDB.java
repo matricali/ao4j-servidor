@@ -21,6 +21,7 @@ import ar.net.argentum.servidor.objetos.Equipable;
 import ar.net.argentum.servidor.objetos.ObjetoMetadataBasica;
 import ar.net.argentum.servidor.objetos.Arma;
 import ar.net.argentum.servidor.objetos.Casco;
+import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Escudo;
 import ar.net.argentum.servidor.objetos.Vestimenta;
 import java.io.File;
@@ -111,6 +112,9 @@ public class ObjetosDB {
                                 break;
                             case VESTIMENTA:
                                 metadata = new Vestimenta(i, jo);
+                                break;
+                            case ALIMENTO:
+                                metadata = new Comestible(i, jo);
                                 break;
 
                             default:
