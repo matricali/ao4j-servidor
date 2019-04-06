@@ -138,6 +138,9 @@ public class Logica {
     }
 
     public static int enteroAleatorio(int minimo, int maximo) {
+        if (minimo >= maximo) {
+            return minimo;
+        }
         return RANDOM.nextInt(maximo - minimo) + minimo;
     }
 
