@@ -323,6 +323,10 @@ public class Servidor {
         personajes.put(p.getCharindex(), p);
     }
 
+    public void eliminarPersonaje(Personaje p) {
+        personajes.remove(p.getCharindex());
+    }
+
     /**
      * @return Obtiene el valor actual del reloj de la maquina virtual en
      * ejecucion
