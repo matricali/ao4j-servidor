@@ -40,12 +40,12 @@ import org.apache.log4j.Logger;
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
 public class Servidor {
-    
+
     protected static final Logger LOGGER = Logger.getLogger(Servidor.class);
     private static int ultimoCharindex = 2;
     private static int ultimoUseridex = 0;
     private static Servidor instancia;
-    
+
     public static Servidor getServidor() {
         if (null == instancia) {
             try {
@@ -56,27 +56,27 @@ public class Servidor {
         }
         return instancia;
     }
-    
+
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure();
         Servidor servidor = Servidor.getServidor();
         servidor.iniciar();
     }
-    
+
     public static synchronized int crearUserindex() {
         ultimoUseridex++;
-        
+
         LOGGER.info("Generado nuevo userindex >>" + ultimoUseridex);
         return ultimoUseridex;
     }
-    
+
     public static synchronized int crearCharindex() {
         ultimoCharindex++;
-        
+
         LOGGER.info("Generado nuevo charindex >>" + ultimoCharindex);
         return ultimoCharindex;
     }
-    
+
     private final ObjetosDB objetosdb;
     private final ConfiguracionGeneral configuracionGeneral;
     private final LinkedList<ConexionConCliente> conexiones;
@@ -87,7 +87,7 @@ public class Servidor {
     private ServerSocket serverSocket;
     private final Map<String, Clase> clases;
     private final Map<String, Raza> razas;
-    
+
     private Servidor() throws IOException {
         // Iniciar configuracion
         this.configuracionGeneral = new ConfiguracionGeneral("config.properties");
@@ -100,7 +100,7 @@ public class Servidor {
         this.conexiones = new LinkedList<>();
         cargarMapas();
     }
-    
+
     public void iniciar() {
         LOGGER.info("Iniciando servidor en el puerto " + configuracionGeneral.getPuerto() + "...");
         try {
@@ -112,7 +112,7 @@ public class Servidor {
             // Si no podemos iniciar el socket ya no hay nada que hacer :(
             return;
         }
-        
+
         Thread logica = new Thread() {
             @Override
             public void run() {
@@ -126,17 +126,17 @@ public class Servidor {
                 }
             }
         };
-        
+
         logica.start();
 
         // Bucle infinito
         while (true) {
             Socket socket = null;
-            
+
             try {
                 // Recibir conexiones entrantes
                 socket = serverSocket.accept();
-                
+
                 LOGGER.info("Se ha conectado un nuevo cliente: " + socket);
                 LOGGER.info("Asignando nuevo Thread al cliente");
 
@@ -148,7 +148,7 @@ public class Servidor {
 
                 // Iniciar el hilo 
                 t.start();
-                
+
             } catch (IOException ex) {
                 LOGGER.fatal(null, ex);
                 if (null != socket) {
@@ -162,7 +162,7 @@ public class Servidor {
             }
         }
     }
-    
+
     public void enviarMensajeDeDifusion(String mensaje) {
         LOGGER.info("[DIFUSION] " + mensaje);
         for (ConexionConCliente conn : conexiones) {
@@ -174,11 +174,11 @@ public class Servidor {
             }
         }
     }
-    
+
     public void enviarMensajeDeDifusion(String mensaje, Object... args) {
         enviarMensajeDeDifusion(MessageFormat.format(mensaje, args));
     }
-    
+
     private void cargarMapas() {
         File directorio = new File("datos/mapas");
         for (File f : directorio.listFiles()) {
@@ -190,7 +190,7 @@ public class Servidor {
             }
         }
     }
-    
+
     public Mapa getMapa(int numMapa) {
         return mapas.get(numMapa);
     }
@@ -209,11 +209,11 @@ public class Servidor {
         }
         return null;
     }
-    
+
     public synchronized void eliminarConexion(ConexionConCliente conexion) {
         conexiones.remove(conexion);
     }
-    
+
     public synchronized void eliminarConexion(Usuario usuario) {
         for (ConexionConCliente conn : conexiones) {
             if (conn.getUsuario() == null) {
@@ -225,15 +225,15 @@ public class Servidor {
             }
         }
     }
-    
+
     public synchronized List<ConexionConCliente> getConexiones() {
         return conexiones;
     }
-    
+
     public void todosMenosUsuarioArea(Usuario usuario, EnvioAUsuario envio) {
         todosMenosUsuarioArea(usuario.getCharindex(), envio);
     }
-    
+
     public void todosMenosUsuarioArea(int charindex, EnvioAUsuario envio) {
         for (ConexionConCliente conn : conexiones) {
             if (conn.getUsuario() == null) {
@@ -267,7 +267,7 @@ public class Servidor {
             // Calculamos la distancia
             final Posicion p1 = centro.getPosicion();
             final Posicion p2 = conn.getUsuario().getCoordenada().getPosicion();
-            
+
             if (Logica.calcularDistancia(p2, p2) > distancia) {
                 // Esta fuera del area deseada
                 continue;
@@ -304,7 +304,7 @@ public class Servidor {
     public void todosMapa(Mapa mapa, EnvioAUsuario envio) {
         todosMapa(mapa.getNumero(), envio);
     }
-    
+
     public int getJugadoresConectados() {
         return conexiones.size();
     }
@@ -318,7 +318,7 @@ public class Servidor {
     public Personaje getPersonaje(int charindex) {
         return personajes.get(charindex);
     }
-    
+
     public void agregarPersonaje(Personaje p) {
         personajes.put(p.getCharindex(), p);
     }
@@ -331,54 +331,57 @@ public class Servidor {
     private long getTimer() {
         return System.nanoTime() / 1000000;
     }
-    
+
+    /**
+     * Procesamos los eventos de las entidades
+     */
     public void procesarEventos() {
         if (getTimer() - timerEventos < intervaloEventos) {
             return;
         }
         this.timerEventos = getTimer();
-        
-        List<ConexionConCliente> lista = getConexiones();
-        // Procesar eventos de los usuarios
-        for (ConexionConCliente conexion : lista) {
-            if (conexion.getUsuario() != null && conexion.getUsuario().isConectado()) {
-                conexion.getUsuario().tick();
+
+        for (Map.Entry<Integer, Personaje> entry : personajes.entrySet()) {
+            try {
+                entry.getValue().tick();
+            } catch (Exception ex) {
+                LOGGER.fatal("Error al procesar eventos del personaje " + entry.getKey() + "-" + entry.getValue().getNombre(), ex);
             }
         }
     }
-    
+
     private Map<String, Clase> cargarClases(String archivo) {
         LOGGER.info("Cargando clases (" + archivo + ")...");
         try {
             File f = new File(archivo);
             InputStream is = new FileInputStream(f);
             ObjectMapper mapper = new ObjectMapper();
-            
+
             return mapper.readValue(is, new TypeReference<Map<String, Clase>>() {
             });
         } catch (IOException ex) {
             throw new RuntimeException("Error al cargar clases", ex);
         }
     }
-    
+
     private Map<String, Raza> cargarRazas(String archivo) {
         LOGGER.info("Cargando razas (" + archivo + ")...");
         try {
             File f = new File(archivo);
             InputStream is = new FileInputStream(f);
             ObjectMapper mapper = new ObjectMapper();
-            
+
             return mapper.readValue(is, new TypeReference<Map<String, Raza>>() {
             });
         } catch (IOException ex) {
             throw new RuntimeException("Error al cargar razas", ex);
         }
     }
-    
+
     public final Clase getClase(String nombre) {
         return clases.get(nombre);
     }
-    
+
     public final Raza getRaza(String nombre) {
         return razas.get(nombre);
     }
