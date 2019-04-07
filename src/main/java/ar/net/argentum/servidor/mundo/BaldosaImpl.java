@@ -171,6 +171,15 @@ public class BaldosaImpl implements Baldosa {
     }
 
     @Override
+    public void setPersonaje(Personaje p) {
+        if (p == null) {
+            this.charindex = 0;
+            return;
+        }
+        this.charindex = p.getCharindex();
+    }
+
+    @Override
     public Mapa getMapa() {
         return mapa;
     }

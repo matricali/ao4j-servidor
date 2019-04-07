@@ -69,6 +69,13 @@ public interface Baldosa {
     public Personaje getPersonaje();
 
     /**
+     * Parar un personaje en la baldosa
+     *
+     * @param p
+     */
+    public void setPersonaje(Personaje p);
+
+    /**
      * @return Instancia del Mapa al cual pertenece la baldosa
      */
     public Mapa getMapa();

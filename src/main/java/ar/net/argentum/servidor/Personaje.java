@@ -224,8 +224,9 @@ public abstract class Personaje implements Viviente, Paralizable {
         }
 
         // Acualizamos la posicion y orientacion del personaje
-        getMapaActual().getBaldosa(getCoordenada().getPosicion()).setCharindex(0);
-        getMapaActual().getBaldosa(nuevaPosicion).setCharindex(getCharindex());
+        Mapa m = getMapaActual();
+        m.getBaldosa(getCoordenada().getPosicion()).setPersonaje(null);
+        m.getBaldosa(nuevaPosicion).setPersonaje(this);
 
         this.coordenada.setPosicion(nuevaPosicion);
         setOrientacion(orientacion);
