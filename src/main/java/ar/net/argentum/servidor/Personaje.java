@@ -53,6 +53,12 @@ public abstract class Personaje implements Viviente, Paralizable {
 
     public Personaje() {
         this.charindex = Servidor.crearCharindex();
+    }
+
+    /**
+     * Evento que se produce cuando "nace" un nuevo personaje
+     */
+    public void alCrear() {
         Servidor.getServidor().agregarPersonaje(this);
     }
 
@@ -262,11 +268,15 @@ public abstract class Personaje implements Viviente, Paralizable {
 
     /**
      * @see Sonidos
-     * @param sonido 
+     * @param sonido
      */
     public void emitirSonido(int sonido) {
         Servidor.getServidor().todosMapa(getCoordenada().getMapa(), (charindex, conexion) -> {
             conexion.enviarMundoReproducirSonido(sonido, getCoordenada().getPosicion());
         });
+    }
+
+    public void tick() {
+
     }
 }

@@ -138,6 +138,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
     public Usuario() {
         this.userindex = Servidor.crearUserindex();
+        alCrear();
     }
 
     /**
