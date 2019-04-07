@@ -195,7 +195,7 @@ public class ConexionConCliente extends Thread {
                     case PQT_USUARIO_AGARRAR_OBJETO:
                         manejarUsuarioAgarrarObjeto();
                         break;
-                        
+
                     case PQT_USUARIO_USAR_OBJETO:
                         manejarUsuarioUsarItem();
                         break;
@@ -507,6 +507,19 @@ public class ConexionConCliente extends Thread {
         } catch (IOException ex) {
             LOGGER.fatal(null, ex);
         }
+    }
+
+    public void enviarPersonajeCrear(Personaje p) {
+        enviarPersonajeCrear(
+                p.getCharindex(),
+                p.getOrientacion().valor(),
+                p.getCoordenada().getPosicion().getX(),
+                p.getCoordenada().getPosicion().getY(),
+                p.getCuerpo(),
+                p.getCabeza(),
+                p.getArma(),
+                p.getEscudo(),
+                p.getCasco());
     }
 
     public void enviarPersonajeAnimacion(int charindex, int efecto, int repeticiones) {
