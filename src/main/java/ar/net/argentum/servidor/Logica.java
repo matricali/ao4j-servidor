@@ -188,4 +188,78 @@ public class Logica {
 
         return (int) ((3 * dañoArma + ((maxDañoArma / 5) * Math.max(0, fuerza - 15)) + dañoGolpe) * modificadorClase);
     }
+
+    /**
+     * Perfilarse hacia el objetivo
+     *
+     * @param centro
+     * @param objetivo
+     * @return
+     */
+    public static Orientacion buscarOrientacion(Posicion centro, Posicion objetivo) {
+
+        int x = centro.getX() - objetivo.getX();
+        int y = centro.getY() - objetivo.getY();
+
+        if (((Sgn(x) == -1) && (Sgn(y) == 1))) {
+            return (verdaderoAleatorio(2) ? Orientacion.NORTE : Orientacion.ESTE);
+        }
+
+        // NW   
+        if (((Sgn(x) == 1)
+                && (Sgn(y) == 1))) {
+            return (verdaderoAleatorio(2) ? Orientacion.OESTE : Orientacion.NORTE);
+
+        }
+
+        // SW
+        if (((Sgn(x) == 1)
+                && (Sgn(y) == -1))) {
+            return (verdaderoAleatorio(2) ? Orientacion.OESTE : Orientacion.SUR);
+
+        }
+
+        // SE
+        if (((Sgn(x) == -1)
+                && (Sgn(y) == -1))) {
+            return (verdaderoAleatorio(2) ? Orientacion.SUR : Orientacion.ESTE);
+
+        }
+
+        // Sur
+        if (((Sgn(x) == 0) && (Sgn(y) == -1))) {
+            return Orientacion.SUR;
+        }
+
+        // norte
+        if (((Sgn(x) == 0) && (Sgn(y) == 1))) {
+            return Orientacion.NORTE;
+        }
+
+        // oeste
+        if (((Sgn(x) == 1) && (Sgn(y) == 0))) {
+            return Orientacion.OESTE;
+        }
+
+        // este
+        if (((Sgn(x) == -1) && (Sgn(y) == 0))) {
+            return Orientacion.ESTE;
+        }
+
+        // No cambiamos de orientacion
+        return null;
+    }
+
+    /**
+     * Función signo. {@link https://es.wikipedia.org/wiki/Funci%C3%B3n_signo}
+     *
+     * @param numero
+     * @return
+     */
+    public static int Sgn(int numero) {
+        if (numero == 0) {
+            return 0;
+        }
+        return (numero / Math.abs(numero));
+    }
 }

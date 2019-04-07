@@ -17,8 +17,11 @@
 package ar.net.argentum.servidor.protocolo;
 
 import ar.net.argentum.servidor.Baldosa;
+import ar.net.argentum.servidor.Coordenada;
 import ar.net.argentum.servidor.InventarioSlot;
 import ar.net.argentum.servidor.Logica;
+import ar.net.argentum.servidor.Mapa;
+import ar.net.argentum.servidor.NPC;
 import ar.net.argentum.servidor.Objeto;
 import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.objetos.Puerta;
@@ -298,6 +301,34 @@ public class ConexionConCliente extends Thread {
                         Integer.valueOf(args[1]),
                         args.length > 2 ? Integer.valueOf(args[2]) : 1);
                 getUsuario().inventarioMeterObjeto(obj);
+                return true;
+
+            case "NPC":
+                if (args.length > 1) {
+                    Coordenada coord = new Coordenada(getUsuario().getCoordenada());
+                    coord.getPosicion().agregarY(-1);
+                    Mapa m = Servidor.getServidor().getMapa(coord.getMapa());
+                    Baldosa b = m.getBaldosa(coord.getPosicion());
+                    if (b.hayAlguien()) {
+                        //  Ya hay alguien en la posicion
+                        enviarMensaje("§5Posicion esta ocupada!");
+                        return true;
+                    }
+                    NPC npc = new NPC();
+                    npc.setNombre("Altoo NPC");
+                    npc.setCuerpo(Integer.valueOf(args[1]));
+                    npc.setCabeza(4);
+                    npc.getVida().setMax(200);
+                    npc.getVida().setMin(200);
+                    npc.setOrientacion(Orientacion.SUR);
+                    npc.setCoordenada(coord);
+                    b.setPersonaje(npc);
+                    m.getPersonajes().add(npc);
+                    Servidor.getServidor().todosMapa(coord.getMapa(), (charindex, conexion) -> {
+                        conexion.enviarPersonajeCrear(npc);
+                    });
+                    enviarMensaje("§dNPC creado en {0}-{1}-{2}", coord.getMapa(), coord.getPosicion().getX(), coord.getPosicion().getY());
+                }
                 return true;
         }
 
