@@ -685,11 +685,13 @@ public class ConexionConCliente extends Thread {
                     encontramos = true;
                     // Hay un objeto en la posicion indicada
                     Objeto obj = b.getObjeto();
-                    switch (obj.getMetadata().getTipo()) {
+                    ObjetoMetadata meta = obj.getMetadata();
+
+                    switch (meta.getTipo()) {
                         case PUERTA:
                             if (Logica.calcularDistancia(getUsuario().getCoordenada().getPosicion(), new Posicion(x, y)) < 3) {
 
-                                Puerta omp = (Puerta) obj.getMetadata();
+                                Puerta omp = (Puerta) meta;
                                 if (omp.getLlave() != 0) {
                                     enviarMensaje(obj.getMetadata().getNombre());
                                     enviarMensaje("§7La puerta esta cerrada con llave.");
