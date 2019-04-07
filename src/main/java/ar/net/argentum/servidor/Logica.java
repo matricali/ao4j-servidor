@@ -25,12 +25,14 @@ import java.util.Random;
  */
 public class Logica {
 
-    public static final int MinXBorder = 5;
-    public static final int MaxXBorder = 95;
-    public static final int MinYBorder = 5;
-    public static final int MaxYBorder = 95;
+    public static final int MAPA_BORDE_X_MIN = 5;
+    public static final int MAPA_BORDE_X_MAX = 95;
+    public static final int MAPA_BORDE_Y_MIN = 5;
+    public static final int MAPA_BORDE_Y_MAX = 95;
+
     public static final int RANGO_VISION_X = 8;
     public static final int RANGO_VISION_Y = 6;
+
     protected static final Random RANDOM = new Random();
 
     /**
@@ -124,7 +126,7 @@ public class Logica {
      * @return
      */
     public static boolean isDentroDelLimite(int numMapa, int x, int y) {
-        return !(x < MinXBorder || x > MaxXBorder || y < MinYBorder || y > MaxYBorder);
+        return !(x < MAPA_BORDE_X_MIN || x > MAPA_BORDE_X_MAX || y < MAPA_BORDE_Y_MIN || y > MAPA_BORDE_Y_MAX);
     }
 
     /**
