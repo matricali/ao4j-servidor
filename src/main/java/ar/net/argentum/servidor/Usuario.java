@@ -757,6 +757,9 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         // Eliminamos el personaje del mundo
         mapa.getBaldosa(getCoordenada().getPosicion()).setCharindex(0);
+        
+        // Eliminamos el personaje de la lista de personajes
+        Servidor.getServidor().eliminarPersonaje(this);
 
         // Le avisamos a los otros clientes que eliminen el personaje que le corresponde a este usuario
         Servidor.getServidor().todosMenosUsuarioArea(this, (usuario, conexion) -> {
