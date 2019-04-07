@@ -18,6 +18,9 @@ package ar.net.argentum.servidor.objetos;
 
 import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.ObjetoTipo;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONObject;
 
 /**
@@ -25,7 +28,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class ObjetoMetadataBasica implements ObjetoMetadata {
+public abstract class MetadataAbstracta implements ObjetoMetadata {
 
     protected int id;
     protected String nombre;
@@ -36,7 +39,7 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
     protected boolean newbie;
     protected boolean agarrable = true;
 
-    public ObjetoMetadataBasica(int id, JSONObject data) {
+    public MetadataAbstracta(int id, JSONObject data) {
         this.id = id;
         this.tipo = ObjetoTipo.valueOf(Integer.valueOf(data.getString("ObjType")));
         this.nombre = data.getString("Name");
@@ -47,7 +50,7 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
         this.newbie = data.has("Newbie") && data.getString("Newbie").equals("1");
     }
 
-    public ObjetoMetadataBasica(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
+    public MetadataAbstracta(int id, String nombre, ObjetoTipo tipo, int grhIndex, int grhSecundario, int maxItems) {
         this.id = id;
         this.nombre = nombre;
         this.tipo = tipo;
@@ -56,7 +59,7 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
         this.maxItems = maxItems;
     }
 
-    public ObjetoMetadataBasica(ObjetoMetadata original) {
+    public MetadataAbstracta(ObjetoMetadata original) {
         this.id = original.getId();
         this.nombre = original.getNombre();
         this.tipo = original.getTipo();
@@ -149,6 +152,14 @@ public class ObjetoMetadataBasica implements ObjetoMetadata {
 
     @Override
     public ObjetoMetadata copiar() {
-        return new ObjetoMetadataBasica(this);
+        try {
+            Class<?> clase = tipo.getClase();
+            return (ObjetoMetadata) clase
+                    .getDeclaredConstructor(clase)
+                    .newInstance(this);
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(MetadataAbstracta.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }

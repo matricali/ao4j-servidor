@@ -39,6 +39,11 @@ public class Coordenada {
         this.posicion = posicion;
     }
 
+    public Coordenada(Coordenada original) {
+        this.mapa = original.mapa;
+        this.posicion = new Posicion(original.getPosicion());
+    }
+
     /**
      * @return the mapa
      */
@@ -65,5 +70,9 @@ public class Coordenada {
      */
     public void setPosicion(Posicion posicion) {
         this.posicion = posicion;
+    }
+
+    public void setPosicion(int x, int y) {
+        setPosicion(new Posicion(x, y));
     }
 }
