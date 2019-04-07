@@ -16,14 +16,13 @@
  */
 package ar.net.argentum.servidor.objetos;
 
-import ar.net.argentum.servidor.ObjetoMetadata;
 import org.json.JSONObject;
 
 /**
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Foro extends ObjetoMetadataBasica {
+public class Foro extends MetadataAbstracta {
 
     protected String foro;
 

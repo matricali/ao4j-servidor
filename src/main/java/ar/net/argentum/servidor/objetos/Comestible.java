@@ -22,7 +22,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Comestible extends ObjetoMetadataBasica {
+public class Comestible extends MetadataAbstracta {
 
     protected int minHambre;
     protected int maxHambre;

@@ -34,7 +34,7 @@ public class InventarioSlot {
 
     @JsonIgnore
     public ObjetoMetadata getObjeto() {
-        return ObjetosDB.obtener(getObjetoId());
+        return ObjetosDB.obtenerCopia(getObjetoId());
     }
 
     public int getCantidad() {

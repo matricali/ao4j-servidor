@@ -23,7 +23,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Bebida extends ObjetoMetadataBasica {
+public class Bebida extends MetadataAbstracta {
 
     protected int minSed;
     protected int maxSed;

@@ -16,7 +16,6 @@
  */
 package ar.net.argentum.servidor.objetos;
 
-import ar.net.argentum.servidor.ObjetoMetadata;
 import ar.net.argentum.servidor.ObjetoTipo;
 import org.json.JSONObject;
 
@@ -25,7 +24,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Puerta extends ObjetoMetadataBasica implements ObjetoMetadata {
+public class Puerta extends MetadataAbstracta {
 
     /**
      * Por defecto las puertas no deberian poder agarrarse

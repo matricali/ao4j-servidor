@@ -23,7 +23,7 @@ import org.json.JSONObject;
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Pocion extends ObjetoMetadataBasica {
+public class Pocion extends MetadataAbstracta {
 
     protected int minModificador = 0;
     protected int maxModificador = 0;

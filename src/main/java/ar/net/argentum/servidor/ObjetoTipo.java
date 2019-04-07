@@ -23,7 +23,8 @@ import ar.net.argentum.servidor.objetos.Casco;
 import ar.net.argentum.servidor.objetos.Comestible;
 import ar.net.argentum.servidor.objetos.Escudo;
 import ar.net.argentum.servidor.objetos.Foro;
-import ar.net.argentum.servidor.objetos.ObjetoMetadataBasica;
+import ar.net.argentum.servidor.objetos.MetadataAbstracta;
+import ar.net.argentum.servidor.objetos.ObjetoGenerico;
 import ar.net.argentum.servidor.objetos.Pocion;
 import ar.net.argentum.servidor.objetos.Puerta;
 import ar.net.argentum.servidor.objetos.Vestimenta;
@@ -83,7 +84,7 @@ public enum ObjetoTipo {
 
     ObjetoTipo(int tipo) {
         this.tipo = tipo;
-        this.clase = ObjetoMetadataBasica.class;
+        this.clase = ObjetoGenerico.class;
     }
 
     public int valor() {

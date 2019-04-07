@@ -16,14 +16,13 @@
  */
 package ar.net.argentum.servidor.objetos;
 
-import ar.net.argentum.servidor.ObjetoMetadata;
 import org.json.JSONObject;
 
 /**
  *
  * @author Jorge Matricali <jorgematricali@gmail.com>
  */
-public class Cartel extends ObjetoMetadataBasica {
+public class Cartel extends MetadataAbstracta {
 
     protected String texto = "";
     protected int fondo = 0;
