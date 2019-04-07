@@ -121,4 +121,18 @@ public class MinMax {
             this.min = max;
         }
     }
+
+    /**
+     * LLenar la barra al maximo
+     */
+    public void llenar() {
+        this.min = max;
+    }
+
+    /**
+     * Vaciar la barra
+     */
+    public void vaciar() {
+        this.min = 0;
+    }
 }
