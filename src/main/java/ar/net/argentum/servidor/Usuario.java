@@ -568,7 +568,22 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         // Si llegamos hasta acá es porque conectamos el golpe
-        int daño = Logica.enteroAleatorio(getGolpe().getMin(), getGolpe().getMax());
+        int daño;
+        int dañoApuñalamiento = 0;
+        if (WeaponEqpObjIndex > 0) {
+            // Obtenemos el arma que tenemos equipada
+            ObjetoMetadata obj = inventario.get(WeaponEqpSlot).getObjeto();
+            Arma metadataArma = (Arma) obj;
+            daño = Logica.calcularDañoFisico(getClase(), getAtributos().get("fuerza"), getGolpe().getMin(), getGolpe().getMax(), metadataArma.getMinDaño(), metadataArma.getMaxDaño());
+            if (metadataArma.isApuñala()) {
+                if (realizarHabilidad("Apuñalar")) {
+                    dañoApuñalamiento = daño * 2;
+                    daño += dañoApuñalamiento;
+                }
+            }
+        } else {
+            daño = Logica.enteroAleatorio(getGolpe().getMin(), getGolpe().getMax());
+        }
 
         emitirSonido(Sonidos.SND_IMPACTO);
         getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
