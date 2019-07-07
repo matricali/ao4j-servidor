@@ -16,6 +16,7 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.entidad.Atacable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -73,6 +74,7 @@ public interface Habilidad {
      * Ganar experiencia en esta habilidad
      *
      * @param acierto Verdadero si se ha tenido suerte al realizar la habilidad
+     *
      * @return Devuelve verdadero si se ha conseguido un nuevo punto al entrenar
      * esta habilidad
      */
@@ -85,4 +87,14 @@ public interface Habilidad {
      * @return Devuelve verdadero si logro realizar la habilidad
      */
     public boolean realizar(Habilidoso habilidoso);
+
+    /**
+     * Intentar realizar la habilidad sobre un Atacable
+     *
+     * @param origen Habilidoso que realiza la habilidad
+     * @param victima Atacable que es objetivo de esta habilidad
+     *
+     * @return Devuelve verdadero si logro realizar la habilidad
+     */
+    public boolean realizar(Habilidoso origen, Atacable victima);
 }

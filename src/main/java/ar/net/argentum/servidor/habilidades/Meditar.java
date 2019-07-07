@@ -19,6 +19,7 @@ package ar.net.argentum.servidor.habilidades;
 import ar.net.argentum.servidor.HabilidadBase;
 import ar.net.argentum.servidor.Habilidoso;
 import ar.net.argentum.servidor.Logica;
+import ar.net.argentum.servidor.entidad.Atacable;
 
 /**
  *
@@ -78,5 +79,10 @@ public class Meditar extends HabilidadBase {
             return 16;
         }
         return 34;
+    }
+
+    @Override
+    public boolean realizar(Habilidoso origen, Atacable victima) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

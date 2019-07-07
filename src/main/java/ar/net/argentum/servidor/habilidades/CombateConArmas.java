@@ -21,6 +21,7 @@ import ar.net.argentum.servidor.Habilidoso;
 import ar.net.argentum.servidor.Logica;
 import ar.net.argentum.servidor.Servidor;
 import ar.net.argentum.servidor.Usuario;
+import ar.net.argentum.servidor.entidad.Atacable;
 
 /**
  *
@@ -61,11 +62,16 @@ public class CombateConArmas extends HabilidadBase {
             }
 
             poderAtaque = poderAtaque + ((float) Math.max(getNivel() - 12, 0) * 2.5f);
-            
+
             int probabilidadExito = (int) Math.max(10, Math.min(90, 50 + poderAtaque * 0.4));
             return (Logica.enteroAleatorio(1, 100) <= probabilidadExito);
         }
 
         return Logica.verdaderoAleatorio(dificultad);
+    }
+
+    @Override
+    public boolean realizar(Habilidoso origen, Atacable victima) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
