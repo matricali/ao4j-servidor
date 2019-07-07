@@ -721,6 +721,25 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         getConexion().enviarUsuarioNombre();
         getConexion().enviarUsuarioCambiaMapa();
+
+        // Le indicamos al cliente de este usuario que dibuje los otros personajes en el area
+        for (Personaje p : getMapaActual().getPersonajes()) {
+            try {
+                getConexion().enviarPersonajeCrear(
+                        getCharindex() == p.getCharindex() ? 1 : p.getCharindex(),
+                        p.getOrientacion().valor(),
+                        p.getCoordenada().getPosicion().getX(),
+                        p.getCoordenada().getPosicion().getY(),
+                        p.getCuerpo(),
+                        p.getCabeza(),
+                        p.getArma(),
+                        p.getEscudo(),
+                        p.getCasco());
+            } catch (Exception ex) {
+                LOGGER.fatal(null, ex);
+            }
+        }
+
         getConexion().enviarUsuarioPosicion();
         getConexion().enviarUsuarioExperiencia();
         getConexion().enviarUsuarioStats();
@@ -739,25 +758,6 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                     getEscudo(),
                     getCasco());
         });
-
-        // Le indicamos al cliente de este usuario que dibuje los otros personajes en el area
-        for (ConexionConCliente conn : Servidor.getServidor().getConexiones()) {
-            Usuario u = conn.getUsuario();
-            try {
-                getConexion().enviarPersonajeCrear(
-                        getCharindex() == u.getCharindex() ? 1 : u.getCharindex(),
-                        u.getOrientacion().valor(),
-                        u.getCoordenada().getPosicion().getX(),
-                        u.getCoordenada().getPosicion().getY(),
-                        u.getCuerpo(),
-                        u.getCabeza(),
-                        u.getArma(),
-                        u.getEscudo(),
-                        u.getCasco());
-            } catch (Exception ex) {
-                LOGGER.fatal(null, ex);
-            }
-        }
 
         // Enviamos los objetos que hay en el mapa
         for (Map.Entry<Posicion, Objeto> entry : mapa.getObjetos().entrySet()) {
