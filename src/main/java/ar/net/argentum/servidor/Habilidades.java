@@ -16,6 +16,7 @@
  */
 package ar.net.argentum.servidor;
 
+import ar.net.argentum.servidor.habilidades.Apuñalar;
 import ar.net.argentum.servidor.habilidades.CombateConArmas;
 import ar.net.argentum.servidor.habilidades.DefensaConEscudos;
 import ar.net.argentum.servidor.habilidades.Meditar;
@@ -48,7 +49,8 @@ public final class Habilidades {
         MEDITAR("meditar", Meditar.class),
         DEFENSA_CON_ESCUDOS("DefensaConEscudos", DefensaConEscudos.class),
         TACTICAS_DE_COMBATE("TacticasDeCombate", TacticasDeCombate.class),
-        COMBATE_CON_ARMAS("CombateConArmas", CombateConArmas.class);
+        COMBATE_CON_ARMAS("CombateConArmas", CombateConArmas.class),
+        APUÑALAR("Apuñalar", Apuñalar.class);
 
         private final Class<?> clase;
         private final String identificador;
