@@ -670,7 +670,9 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         // @TODO: Procesar matar NPC, ganar experiencia, etc.
-        ganarExperiencia(100);
+        if (victima instanceof NPC) {
+            ganarExperiencia(((NPC) victima).getExperiencia());
+        }
     }
 
     /**
