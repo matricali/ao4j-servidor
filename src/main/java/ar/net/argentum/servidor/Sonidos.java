@@ -50,5 +50,9 @@ public class Sonidos {
     public static final int SND_CARPINTERO_TRABAJANDO = 42;
     public static final int SND_BEBER = 46;
     public static final int SND_MUERTE_MUJER = 74;
+    public static final int SND_FLECHA_IMPACTO = 65;
+    public static final int SND_CONVERSION_BARCO = 55;
     public static final int SND_COMIDA_2 = 82; // Comer manzana
+    public static final int SND_MUERTE_MUJER_AGUA = 211;
+    public static final int SND_MUERTE_HOMBRE_AGUA = 212;
 }
