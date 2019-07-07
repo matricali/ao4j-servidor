@@ -599,7 +599,12 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         ParteCuerpo lugar = ParteCuerpo.alAzar();
         int dañoFinal = victima.recibeDañoFisico(this, lugar, daño);
         enviarMensaje("§4¡¡Le has pegado a {0} en {1} por {2}!!", ((Personaje) objetivo).getNombre(), lugar.getDescripcion(), dañoFinal);
-
+        if (dañoApuñalamiento > 0) {
+            enviarMensaje("§eHas apuñalado a {0} por {1}!!", victima.getNombre(), dañoApuñalamiento);
+            if (victima instanceof RecibeChat) {
+                ((RecibeChat) victima).enviarMensaje("§e{0} te ha apuñalado por {1}!!", getNombre(), dañoApuñalamiento);
+            }
+        }
         return resultado;
     }
 
