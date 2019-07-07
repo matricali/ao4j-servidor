@@ -588,6 +588,12 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         emitirSonido(Sonidos.SND_IMPACTO);
         getStamina().disminuir(Balance.COMBATE_ENERGIA_NECESARIA);
         getConexion().enviarUsuarioStats();
+        if (victima instanceof Personaje) {
+            Personaje pv = (Personaje) victima;
+            Servidor.getServidor().todosArea(pv.getCoordenada(), 10, (charindex, conexion) -> {
+                conexion.enviarPersonajeAnimacion(pv.getCharindex(), 14, 2);
+            });
+        }
 
         // Le provocamos daño a la victima
         ParteCuerpo lugar = ParteCuerpo.alAzar();
