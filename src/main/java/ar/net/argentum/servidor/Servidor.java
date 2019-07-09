@@ -58,7 +58,6 @@ public class Servidor {
     }
 
     public static void main(String[] args) throws IOException {
-        BasicConfigurator.configure();
         Servidor servidor = Servidor.getServidor();
         servidor.iniciar();
     }
