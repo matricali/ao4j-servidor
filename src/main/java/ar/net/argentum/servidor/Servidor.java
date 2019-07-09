@@ -98,6 +98,8 @@ public class Servidor {
         // Creamos una lista para mantener las conexiones
         this.conexiones = new LinkedList<>();
         cargarMapas();
+
+        Runtime.getRuntime().addShutdownHook(new RutinaApagado(this));
     }
 
     public void iniciar() {
