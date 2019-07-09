@@ -86,6 +86,7 @@ public class Servidor {
     private ServerSocket serverSocket;
     private final Map<String, Clase> clases;
     private final Map<String, Raza> razas;
+    private boolean corriendo = false;
 
     private Servidor() throws IOException {
         // Iniciar configuracion
@@ -114,24 +115,27 @@ public class Servidor {
             return;
         }
 
+        this.corriendo = true;
+
         Thread logica = new Thread() {
             @Override
             public void run() {
                 LOGGER.info("Iniciando thread de logica");
-                while (true) {
+                while (corriendo) {
                     try {
                         procesarEventos();
                     } catch (Exception ex) {
                         LOGGER.fatal(ex);
                     }
                 }
+                LOGGER.info("Deteniendo thread de logica");
             }
         };
 
         logica.start();
 
         // Bucle infinito
-        while (true) {
+        while (corriendo) {
             Socket socket = null;
 
             try {
@@ -162,6 +166,12 @@ public class Servidor {
                 }
             }
         }
+
+    }
+
+    public void detener() {
+        LOGGER.info("Deteniendo servidor...");
+        this.corriendo = false;
     }
 
     public void enviarMensajeDeDifusion(String mensaje) {
