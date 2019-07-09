@@ -37,7 +37,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Representa un juegador
@@ -46,7 +47,7 @@ import org.apache.log4j.Logger;
  */
 public class Usuario extends Personaje implements Atacante, Atacable, GanaExperiencia, Habilidoso, RecibeChat {
 
-    private static final Logger LOGGER = Logger.getLogger(Usuario.class);
+    private static final Logger LOGGER = LogManager.getLogger(Usuario.class);
 
     /**
      * Compruebe si esta registrado un usuario.
@@ -177,7 +178,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         try {
             mapper.writeValue(Usuario.getArchivo(nombre), this);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -736,7 +737,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                         p.getEscudo(),
                         p.getCasco());
             } catch (Exception ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
             }
         }
 
@@ -1044,7 +1045,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 // Todavia no habiamos aprendido esta hablidad
                 skill = aprenderHabilidad(id);
             } catch (InstantiationException | IllegalAccessException ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
                 return;
             }
         }
@@ -1081,7 +1082,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
                 // Todavia no habiamos aprendido esta hablidad
                 skill = aprenderHabilidad(id);
             } catch (InstantiationException | IllegalAccessException ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
                 return false;
             }
         }

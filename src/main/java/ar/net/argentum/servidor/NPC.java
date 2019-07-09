@@ -19,7 +19,8 @@ package ar.net.argentum.servidor;
 import ar.net.argentum.servidor.entidad.Atacable;
 import ar.net.argentum.servidor.entidad.Atacante;
 import ar.net.argentum.servidor.mundo.Orientacion;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Un personaje controlado por el servidor
@@ -28,7 +29,7 @@ import org.apache.log4j.Logger;
  */
 public class NPC extends Personaje implements Atacable, Atacante {
 
-    private static final Logger LOGGER = Logger.getLogger(NPC.class);
+    private static final Logger LOGGER = LogManager.getLogger(NPC.class);
     private int contadorMovimiento;
     private int contadorAtaque;
     private int objetivo = 0;

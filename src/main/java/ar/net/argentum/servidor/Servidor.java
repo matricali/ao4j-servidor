@@ -16,8 +16,8 @@
  */
 package ar.net.argentum.servidor;
 
-import ar.net.argentum.servidor.mundo.MapaAntiguo;
 import ar.net.argentum.servidor.configuracion.ConfiguracionGeneral;
+import ar.net.argentum.servidor.mundo.MapaAntiguo;
 import ar.net.argentum.servidor.protocolo.ConexionConCliente;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class Servidor {
 
-    protected static final Logger LOGGER = Logger.getLogger(Servidor.class);
+    protected static final Logger LOGGER = LogManager.getLogger(Servidor.class);
     private static int ultimoCharindex = 2;
     private static int ultimoUseridex = 0;
     private static Servidor instancia;
@@ -51,7 +51,7 @@ public class Servidor {
             try {
                 instancia = new Servidor();
             } catch (IOException ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
             }
         }
         return instancia;
@@ -107,7 +107,7 @@ public class Servidor {
             // Iniciar socket, el puerto por defecto es 7666
             this.serverSocket = new ServerSocket(configuracionGeneral.getPuerto());
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
 
             // Si no podemos iniciar el socket ya no hay nada que hacer :(
             return;
@@ -121,7 +121,7 @@ public class Servidor {
                     try {
                         procesarEventos();
                     } catch (Exception ex) {
-                        LOGGER.fatal(null, ex);
+                        LOGGER.fatal(ex);
                     }
                 }
             }
@@ -150,13 +150,13 @@ public class Servidor {
                 t.start();
 
             } catch (IOException ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
                 if (null != socket) {
                     // Si creamos el Socket entonces hay que cerrarlo
                     try {
                         socket.close();
                     } catch (IOException e) {
-                        LOGGER.fatal(null, e);
+                        LOGGER.fatal(e);
                     }
                 }
             }

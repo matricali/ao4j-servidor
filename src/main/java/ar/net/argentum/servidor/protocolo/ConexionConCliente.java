@@ -38,7 +38,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.text.MessageFormat;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Clase encargada de la comunicacion entre el cliente y el servidor
@@ -74,7 +75,7 @@ public class ConexionConCliente extends Thread {
     protected static final byte PQT_USUARIO_AGARRAR_OBJETO = 0x25;
     protected static final byte PQT_MUNDO_BALDOSA_BLOQUEADA = 0x26;
 
-    protected static final Logger LOGGER = Logger.getLogger(ConexionConCliente.class);
+    protected static final Logger LOGGER = LogManager.getLogger(ConexionConCliente.class);
     /**
      * Conexion
      */
@@ -139,7 +140,7 @@ public class ConexionConCliente extends Thread {
                 try {
                     tipoPaquete = dis.readByte();
                 } catch (EOFException | SocketException ex) {
-                    LOGGER.fatal(null, ex);
+                    LOGGER.fatal(ex);
                     this.conectado = false;
                     break;
                 }
@@ -209,7 +210,7 @@ public class ConexionConCliente extends Thread {
                         break;
                 }
             } catch (IOException e) {
-                LOGGER.fatal(null, e);
+                LOGGER.fatal(e);
             }
         }
 
@@ -228,7 +229,7 @@ public class ConexionConCliente extends Thread {
             // Eliminamos la conexion de nuestra lista
             Servidor.getServidor().eliminarConexion(this);
         } catch (IOException e) {
-            LOGGER.fatal(null, e);
+            LOGGER.fatal(e);
         }
     }
 
@@ -249,7 +250,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_DESCONECTAR);
             dos.writeUTF(mensaje);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         this.conectado = false;
     }
@@ -259,7 +260,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_CHAT);
             dos.writeUTF(mensaje);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -394,7 +395,7 @@ public class ConexionConCliente extends Thread {
                 return false;
             }
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -440,7 +441,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(is.getCantidad());
             dos.writeBoolean(is.isEquipado());
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -449,7 +450,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_CAMBIA_MUNDO);
             dos.writeInt(usuario.getCoordenada().getMapa());
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -458,7 +459,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_USUARIO_NOMBRE);
             dos.writeUTF(usuario.getNombre());
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -470,7 +471,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(usuario.getCoordenada().getPosicion().getY());
             dos.writeInt(usuario.getOrientacion().valor());
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -494,7 +495,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(usuario.getSed().getMax());
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -506,7 +507,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(usuario.getExperienciaSiguienteNivel());
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -518,7 +519,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(y);
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -536,7 +537,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(casco);
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -560,7 +561,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(efecto);
             dos.writeInt(repeticiones);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -570,7 +571,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(charindex);
             dos.writeInt(heading);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -579,7 +580,7 @@ public class ConexionConCliente extends Thread {
             dos.writeByte(PQT_PERSONAJE_QUITAR);
             dos.writeInt(charindex);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -595,7 +596,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(casco);
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -620,7 +621,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(y);
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -638,7 +639,7 @@ public class ConexionConCliente extends Thread {
             }
             return true;
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -682,7 +683,7 @@ public class ConexionConCliente extends Thread {
             });
             return true;
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -770,10 +771,10 @@ public class ConexionConCliente extends Thread {
                 }
                 return true;
             } catch (Exception ex) {
-                LOGGER.fatal(null, ex);
+                LOGGER.fatal(ex);
             }
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -791,7 +792,7 @@ public class ConexionConCliente extends Thread {
             LOGGER.debug("PQT_USUARIO_EQUIPAR_SLOT<<" + invslot);
             usuario.inventarioEquiparSlot(invslot);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -802,7 +803,7 @@ public class ConexionConCliente extends Thread {
             LOGGER.debug("PQT_USUARIO_USAR_ITEM<<" + invslot);
             usuario.inventarioUsarItem(invslot);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -821,7 +822,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(cantidad);
             dos.writeUTF(nombre);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 
@@ -842,7 +843,7 @@ public class ConexionConCliente extends Thread {
             LOGGER.debug("PQT_USUARIO_TIRAR_OBJETO<<" + invslot + "<<" + cantidad);
             usuario.inventarioTirarObjeto(invslot, cantidad);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
@@ -862,7 +863,7 @@ public class ConexionConCliente extends Thread {
             dos.writeInt(y);
             dos.writeBoolean(b);
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 }

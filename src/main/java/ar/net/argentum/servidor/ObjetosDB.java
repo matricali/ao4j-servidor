@@ -20,7 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -31,7 +32,7 @@ import org.json.JSONTokener;
  */
 public class ObjetosDB {
 
-    private static final Logger LOGGER = Logger.getLogger(ObjetosDB.class);
+    private static final Logger LOGGER = LogManager.getLogger(ObjetosDB.class);
     protected static ObjetoMetadata[] OBJETOS;
 
     public static ObjetoMetadata obtener(int id) {
@@ -119,12 +120,12 @@ public class ObjetosDB {
                         LOGGER.info("OBJ" + i + " - " + nombre);
                     }
                 } catch (Exception ex) {
-                    LOGGER.fatal(null, ex);
+                    LOGGER.fatal(ex);
                 }
             }
 
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
     }
 }

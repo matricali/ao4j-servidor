@@ -27,7 +27,8 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Maneja un mapa en el formato original.
@@ -49,7 +50,7 @@ public class MapaAntiguo extends MapaAbstracto {
      *
      * 2)
      */
-    private static final Logger LOGGER = Logger.getLogger(MapaAntiguo.class);
+    private static final Logger LOGGER = LogManager.getLogger(MapaAntiguo.class);
 
     private static final byte MAPA_MIN_X = 1;
     private static final byte MAPA_MAX_X = 100;
@@ -123,7 +124,7 @@ public class MapaAntiguo extends MapaAbstracto {
 
                         baldosas[x][y] = md;
                     } catch (IOException ex) {
-                        LOGGER.fatal(null, ex);
+                        LOGGER.fatal(ex);
                     }
                 }
             }
@@ -209,14 +210,14 @@ public class MapaAntiguo extends MapaAbstracto {
                             md.setObjeto(new Objeto(objIndex, objCantidad));
                         }
                     } catch (IOException ex) {
-                        LOGGER.fatal(null, ex);
+                        LOGGER.fatal(ex);
                     }
                 }
             }
             LOGGER.info("Carga de mapa finalizada!");
             return true;
         } catch (IOException ex) {
-            LOGGER.fatal(null, ex);
+            LOGGER.fatal(ex);
         }
         return false;
     }
