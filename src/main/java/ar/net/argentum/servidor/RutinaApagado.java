@@ -36,7 +36,7 @@ public class RutinaApagado extends Thread {
             ex.printStackTrace();
         } finally {
             try {
-                servidor.reader.getTerminal().restore();
+                // servidor.reader.getTerminal().restore();
             } catch (Exception e) {
             }
         }
