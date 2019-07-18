@@ -75,4 +75,9 @@ public class Coordenada {
     public void setPosicion(int x, int y) {
         setPosicion(new Posicion(x, y));
     }
-}
+    
+    @Override
+    public String toString() {
+        return String.format("%d-%d-%d", mapa, posicion.getX(), posicion.getY());
+    }
+} 
