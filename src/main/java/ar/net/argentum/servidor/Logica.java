@@ -265,4 +265,8 @@ public class Logica {
         }
         return (numero / Math.abs(numero));
     }
+    
+    public static Orientacion orientacionAleatoria() {
+        return Orientacion.valueOf(enteroAleatorio(1, 4));
+    }
 }
