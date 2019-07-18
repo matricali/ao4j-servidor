@@ -50,7 +50,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
     private static final Logger LOGGER = LogManager.getLogger(Usuario.class);
 
     /**
-     * Compruebe si esta registrado un usuario.
+     * Comprueba si esta registrado un usuario.
      *
      * @param nombre Nombre de usuario
      * @return bool Verdadero si el usuario ya existe
@@ -60,6 +60,12 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         return f.exists() && !f.isDirectory();
     }
 
+    /**
+     * Comprueba si el nombre de usuario es válido.
+     *
+     * @param nombre Nombre de usuario
+     * @return bool Verdadero si el nombre de usuario es válido
+     */
     public static boolean nombreValido(String nombre) {
         if (nombre.isEmpty() || nombre.length() > 16) {
             return false;
@@ -69,6 +75,13 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         return matcher.find();
     }
 
+    /**
+     * Cargar usuario
+     *
+     * @param nombre Nombre de usuario
+     * @return Instancia del usuario
+     * @throws Exception
+     */
     public static Usuario cargar(String nombre) throws Exception {
         if (!existePersonaje(nombre)) {
             throw new Exception("No existe el personaje!");
@@ -707,13 +720,14 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         Mapa mapa = getMapaActual();
         Baldosa baldosa = mapa.getBaldosa(getCoordenada().getPosicion());
 
-        if (baldosa.getCharindex() != 0) {
+        if (baldosa.hayAlguien()) {
             // Ya hay alguien parado en esa posicion
             desconectar("Hay alguien parado en tu posicion, intenta luego.");
         }
 
         // Posicionamos al personaje en el mundo
-        baldosa.setCharindex(getCharindex());
+        baldosa.setPersonaje(this);
+        mapa.getPersonajes().add(this);
 
         setConectado(true);
         guardar();
@@ -722,6 +736,9 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
 
         getConexion().enviarUsuarioNombre();
         getConexion().enviarUsuarioCambiaMapa();
+        getConexion().enviarUsuarioExperiencia();
+        getConexion().enviarUsuarioStats();
+        getConexion().usuarioInventarioActualizar();
 
         // Le indicamos al cliente de este usuario que dibuje los otros personajes en el area
         for (Personaje p : getMapaActual().getPersonajes()) {
@@ -742,9 +759,6 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         }
 
         getConexion().enviarUsuarioPosicion();
-        getConexion().enviarUsuarioExperiencia();
-        getConexion().enviarUsuarioStats();
-        getConexion().usuarioInventarioActualizar();
 
         // Avisamos a los clientes conectados que dibujen este personaje
         Servidor.getServidor().todosMenosUsuarioArea(this, (u, conexion) -> {
@@ -783,11 +797,12 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
         guardar();
 
         Servidor.getServidor().enviarMensajeDeDifusion("§7{0} se ha desconectado del juego.", getNombre());
-        Mapa mapa = Servidor.getServidor().getMapa(getCoordenada().getMapa());
+        Mapa mapa = getMapaActual();
 
         // Eliminamos el personaje del mundo
-        mapa.getBaldosa(getCoordenada().getPosicion()).setCharindex(0);
-        
+        mapa.getBaldosa(getCoordenada().getPosicion()).setPersonaje(null);
+        mapa.getPersonajes().remove(this);
+
         // Eliminamos el personaje de la lista de personajes
         Servidor.getServidor().eliminarPersonaje(this);
 
@@ -832,6 +847,7 @@ public class Usuario extends Personaje implements Atacante, Atacable, GanaExperi
     /**
      * Actualizamos todo lo que tengamos que actualizar del usuario
      */
+    @Override
     public void tick() {
         if (isMuerto()) {
             return;
