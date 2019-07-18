@@ -59,6 +59,10 @@ public class Servidor {
 
     public static void main(String[] args) throws IOException {
         Servidor servidor = Servidor.getServidor();
+
+        LOGGER.info("Iniciando mundo...");
+        servidor.cargarMapas();
+
         servidor.iniciar();
     }
 
@@ -98,7 +102,6 @@ public class Servidor {
         this.personajes = new ConcurrentHashMap<>();
         // Creamos una lista para mantener las conexiones
         this.conexiones = new LinkedList<>();
-        cargarMapas();
 
         Runtime.getRuntime().addShutdownHook(new RutinaApagado(this));
     }
