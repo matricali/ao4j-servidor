@@ -18,6 +18,8 @@ package ar.net.argentum.servidor;
 
 import ar.net.argentum.servidor.mundo.Orientacion;
 import java.util.Random;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -33,6 +35,7 @@ public class Logica {
     public static final int RANGO_VISION_X = 8;
     public static final int RANGO_VISION_Y = 6;
 
+    protected static final Logger LOGGER = LogManager.getLogger(Logica.class);
     protected static final Random RANDOM = new Random();
 
     /**
@@ -72,43 +75,43 @@ public class Logica {
 
         // Es un mapa valido?
         if (mapa == null) {
-            System.out.println("Mapa invalido.");
+            LOGGER.error("Mapa invalido.");
             return false;
         }
 
         if (!isDentroDelLimite(numMapa, x, y)) {
-            System.out.println("Fuera de los limites del mapa.");
+            LOGGER.error("Fuera de los limites del mapa.");
             return false;
         }
 
         Baldosa baldosa = mapa.getBaldosa(x, y);
 
         if (baldosa == null) {
-            System.out.println("Baldosa invalida.");
+            LOGGER.error("Baldosa invalida.");
             return false;
         }
 
         // Esta bloqueado?
         if (baldosa.isBloqueado()) {
-            System.out.println("Baldosa bloqueada.");
+            LOGGER.error("Baldosa bloqueada.");
             return false;
         }
 
         // Hay alguien parado en la nueva posicion?
         if (baldosa.getCharindex() > 0) {
-            System.out.println("Ya hay alguien parado en la baldosa.");
+            LOGGER.error("Ya hay alguien parado en la baldosa.");
             return false;
         }
 
         // Puede caminar por el agua?
         if (baldosa.isAgua() && !puedeAgua) {
-            System.out.println("El usuario no puede ir por el agua.");
+            LOGGER.error("El usuario no puede ir por el agua.");
             return false;
         }
 
         // Puede caminar por la tierra?
         if (baldosa.isTierra() && !puedeTierra) {
-            System.out.println("El usuario no puede ir por la tierra.");
+            LOGGER.error("El usuario no puede ir por la tierra.");
             return false;
         }
 
